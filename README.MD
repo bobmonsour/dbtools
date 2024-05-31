@@ -1,1 +1,1 @@
-These are a set of command line tools that support managing the data that drives the [11tybundle.dev](https://11tybundle.dev) website. The data is stored in a json file. They are node scripts that will evolve over time to add more functionality, e.g., editing and deleting entries.
+These are a set of node scripts that support managing the data that drives the [11tybundle.dev](https://11tybundle.dev) website. The data is stored in a json file. They will evolve over time to add more functionality, e.g., editing and deleting entries.
