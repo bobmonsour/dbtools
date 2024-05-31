@@ -26,7 +26,7 @@ const getDefaultDate = () => {
 const validateDate = (input) => {
   const datePattern = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
   if (!datePattern.test(input)) {
-    return "Please enter a valid date in the format YYYY-MM-DD";
+    return "Please enter a valid date in YYYY-MM-DD format.";
   }
 
   const [year, month, day] = input.split("-").map(Number);
@@ -39,11 +39,11 @@ const validateDate = (input) => {
     date.getDate() !== day ||
     date.getFullYear() !== year
   ) {
-    return "Invalid date. Please check the day and month values.";
+    return "Invalid date. Enter date in YYYY-MM-DD format.";
   }
 
   if (date > currentDate) {
-    return "Date cannot be later than today";
+    return "Date cannot be later than today.";
   }
 
   return true;
@@ -55,7 +55,7 @@ const validateUrlFormat = (url) => {
     new URL(url);
     return true;
   } catch (err) {
-    return "Please enter a valid URL";
+    return "Please enter a valid URL.";
   }
 };
 
@@ -65,7 +65,7 @@ const validateUrlAccessibility = async (url) => {
     await axios.head(url);
     return true;
   } catch (err) {
-    return "URL is not accessible";
+    return "URL is not accessible.";
   }
 };
 
@@ -88,7 +88,7 @@ const promptCommonInfo = async () => {
       type: "input",
       name: "Title",
       message: "Title:",
-      validate: (input) => (input ? true : "Title is required"),
+      validate: (input) => (input ? true : "Title is required."),
     },
     {
       type: "input",
@@ -124,7 +124,7 @@ const handleBlogPost = async () => {
       type: "input",
       name: "Author",
       message: "Author:",
-      validate: (input) => (input ? true : "Author is required"),
+      validate: (input) => (input ? true : "Author is required."),
     },
     {
       type: "checkbox",
@@ -133,7 +133,7 @@ const handleBlogPost = async () => {
       pageSize: 10,
       choices: config.categories,
       validate: (input) =>
-        input.length > 0 ? true : "At least one category must be selected",
+        input.length > 0 ? true : "At least one category must be selected.",
     },
   ]);
   return {
@@ -197,6 +197,7 @@ const validateJsonObject = (data) => {
     JSON.parse(jsonString);
     return true;
   } catch (error) {
+    console.log("Error parsing JSON:", error.message);
     return false;
   }
 };
