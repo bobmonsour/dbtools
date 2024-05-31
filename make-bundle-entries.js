@@ -209,7 +209,7 @@ const appendToJsonFile = (data) => {
     const jsonData = JSON.parse(fileData);
     jsonData.push(data);
     fs.writeFileSync(dbFilePath, JSON.stringify(jsonData, null, 2), "utf8");
-    console.log(chalk.green("Entry successfully added to the file."));
+    console.log(chalk.green("Entry successfully saved!"));
   } catch (error) {
     console.error(chalk.red("Error writing to the file:", error));
   }
@@ -252,24 +252,43 @@ const main = async () => {
   // Validate if the entry data is a valid JSON object
   if (validateJsonObject(entryData)) {
     console.log("Entry Data is a valid JSON object:", entryData);
-    appendToJsonFile(entryData);
+    // appendToJsonFile(entryData);
   } else {
     console.error(chalk.red("Entry Data is not a valid JSON object"));
   }
 
-  const restart = await inquirer.prompt([
+  const { whatNext } = await inquirer.prompt([
     {
-      type: "confirm",
-      name: "restart",
-      message: "Do you want to add another entry?",
-      default: false,
+      type: "list",
+      name: "whatNext",
+      message: "What's next?",
+      choices: ["1) edit entry", "2) save & exit", "3) save & add another"],
     },
   ]);
 
-  if (restart.restart) {
+  let exitStatus = false;
+  switch (whatNext) {
+    case "1) edit entry":
+      console.log("Edit entry");
+      exitStatus = true;
+      break;
+    case "2) save & exit":
+      appendToJsonFile(entryData);
+      exitStatus = true;
+      break;
+    case "3) save & add another":
+      appendToJsonFile(entryData);
+      // console.log("Adding another entry");
+      break;
+    default:
+      console.log("Invalid choice");
+      return;
+  }
+
+  if (exitStatus === false) {
     return main();
   } else {
-    console.log("All done!");
+    console.log("All done...bye!");
   }
 };
 
