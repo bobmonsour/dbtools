@@ -8,6 +8,7 @@ import { config } from "./config.js";
 // checkForDuplicateUrl - Check for duplicate URL in the bundle database file
 // makeBackupFile - Create a backup of the bundle database file
 // getLatestIssueNumber - Get the latest Issue number from the bundle database
+// editJsonObject - Edit a JSON object interactively
 
 // Function to check for duplicate URL in the JSON file
 export const checkForDuplicateUrl = (url) => {

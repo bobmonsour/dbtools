@@ -1,6 +1,7 @@
 import inquirer from "inquirer";
 import axios from "axios";
 import fs from "fs";
+import readline from "readline";
 import chalk from "chalk";
 import {
   makeBackupFile,
@@ -11,6 +12,9 @@ import { config } from "./config.js";
 
 // Get the location of the bundle database file
 const dbFilePath = config.dbFilePath;
+
+// Declare readline variable for user input
+let rl;
 
 // Function to generate a default date for the entry
 // The date should default to today's date in the format of YYYY-MM-DD
@@ -69,6 +73,19 @@ const validateUrlAccessibility = async (url) => {
   }
 };
 
+// Function to validate the Link
+const validateLink = async (input) => {
+  const formatValidation = validateUrlFormat(input);
+  if (formatValidation !== true) {
+    return formatValidation;
+  }
+  if (checkForDuplicateUrl(input)) {
+    return "This Link already exists in the data!";
+  }
+  const accessibilityValidation = await validateUrlAccessibility(input);
+  return accessibilityValidation;
+};
+
 // Function to prompt for common information
 const promptCommonInfo = async () => {
   const latestIssueNumber = getLatestIssueNumber();
@@ -94,17 +111,7 @@ const promptCommonInfo = async () => {
       type: "input",
       name: "Link",
       message: "Link:",
-      validate: async (input) => {
-        const formatValidation = validateUrlFormat(input);
-        if (formatValidation !== true) {
-          return formatValidation;
-        }
-        if (checkForDuplicateUrl(input)) {
-          return "This Link already exists in the data!";
-        }
-        const accessibilityValidation = await validateUrlAccessibility(input);
-        return accessibilityValidation;
-      },
+      validate: validateLink,
     },
   ]);
 };
@@ -215,12 +222,58 @@ const appendToJsonFile = (data) => {
   }
 };
 
+// Function to initialize readline for user input
+const initializeReadline = () => {
+  rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+};
+
+// Function to close readline interface
+const closeReadline = () => {
+  if (rl) {
+    rl.close();
+  }
+};
+
+// Function to prompt user for input
+const promptUser = (query) => {
+  return new Promise((resolve) => {
+    rl.question(query, (answer) => {
+      resolve(answer);
+    });
+  });
+};
+
+// Function to edit a JSON object interactively
+const editJsonObject = async (jsonObject) => {
+  try {
+    // Iterate through each key-value pair
+    for (const [key, value] of Object.entries(jsonObject)) {
+      const userInput = await promptUser(
+        `${key} is "${value}" (Enter = accept, or enter new value): `
+      );
+      if (userInput) {
+        jsonObject[key] = userInput;
+      }
+    }
+
+    // Return the edited JSON object
+    return jsonObject;
+  } catch (error) {
+    console.error("Error:", error);
+  } finally {
+    closeReadline();
+  }
+};
+
 // Main function to prompt for entry type and handle accordingly
 const main = async () => {
   // make a backup of the file before making changes
   const inputFilePath = dbFilePath;
   makeBackupFile(inputFilePath);
-
+  closeReadline(); // Close readline before using inquirer
   const { entryType } = await inquirer.prompt([
     {
       type: "list",
@@ -257,6 +310,7 @@ const main = async () => {
     console.error(chalk.red("Entry Data is not a valid JSON object"));
   }
 
+  closeReadline(); // Close readline before using inquirer
   const { whatNext } = await inquirer.prompt([
     {
       type: "list",
@@ -269,8 +323,16 @@ const main = async () => {
   let exitStatus = false;
   switch (whatNext) {
     case "1) edit entry":
-      console.log("Edit entry");
-      exitStatus = true;
+      // Provide an editing interface for the JSON object
+      // Reinitialize readline for further editing
+      initializeReadline();
+      let editedData = await editJsonObject(entryData);
+      if (validateJsonObject(editedData)) {
+        console.log("Entry Data is a valid JSON object:", editedData);
+        appendToJsonFile(editedData);
+      } else {
+        console.error(chalk.red("Entry Data is not a valid JSON object"));
+      }
       break;
     case "2) save & exit":
       appendToJsonFile(entryData);
@@ -278,7 +340,6 @@ const main = async () => {
       break;
     case "3) save & add another":
       appendToJsonFile(entryData);
-      // console.log("Adding another entry");
       break;
     default:
       console.log("Invalid choice");
