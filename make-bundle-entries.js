@@ -316,13 +316,20 @@ const main = async () => {
       type: "list",
       name: "whatNext",
       message: "What's next?",
-      choices: ["1) edit entry", "2) save & exit", "3) save & add another"],
+      choices: ["1) save & exit", "2) save & add another", "3) edit entry"],
     },
   ]);
 
   let exitStatus = false;
   switch (whatNext) {
-    case "1) edit entry":
+    case "1) save & exit":
+      appendToJsonFile(entryData);
+      exitStatus = true;
+      break;
+    case "2) save & add another":
+      appendToJsonFile(entryData);
+      break;
+    case "3) edit entry":
       // Provide an editing interface for the JSON object
       // Reinitialize readline for further editing
       initializeReadline();
@@ -333,13 +340,6 @@ const main = async () => {
       } else {
         console.error(chalk.red("Entry Data is not a valid JSON object"));
       }
-      break;
-    case "2) save & exit":
-      appendToJsonFile(entryData);
-      exitStatus = true;
-      break;
-    case "3) save & add another":
-      appendToJsonFile(entryData);
       break;
     default:
       console.log("Invalid choice");
