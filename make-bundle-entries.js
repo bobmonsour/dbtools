@@ -268,11 +268,19 @@ const editJsonObject = async (jsonObject) => {
   }
 };
 
+// Set backup count to 0
+let backupCount = 0;
+
 // Main function to prompt for entry type and handle accordingly
 const main = async () => {
   // make a backup of the file before making changes
-  const inputFilePath = dbFilePath;
-  makeBackupFile(inputFilePath);
+  // make a single backup per entry/editing session
+  if (backupCount === 0) {
+    makeBackupFile(dbFilePath);
+    const inputFilePath = dbFilePath;
+    makeBackupFile(inputFilePath);
+    backupCount++;
+  }
   closeReadline(); // Close readline before using inquirer
   const { entryType } = await inquirer.prompt([
     {
