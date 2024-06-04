@@ -1,7 +1,6 @@
 import inquirer from "inquirer";
 import axios from "axios";
 import fs from "fs";
-import readline from "readline";
 import chalk from "chalk";
 import {
   makeBackupFile,
@@ -12,9 +11,12 @@ import { config } from "./config.js";
 
 // Get the location of the bundle database file
 const dbFilePath = config.dbFilePath;
-
-// Declare readline variable for user input
-let rl;
+// Set db file backup state
+let backedUp = false;
+// Set next action after initial entry
+let nextAction = "ask what next";
+// Create the entry data object
+let entryData = {};
 
 // Function to generate a default date for the entry
 // The date should default to today's date in the format of YYYY-MM-DD
@@ -87,13 +89,14 @@ const validateLink = async (input) => {
 };
 
 // Function to prompt for common information
-const promptCommonInfo = async () => {
+const promptCommonInfo = async (enterOrEdit, entryData) => {
   const latestIssueNumber = getLatestIssueNumber();
   return await inquirer.prompt([
     {
       type: "input",
       name: "Issue",
       message: `Issue (latest is ${latestIssueNumber}):`,
+      default: enterOrEdit === "edit" ? entryData.Issue : latestIssueNumber,
       validate: function (input) {
         if (input.trim() === "" || !isNaN(input)) {
           return true;
@@ -105,20 +108,22 @@ const promptCommonInfo = async () => {
       type: "input",
       name: "Title",
       message: "Title:",
+      default: enterOrEdit === "edit" ? entryData.Title : null,
       validate: (input) => (input ? true : "Title is required."),
     },
     {
       type: "input",
       name: "Link",
       message: "Link:",
+      default: enterOrEdit === "edit" ? entryData.Link : null,
       validate: validateLink,
     },
   ]);
 };
 
-// Function to handle blog post entry
-const handleBlogPost = async () => {
-  const commonInfo = await promptCommonInfo();
+// Function to ENTER post info
+const enterPost = async () => {
+  const commonInfo = await promptCommonInfo("enter");
   const additionalInfo = await inquirer.prompt([
     {
       type: "input",
@@ -143,7 +148,7 @@ const handleBlogPost = async () => {
         input.length > 0 ? true : "At least one category must be selected.",
     },
   ]);
-  return {
+  entryData = {
     Issue: commonInfo.Issue,
     Type: "blog post",
     Title: commonInfo.Title,
@@ -152,22 +157,24 @@ const handleBlogPost = async () => {
     Author: additionalInfo.Author,
     Categories: additionalInfo.Categories,
   };
+  return;
 };
 
-// Function to handle site entry
-const handleSite = async () => {
-  const commonInfo = await promptCommonInfo();
-  return {
+// Function to ENTER site info
+const enterSite = async () => {
+  const commonInfo = await promptCommonInfo("enter");
+  entryData = {
     Issue: commonInfo.Issue,
     Type: "site",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
   };
+  return;
 };
 
-// Function to handle release entry
-const handleRelease = async () => {
-  const commonInfo = await promptCommonInfo();
+// Function to ENTER release info
+const enterRelease = async () => {
+  const commonInfo = await promptCommonInfo("enter");
   const additionalInfo = await inquirer.prompt([
     {
       type: "input",
@@ -177,24 +184,160 @@ const handleRelease = async () => {
       validate: validateDate,
     },
   ]);
-  return {
+  entryData = {
     Issue: commonInfo.Issue,
     Type: "release",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
     Date: additionalInfo.Date,
   };
+  return;
 };
 
-// Function to handle starter entry
-const handleStarter = async () => {
-  const commonInfo = await promptCommonInfo();
-  return {
+// Function to ENTER starter info
+const enterStarter = async () => {
+  const commonInfo = await promptCommonInfo("enter");
+  entryData = {
     Issue: commonInfo.Issue,
     Type: "starter",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
   };
+  return;
+};
+
+// Function to EDIT post info
+const editPost = async () => {
+  const commonInfo = await promptCommonInfo("edit", entryData);
+  const additionalInfo = await inquirer.prompt([
+    {
+      type: "input",
+      name: "Date",
+      message: "Date (YYYY-MM-DD):",
+      default: entryData.Date,
+      validate: validateDate,
+    },
+    {
+      type: "input",
+      name: "Author",
+      message: "Author:",
+      default: entryData.Author,
+      validate: (input) => (input ? true : "Author is required."),
+    },
+    {
+      type: "checkbox",
+      name: "Categories",
+      message: "Categories (1 or more):",
+      pageSize: 10,
+      choices: config.categories.map((category) => {
+        return {
+          name: category,
+          checked: entryData.Categories.includes(category),
+        };
+      }),
+      validate: (input) =>
+        input.length > 0 ? true : "At least one category must be selected.",
+    },
+  ]);
+  entryData = {
+    Issue: commonInfo.Issue,
+    Type: "blog post",
+    Title: commonInfo.Title,
+    Link: commonInfo.Link,
+    Date: additionalInfo.Date,
+    Author: additionalInfo.Author,
+    Categories: additionalInfo.Categories,
+  };
+  return;
+};
+
+// Function to EDIT site info
+const editSite = async () => {
+  const commonInfo = await promptCommonInfo("edit", entryData);
+  entryData = {
+    Issue: commonInfo.Issue,
+    Type: "site",
+    Title: commonInfo.Title,
+    Link: commonInfo.Link,
+  };
+  return;
+};
+
+// Function to EDIT release info
+const editRelease = async () => {
+  const commonInfo = await promptCommonInfo("edit", entryData);
+  const additionalInfo = await inquirer.prompt([
+    {
+      type: "input",
+      name: "Date",
+      message: "Date (YYYY-MM-DD):",
+      default: getDefaultDate(),
+      validate: validateDate,
+    },
+  ]);
+  entryData = {
+    Issue: commonInfo.Issue,
+    Type: "release",
+    Title: commonInfo.Title,
+    Link: commonInfo.Link,
+    Date: additionalInfo.Date,
+  };
+  return;
+};
+
+// Function to EDIT starter info
+const editStarter = async () => {
+  const commonInfo = await promptCommonInfo("edit", entryData);
+  entryData = {
+    Issue: commonInfo.Issue,
+    Type: "starter",
+    Title: commonInfo.Title,
+    Link: commonInfo.Link,
+  };
+  return;
+};
+
+// Function to process user selected steps after entry
+const afterEntry = async () => {
+  const { whatNext } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "whatNext",
+      message: "What's next?",
+      choices: ["1) save & exit", "2) save & add another", "3) edit entry"],
+    },
+  ]);
+  switch (whatNext) {
+    case "1) save & exit":
+      await appendToJsonFile(entryData);
+      return (nextAction = "exit");
+    case "2) save & add another":
+      await appendToJsonFile(entryData);
+      nextAction = "add another";
+      return;
+    case "3) edit entry":
+      nextAction = "ask what next";
+      switch (entryData.Type) {
+        case "blog post":
+          await editPost();
+          return;
+        case "site":
+          await editSite();
+          return;
+        case "release":
+          await editRelease();
+          return;
+        case "starter":
+          await editStarter();
+          return;
+        default:
+          console.log("Invalid EDIT type");
+          return;
+      }
+    default:
+      console.log("Invalid choice");
+      return;
+  }
 };
 
 // Function to validate if the entry data is a valid JSON object
@@ -210,7 +353,7 @@ const validateJsonObject = (data) => {
 };
 
 // Function to append the validated entry data to the JSON file
-const appendToJsonFile = (data) => {
+const appendToJsonFile = async (data) => {
   try {
     const fileData = fs.readFileSync(dbFilePath, "utf8");
     const jsonData = JSON.parse(fileData);
@@ -222,143 +365,64 @@ const appendToJsonFile = (data) => {
   }
 };
 
-// Function to initialize readline for user input
-const initializeReadline = () => {
-  rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-};
-
-// Function to close readline interface
-const closeReadline = () => {
-  if (rl) {
-    rl.close();
-  }
-};
-
-// Function to prompt user for input
-const promptUser = (query) => {
-  return new Promise((resolve) => {
-    rl.question(query, (answer) => {
-      resolve(answer);
-    });
-  });
-};
-
-// Function to edit a JSON object interactively
-const editJsonObject = async (jsonObject) => {
-  try {
-    // Iterate through each key-value pair
-    for (const [key, value] of Object.entries(jsonObject)) {
-      const userInput = await promptUser(
-        `${key} is "${value}" (Enter = accept, or enter new value): `
-      );
-      if (userInput) {
-        jsonObject[key] = userInput;
-      }
-    }
-
-    // Return the edited JSON object
-    return jsonObject;
-  } catch (error) {
-    console.error("Error:", error);
-  } finally {
-    closeReadline();
-  }
-};
-
-// Set backup count to 0
-let backupCount = 0;
-
-// Main function to prompt for entry type and handle accordingly
+// Main function to prompt for entry type and
+// call the respective entry function
 const main = async () => {
-  // make a backup of the file before making changes
+  // make a backup of the file before creating new entries
   // make a single backup per entry/editing session
-  if (backupCount === 0) {
+  if (!backedUp) {
     makeBackupFile(dbFilePath);
     const inputFilePath = dbFilePath;
     makeBackupFile(inputFilePath);
-    backupCount++;
+    backedUp = true;
   }
-  closeReadline(); // Close readline before using inquirer
+
   const { entryType } = await inquirer.prompt([
     {
       type: "list",
       name: "entryType",
       message: "Type of entry:",
-      choices: ["1) blog post", "2) site", "3) release", "4) starter"],
+      choices: ["1) post", "2) site", "3) release", "4) starter"],
     },
   ]);
 
-  let entryData;
   switch (entryType) {
-    case "1) blog post":
-      entryData = await handleBlogPost();
+    case "1) post":
+      await enterPost();
       break;
     case "2) site":
-      entryData = await handleSite();
+      await enterSite();
       break;
     case "3) release":
-      entryData = await handleRelease();
+      await enterRelease();
       break;
     case "4) starter":
-      entryData = await handleStarter();
+      await enterStarter();
       break;
     default:
-      console.log("Invalid entry type");
+      console.log("Invalid ENTRY type");
       return;
   }
 
   // Validate if the entry data is a valid JSON object
   if (validateJsonObject(entryData)) {
     console.log("Entry Data is a valid JSON object:", entryData);
-    // appendToJsonFile(entryData);
   } else {
     console.error(chalk.red("Entry Data is not a valid JSON object"));
   }
 
-  closeReadline(); // Close readline before using inquirer
-  const { whatNext } = await inquirer.prompt([
-    {
-      type: "list",
-      name: "whatNext",
-      message: "What's next?",
-      choices: ["1) save & exit", "2) save & add another", "3) edit entry"],
-    },
-  ]);
-
-  let exitStatus = false;
-  switch (whatNext) {
-    case "1) save & exit":
-      appendToJsonFile(entryData);
-      exitStatus = true;
-      break;
-    case "2) save & add another":
-      appendToJsonFile(entryData);
-      break;
-    case "3) edit entry":
-      // Provide an editing interface for the JSON object
-      // Reinitialize readline for further editing
-      initializeReadline();
-      let editedData = await editJsonObject(entryData);
-      if (validateJsonObject(editedData)) {
-        console.log("Entry Data is a valid JSON object:", editedData);
-        appendToJsonFile(editedData);
-      } else {
-        console.error(chalk.red("Entry Data is not a valid JSON object"));
-      }
-      break;
-    default:
-      console.log("Invalid choice");
-      return;
+  while (nextAction !== "exit") {
+    await afterEntry();
+    switch (nextAction) {
+      case "exit":
+        break;
+      case "add another":
+        return main();
+      case "ask what next":
+        continue;
+    }
   }
-
-  if (exitStatus === false) {
-    return main();
-  } else {
-    console.log("All done...bye!");
-  }
+  console.log("All done...bye!");
 };
 
 // Run the main function
