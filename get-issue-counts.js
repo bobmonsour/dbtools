@@ -81,7 +81,7 @@ const promptAnotherRequest = async () => {
     {
       type: "confirm",
       name: "anotherRequest",
-      message: "Do you want to make another request?",
+      message: "Counts from another issue?",
       default: false,
     },
   ]);
