@@ -1,4 +1,4 @@
-import inquirer from "inquirer";
+import { input, rawlist, checkbox } from "@inquirer/prompts";
 import axios from "axios";
 import fs from "fs";
 import chalk from "chalk";
@@ -91,71 +91,57 @@ const validateLink = async (input) => {
 // Function to prompt for common information
 const promptCommonInfo = async (enterOrEdit, entryData) => {
   const latestIssueNumber = getLatestIssueNumber();
-  return await inquirer.prompt([
-    {
-      type: "input",
-      name: "Issue",
-      message: `Issue (latest is ${latestIssueNumber}):`,
-      default: enterOrEdit === "edit" ? entryData.Issue : latestIssueNumber,
-      validate: function (input) {
-        if (input.trim() === "" || !isNaN(input)) {
-          return true;
-        }
-        return "Please enter a valid number or leave the input blank.";
-      },
+  const commonInfo = {};
+  commonInfo.Issue = await input({
+    message: `Issue (latest is ${latestIssueNumber}):`,
+    default: enterOrEdit === "edit" ? entryData.Issue : latestIssueNumber,
+    validate: function (input) {
+      if (input.trim() === "" || !isNaN(input)) {
+        return true;
+      }
+      return "Please enter a valid number or leave the input blank.";
     },
-    {
-      type: "input",
-      name: "Title",
-      message: "Title:",
-      default: enterOrEdit === "edit" ? entryData.Title : null,
-      validate: (input) => (input ? true : "Title is required."),
-    },
-    {
-      type: "input",
-      name: "Link",
-      message: "Link:",
-      default: enterOrEdit === "edit" ? entryData.Link : null,
-      validate: validateLink,
-    },
-  ]);
+  });
+  commonInfo.Title = await input({
+    message: "Title:",
+    default: enterOrEdit === "edit" ? entryData.Title : null,
+    validate: (input) => (input ? true : "Title is required."),
+  });
+  commonInfo.Link = await input({
+    message: "Link:",
+    default: enterOrEdit === "edit" ? entryData.Link : null,
+    validate: validateLink,
+  });
+  return commonInfo;
 };
 
 // Function to ENTER post info
 const enterPost = async () => {
   const commonInfo = await promptCommonInfo("enter");
-  const additionalInfo = await inquirer.prompt([
-    {
-      type: "input",
-      name: "Date",
-      message: "Date (YYYY-MM-DD):",
-      default: getDefaultDate(),
-      validate: validateDate,
-    },
-    {
-      type: "input",
-      name: "Author",
-      message: "Author:",
-      validate: (input) => (input ? true : "Author is required."),
-    },
-    {
-      type: "checkbox",
-      name: "Categories",
-      message: "Categories (1 or more):",
-      pageSize: 10,
-      choices: config.categories,
-      validate: (input) =>
-        input.length > 0 ? true : "At least one category must be selected.",
-    },
-  ]);
+  const Date = await input({
+    message: "Date (YYYY-MM-DD):",
+    default: getDefaultDate(),
+    validate: validateDate,
+  });
+  const Author = await input({
+    message: "Author:",
+    validate: (input) => (input ? true : "Author is required."),
+  });
+  const Categories = await checkbox({
+    message: "Categories (1 or more):",
+    pageSize: 10,
+    choices: config.categories,
+    validate: (input) =>
+      input.length > 0 ? true : "At least one category must be selected.",
+  });
   entryData = {
     Issue: commonInfo.Issue,
     Type: "blog post",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
-    Date: additionalInfo.Date,
-    Author: additionalInfo.Author,
-    Categories: additionalInfo.Categories,
+    Date: Date,
+    Author: Author,
+    Categories: Categories,
   };
   return;
 };
@@ -175,21 +161,17 @@ const enterSite = async () => {
 // Function to ENTER release info
 const enterRelease = async () => {
   const commonInfo = await promptCommonInfo("enter");
-  const additionalInfo = await inquirer.prompt([
-    {
-      type: "input",
-      name: "Date",
-      message: "Date (YYYY-MM-DD):",
-      default: getDefaultDate(),
-      validate: validateDate,
-    },
-  ]);
+  const additionalInfo = await input({
+    message: "Date (YYYY-MM-DD):",
+    default: getDefaultDate(),
+    validate: validateDate,
+  });
   entryData = {
     Issue: commonInfo.Issue,
     Type: "release",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
-    Date: additionalInfo.Date,
+    Date: additionalInfo,
   };
   return;
 };
@@ -209,44 +191,36 @@ const enterStarter = async () => {
 // Function to EDIT post info
 const editPost = async () => {
   const commonInfo = await promptCommonInfo("edit", entryData);
-  const additionalInfo = await inquirer.prompt([
-    {
-      type: "input",
-      name: "Date",
-      message: "Date (YYYY-MM-DD):",
-      default: entryData.Date,
-      validate: validateDate,
-    },
-    {
-      type: "input",
-      name: "Author",
-      message: "Author:",
-      default: entryData.Author,
-      validate: (input) => (input ? true : "Author is required."),
-    },
-    {
-      type: "checkbox",
-      name: "Categories",
-      message: "Categories (1 or more):",
-      pageSize: 10,
-      choices: config.categories.map((category) => {
-        return {
-          name: category,
-          checked: entryData.Categories.includes(category),
-        };
-      }),
-      validate: (input) =>
-        input.length > 0 ? true : "At least one category must be selected.",
-    },
-  ]);
+  const Date = await input({
+    message: "Date (YYYY-MM-DD):",
+    default: entryData.Date,
+    validate: validateDate,
+  });
+  const Author = await input({
+    message: "Author:",
+    default: entryData.Author,
+    validate: (input) => (input ? true : "Author is required."),
+  });
+  const Categories = await checkbox({
+    message: "Categories (1 or more):",
+    pageSize: 10,
+    choices: config.categories.map((category) => {
+      return {
+        name: category,
+        checked: entryData.Categories.includes(category),
+      };
+    }),
+    validate: (input) =>
+      input.length > 0 ? true : "At least one category must be selected.",
+  });
   entryData = {
     Issue: commonInfo.Issue,
     Type: "blog post",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
-    Date: additionalInfo.Date,
-    Author: additionalInfo.Author,
-    Categories: additionalInfo.Categories,
+    Date: Date,
+    Author: Author,
+    Categories: Categories,
   };
   return;
 };
@@ -266,21 +240,17 @@ const editSite = async () => {
 // Function to EDIT release info
 const editRelease = async () => {
   const commonInfo = await promptCommonInfo("edit", entryData);
-  const additionalInfo = await inquirer.prompt([
-    {
-      type: "input",
-      name: "Date",
-      message: "Date (YYYY-MM-DD):",
-      default: getDefaultDate(),
-      validate: validateDate,
-    },
-  ]);
+  const Date = await input({
+    message: "Date (YYYY-MM-DD):",
+    default: getDefaultDate(),
+    validate: validateDate,
+  });
   entryData = {
     Issue: commonInfo.Issue,
     Type: "release",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
-    Date: additionalInfo.Date,
+    Date: Date,
   };
   return;
 };
@@ -299,23 +269,23 @@ const editStarter = async () => {
 
 // Function to process user selected steps after entry
 const afterEntry = async () => {
-  const { whatNext } = await inquirer.prompt([
-    {
-      type: "list",
-      name: "whatNext",
-      message: "What's next?",
-      choices: ["1) save & exit", "2) save & add another", "3) edit entry"],
-    },
-  ]);
+  const whatNext = await rawlist({
+    message: "What's next?",
+    choices: [
+      { name: "save & exit", value: "save & exit" },
+      { name: "save & add another", value: "save & add another" },
+      { name: "edit entry", value: "edit entry" },
+    ],
+  });
   switch (whatNext) {
-    case "1) save & exit":
+    case "save & exit":
       await appendToJsonFile(entryData);
       return (nextAction = "exit");
-    case "2) save & add another":
+    case "save & add another":
       await appendToJsonFile(entryData);
       nextAction = "add another";
       return;
-    case "3) edit entry":
+    case "edit entry":
       nextAction = "ask what next";
       switch (entryData.Type) {
         case "blog post":
@@ -377,26 +347,27 @@ const main = async () => {
     backedUp = true;
   }
 
-  const { entryType } = await inquirer.prompt([
-    {
-      type: "list",
-      name: "entryType",
-      message: "Type of entry:",
-      choices: ["1) post", "2) site", "3) release", "4) starter"],
-    },
-  ]);
+  const entryType = await rawlist({
+    message: "Type of entry:",
+    choices: [
+      { name: "post", value: "post" },
+      { name: "site", value: "site" },
+      { name: "release", value: "release" },
+      { name: "starter", value: "starter" },
+    ],
+  });
 
   switch (entryType) {
-    case "1) post":
+    case "post":
       await enterPost();
       break;
-    case "2) site":
+    case "site":
       await enterSite();
       break;
-    case "3) release":
+    case "release":
       await enterRelease();
       break;
-    case "4) starter":
+    case "starter":
       await enterStarter();
       break;
     default:

@@ -1,17 +1,14 @@
-import inquirer from "inquirer";
+import { input, confirm } from "@inquirer/prompts";
 import chalk from "chalk";
 import { checkForDuplicateUrl } from "./utils.js";
 
 // Main function to prompt for a URL to see if it's already in the db
 const main = async () => {
   // console.log(chalk.red("Latest issue number:", getLatestIssueNumber()));
-  const { url } = await inquirer.prompt([
-    {
-      type: "input",
-      name: "url",
-      message: "Enter URL to search for:",
-    },
-  ]);
+  const url = await input({
+    name: "url",
+    message: "Enter URL to search for:",
+  });
 
   // Check if the url is already in the database
   const isDuplicate = checkForDuplicateUrl(url);
@@ -21,16 +18,13 @@ const main = async () => {
     console.log(chalk.green("URL is not in the database"));
   }
 
-  const restart = await inquirer.prompt([
-    {
-      type: "confirm",
-      name: "restart",
-      message: "Do you want to check another URL?",
-      default: false,
-    },
-  ]);
+  const restart = await confirm({
+    name: "restart",
+    message: "Do you want to check another URL? (y/N):",
+    default: false,
+  });
 
-  if (restart.restart) {
+  if (restart) {
     return main();
   } else {
     console.log("All done!");

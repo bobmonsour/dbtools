@@ -1,4 +1,4 @@
-import inquirer from "inquirer";
+import { input, confirm } from "@inquirer/prompts";
 import fs from "fs";
 import chalk from "chalk";
 import { getLatestIssueNumber } from "./utils.js";
@@ -58,34 +58,27 @@ const countEntriesByIssue = (issueNumber) => {
 
 // Function to prompt the user for the issue number
 const promptIssueNumber = async () => {
-  const answers = await inquirer.prompt([
-    {
-      type: "input",
-      name: "issueNumber",
-      message: "Please enter the Issue number:",
-      default: getLatestIssueNumber(),
-      validate: (input) => {
-        if (!isNaN(input)) {
-          return true;
-        }
-        return "Please enter a valid number";
-      },
+  const answer = await input({
+    message: "Enter the issue number:",
+    default: getLatestIssueNumber(),
+    validate: (input) => {
+      if (!isNaN(input)) {
+        return true;
+      }
+      return "Please enter a valid number";
     },
-  ]);
-  return answers.issueNumber;
+  });
+  console.log("answer: ", answer);
+  return answer;
 };
 
 // Function to prompt the user if they want to make another request
 const promptAnotherRequest = async () => {
-  const answers = await inquirer.prompt([
-    {
-      type: "confirm",
-      name: "anotherRequest",
-      message: "Counts from another issue?",
-      default: false,
-    },
-  ]);
-  return answers.anotherRequest;
+  const answer = await confirm({
+    message: "Another issue? (y/N):",
+    default: false,
+  });
+  return answer;
 };
 
 // Main function to run the script
