@@ -6,6 +6,7 @@ import {
   makeBackupFile,
   getLatestIssueNumber,
   checkForDuplicateUrl,
+  countEntriesByIssue,
 } from "./utils.js";
 import { config } from "./config.js";
 
@@ -393,6 +394,14 @@ const main = async () => {
         continue;
     }
   }
+  const latestIssueNumber = getLatestIssueNumber();
+  const itemCounts = countEntriesByIssue(latestIssueNumber);
+  // Output the results
+  console.log(chalk.blue(`Issue Number: ${itemCounts.issueNumber}`));
+  console.log(chalk.green(`Blog Posts: ${itemCounts.blogPostCount}`));
+  console.log(chalk.green(`Sites: ${itemCounts.siteCount}`));
+  console.log(chalk.green(`Releases: ${itemCounts.releaseCount}`));
+  console.log(chalk.green(`Starters: ${itemCounts.starterCount}`));
   console.log("All done...bye!");
 };
 

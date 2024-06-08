@@ -87,3 +87,55 @@ export const getLatestIssueNumber = () => {
     return 0;
   }
 };
+
+// Function to read the JSON file and count the number of each type of entry for a given Issue number
+export const countEntriesByIssue = (issueNumber) => {
+  // Get the location of the bundle database file
+  const dbFilePath = config.dbFilePath;
+
+  try {
+    // Read the JSON file
+    const data = fs.readFileSync(dbFilePath, "utf8");
+    const jsonData = JSON.parse(data);
+
+    // Initialize counters for each type of entry
+    let blogPostCount = 0;
+    let siteCount = 0;
+    let releaseCount = 0;
+    let starterCount = 0;
+
+    // Filter and count the entries based on the given Issue number
+    jsonData.forEach((item) => {
+      if (item.Issue == issueNumber) {
+        // Use loose equality to handle different types
+        switch (item.Type) {
+          case "blog post":
+            blogPostCount++;
+            break;
+          case "site":
+            siteCount++;
+            break;
+          case "release":
+            releaseCount++;
+            break;
+          case "starter":
+            starterCount++;
+            break;
+          default:
+            break;
+        }
+      }
+    });
+    return {
+      issueNumber,
+      blogPostCount,
+      siteCount,
+      releaseCount,
+      starterCount,
+    };
+  } catch (error) {
+    console.error(
+      chalk.red("Error reading or processing the JSON file:", error)
+    );
+  }
+};
