@@ -350,10 +350,10 @@ const main = async () => {
   const entryType = await rawlist({
     message: "Type of entry:",
     choices: [
-      { name: "post", value: "post" },
-      { name: "site", value: "site" },
-      { name: "release", value: "release" },
-      { name: "starter", value: "starter" },
+      { value: "post" },
+      { value: "site" },
+      { value: "release" },
+      { value: "starter" },
     ],
   });
 
