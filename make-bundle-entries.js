@@ -272,9 +272,9 @@ const afterEntry = async () => {
   const whatNext = await rawlist({
     message: "What's next?",
     choices: [
-      { name: "save & exit", value: "save & exit" },
-      { name: "save & add another", value: "save & add another" },
-      { name: "edit entry", value: "edit entry" },
+      { value: "save & exit" },
+      { value: "save & add another" },
+      { value: "edit entry" },
     ],
   });
   switch (whatNext) {
