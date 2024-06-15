@@ -7,6 +7,7 @@ import {
   getLatestIssueNumber,
   checkForDuplicateUrl,
   countEntriesByIssue,
+  getUniqueCategories,
 } from "./utils.js";
 import { config } from "./config.js";
 
@@ -18,6 +19,8 @@ let backedUp = false;
 let nextAction = "ask what next";
 // Create the entry data object
 let entryData = {};
+let { uniqueCategoryChoices, uniqueCategories } = getUniqueCategories();
+// console.log("Unique Categories:", uniqueCategories);
 
 // Function to generate a default date for the entry
 // The date should default to today's date in the format of YYYY-MM-DD
@@ -131,7 +134,7 @@ const enterPost = async () => {
   const Categories = await checkbox({
     message: "Categories (1 or more):",
     pageSize: 10,
-    choices: config.categories,
+    choices: uniqueCategoryChoices,
     validate: (input) =>
       input.length > 0 ? true : "At least one category must be selected.",
   });
@@ -205,7 +208,7 @@ const editPost = async () => {
   const Categories = await checkbox({
     message: "Categories (1 or more):",
     pageSize: 10,
-    choices: config.categories.map((category) => {
+    choices: uniqueCategories.map((category) => {
       return {
         name: category,
         checked: entryData.Categories.includes(category),

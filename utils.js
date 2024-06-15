@@ -139,3 +139,41 @@ export const countEntriesByIssue = (issueNumber) => {
     );
   }
 };
+
+// Function to read the JSON file and generate an array of the
+// unique categories used in the checkbox portion of the post entries.
+// The array takes the form of:
+//
+// [ { value: "Category Name 1" }, { value: "Category Name 2" }... ]
+//
+export const getUniqueCategories = () => {
+  // Get the location of the bundle database file
+  const dbFilePath = config.dbFilePath;
+
+  try {
+    // Read the JSON file
+    const data = fs.readFileSync(dbFilePath, "utf8");
+    const jsonData = JSON.parse(data);
+    const categories = new Set();
+    for (const item of jsonData) {
+      if (item.hasOwnProperty("Categories")) {
+        for (const category of item.Categories) {
+          categories.add(category);
+        }
+      }
+    }
+    const uniqueCategoryChoices = Array.from(categories)
+      .sort()
+      .map((category) => {
+        return { value: category };
+      });
+    console.log(uniqueCategoryChoices);
+    const uniqueCategories = Array.from(categories).sort();
+    console.log(uniqueCategories);
+    return { uniqueCategoryChoices, uniqueCategories };
+  } catch (error) {
+    console.error(
+      chalk.red("Error reading or processing the JSON file:", error)
+    );
+  }
+};

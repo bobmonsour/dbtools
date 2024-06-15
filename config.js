@@ -33,6 +33,7 @@ export const config = {
     { value: "Global Data" },
     { value: "How to..." },
     { value: "Images" },
+    { value: "Image Galleries" },
     { value: "Internationalization" },
     { value: "Layouts" },
     { value: "Markdown" },
