@@ -20,7 +20,6 @@ let nextAction = "ask what next";
 // Create the entry data object
 let entryData = {};
 let { uniqueCategoryChoices, uniqueCategories } = getUniqueCategories();
-// console.log("Unique Categories:", uniqueCategories);
 
 // Function to generate a default date for the entry
 // The date should default to today's date in the format of YYYY-MM-DD
@@ -210,7 +209,7 @@ const editPost = async () => {
     pageSize: 10,
     choices: uniqueCategories.map((category) => {
       return {
-        name: category,
+        value: category,
         checked: entryData.Categories.includes(category),
       };
     }),
@@ -329,6 +328,7 @@ const validateJsonObject = (data) => {
 // Function to append the validated entry data to the JSON file
 const appendToJsonFile = async (data) => {
   try {
+    console.log("Appending to JSON file...", data);
     const fileData = fs.readFileSync(dbFilePath, "utf8");
     const jsonData = JSON.parse(fileData);
     jsonData.push(data);

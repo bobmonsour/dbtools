@@ -167,9 +167,9 @@ export const getUniqueCategories = () => {
       .map((category) => {
         return { value: category };
       });
-    console.log(uniqueCategoryChoices);
+    // console.log("Category Choices: " + uniqueCategoryChoices);
     const uniqueCategories = Array.from(categories).sort();
-    console.log(uniqueCategories);
+    // console.log("Categories: " + uniqueCategories);
     return { uniqueCategoryChoices, uniqueCategories };
   } catch (error) {
     console.error(
