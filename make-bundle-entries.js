@@ -351,16 +351,8 @@ const pushChanges = async () => {
 	const execPromise = util.promisify(exec);
 
 	try {
-		const directory = "/Users/Bob/Dropbox/Docs/Sites/dbtools/devdata";
-		const fileToCommit = "bundledb.json";
-		// const directory = "/Users/Bob/Dropbox/Docs/Sites/11tybundle.dev";
-		// const fileToCommit = "src/_data/bundledb.json";
-
-		// Change to the specified directory
-		process.chdir(directory);
-
 		// Perform Git operations
-		await execPromise(`git add ${fileToCommit}`);
+		await execPromise(`git add ${dbFilePath}`);
 		await execPromise(`git commit -m "Added to bundledb.json"`);
 		await execPromise(`git push origin addpush`);
 
