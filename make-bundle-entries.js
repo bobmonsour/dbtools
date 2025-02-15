@@ -10,6 +10,8 @@ import {
 	getUniqueCategories,
 } from "./utils.js";
 import { config } from "./config.js";
+import { exec } from "child_process";
+import util from "util";
 
 // Get the location of the bundle database file
 const dbFilePath = config.dbFilePath;
@@ -84,9 +86,9 @@ const validateLink = async (input) => {
 	if (formatValidation !== true) {
 		return formatValidation;
 	}
-	if (checkForDuplicateUrl(input)) {
-		return "This Link already exists in the data!";
-	}
+	// if (checkForDuplicateUrl(input)) {
+	// 	return "This Link already exists in the data!";
+	// }
 	const accessibilityValidation = await validateUrlAccessibility(input);
 	return accessibilityValidation;
 };
@@ -346,13 +348,13 @@ const appendToJsonFile = async (data) => {
 
 // Function to push changes to the Git repository
 const pushChanges = async () => {
-	const { exec } = require("child_process");
-	const util = require("util");
 	const execPromise = util.promisify(exec);
 
 	try {
-		const directory = "/Users/Bob/Dropbox/Docs/Sites/11tybundle.dev";
-		const fileToCommit = "src/_data/bundledb.json";
+		const directory = "/Users/Bob/Dropbox/Docs/Sites/dbtools";
+		const fileToCommit = "devdata/bundledb.json";
+		// const directory = "/Users/Bob/Dropbox/Docs/Sites/11tybundle.dev";
+		// const fileToCommit = "src/_data/bundledb.json";
 
 		// Change to the specified directory
 		process.chdir(directory);
