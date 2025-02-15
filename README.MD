@@ -2,4 +2,4 @@ These are a set of node scripts that support managing the data that drives the [
 
 They are not very well documented at the moment...and they are likely of little use to anyone but the curious.
 
-If you want to know more, I wrote a [blog post about them] (https://bobmonsour.com/blog/node-cli-of-my-dreams/).
+If you want to know more, I wrote a [blog post about them](https://bobmonsour.com/blog/node-cli-of-my-dreams/).
