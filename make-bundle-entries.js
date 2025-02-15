@@ -351,8 +351,8 @@ const pushChanges = async () => {
 	const execPromise = util.promisify(exec);
 
 	try {
-		const directory = "/Users/Bob/Dropbox/Docs/Sites/dbtools";
-		const fileToCommit = "devdata/bundledb.json";
+		const directory = "/Users/Bob/Dropbox/Docs/Sites/dbtools/devdata";
+		const fileToCommit = "bundledb.json";
 		// const directory = "/Users/Bob/Dropbox/Docs/Sites/11tybundle.dev";
 		// const fileToCommit = "src/_data/bundledb.json";
 
