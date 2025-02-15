@@ -1,6 +1,8 @@
 // Set up required configuration to support the 11ty Bundle database utilities
 export const config = {
 	// Use the following for production
+	dbFileDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundle.dev/src/_data",
+	dbFilename: "bundledb.json",
 	dbFilePath:
 		"/Users/Bob/Dropbox/Docs/Sites/11tybundle.dev/src/_data/bundledb.json",
 	dbBackupDir:
@@ -8,6 +10,8 @@ export const config = {
 	badLinksDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundle.dev/devdata/badlinks",
 
 	// Use the following for testing
+	// dbFileDir: "/Users/Bob/Dropbox/Docs/Sites/dbtools/devdata",
+	// dbFilename: "bundledb.json",
 	// dbFilePath: "/Users/Bob/Dropbox/Docs/Sites/dbtools/devdata/bundledb.json",
 	// dbBackupDir: "/Users/Bob/Dropbox/Docs/Sites/dbtools/devdata/bundledb-backups",
 	// badLinksDir: "/Users/Bob/Dropbox/Docs/Sites/dbtools/devdata/badlinks",
