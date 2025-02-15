@@ -773,5 +773,18 @@
       "Blogging",
       "Collections"
     ]
+  },
+  {
+    "Issue": "4",
+    "Type": "blog post",
+    "Title": "How I built the Books page",
+    "Link": "https://bobmonsour.com/blog/building-the-book-page/",
+    "Date": "2025-02-14",
+    "Author": "Bob Monsour",
+    "Categories": [
+      "Blogging",
+      "Data Cascade",
+      "Edge Functions"
+    ]
   }
 ]
