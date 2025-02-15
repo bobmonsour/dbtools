@@ -362,7 +362,7 @@ const pushChanges = async () => {
 		// Perform Git operations
 		await execPromise(`git add ${fileToCommit}`);
 		await execPromise(`git commit -m "Added to bundledb.json"`);
-		await execPromise(`git push origin main`);
+		await execPromise(`git push origin addpush`);
 
 		console.log(chalk.green("Changes pushed to the repository successfully!"));
 	} catch (error) {
