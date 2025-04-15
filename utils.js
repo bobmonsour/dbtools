@@ -177,3 +177,45 @@ export const getUniqueCategories = () => {
     );
   }
 };
+
+/**
+ * Function to count the number of blog post entries before or after a given date.
+ * @param {string} date - The date in yyyy-mm-dd format.
+ * @param {string} condition - Either 'before' or 'after'.
+ * @returns {number} - The count of blog post entries matching the condition.
+ */
+export const countEntriesAsOfDate = (date, condition) => {
+  const dbFilePath = config.dbFilePath; // Get the location of the bundle database file
+
+  try {
+    // Read the JSON file
+    const data = fs.readFileSync(dbFilePath, "utf8");
+    const jsonData = JSON.parse(data);
+
+    // Parse the input date
+    const inputDate = new Date(date);
+
+    // Validate the condition
+    if (condition !== "before" && condition !== "after") {
+      throw new Error("Invalid condition. Use 'before' or 'after'.");
+    }
+
+    // Filter and count the entries based on the condition
+    const count = jsonData.filter((entry) => {
+      if (entry.Type === "blog post" && entry.Date) {
+        const entryDate = new Date(entry.Date);
+        return condition === "before"
+          ? entryDate < inputDate
+          : entryDate > inputDate;
+      }
+      return false;
+    }).length;
+
+    return count;
+  } catch (error) {
+    console.error(
+      chalk.red("Error reading or processing the JSON file:", error)
+    );
+    return 0;
+  }
+};
