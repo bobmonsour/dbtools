@@ -179,12 +179,13 @@ export const getUniqueCategories = () => {
 };
 
 /**
- * Function to count the number of blog post entries before or after a given date.
+ * Function to count the number of entries of a specific type before or after a given date.
  * @param {string} date - The date in yyyy-mm-dd format.
  * @param {string} condition - Either 'before' or 'after'.
- * @returns {number} - The count of blog post entries matching the condition.
+ * @param {string} type - The type of entry to filter by ('blog post', 'release', 'site').
+ * @returns {number} - The count of entries matching the condition and type.
  */
-export const countEntriesAsOfDate = (date, condition) => {
+export const countEntriesAsOfDate = (date, condition, type) => {
   const dbFilePath = config.dbFilePath; // Get the location of the bundle database file
 
   try {
@@ -200,9 +201,14 @@ export const countEntriesAsOfDate = (date, condition) => {
       throw new Error("Invalid condition. Use 'before' or 'after'.");
     }
 
-    // Filter and count the entries based on the condition
+    // Validate the type
+    if (!["blog post", "release", "site"].includes(type)) {
+      throw new Error("Invalid type. Use 'blog post', 'release', or 'site'.");
+    }
+
+    // Filter and count the entries based on the condition and type
     const count = jsonData.filter((entry) => {
-      if (entry.Type === "blog post" && entry.Date) {
+      if (entry.Type === type && entry.Date) {
         const entryDate = new Date(entry.Date);
         return condition === "before"
           ? entryDate < inputDate

@@ -33,6 +33,19 @@ const promptBeforeAfter = async () => {
   return answer;
 };
 
+// Function to prompt the user for the type of entry
+const promptEntryType = async () => {
+  const answer = await select({
+    message: "Select the type of entry:",
+    choices: [
+      { name: "Posts", value: "blog post" },
+      { name: "Releases", value: "release" },
+      { name: "Sites", value: "site" },
+    ],
+  });
+  return answer;
+};
+
 // Function to prompt the user if they want to make another request
 const promptAnotherRequest = async () => {
   const answer = await confirm({
@@ -49,11 +62,14 @@ const main = async () => {
     while (continueRequest) {
       const date = await promptDate();
       const beforeAfter = await promptBeforeAfter();
-      const postCount = countEntriesAsOfDate(date, beforeAfter);
+      const entryType = await promptEntryType();
+      const postCount = countEntriesAsOfDate(date, beforeAfter, entryType);
       // Output the results
       console.log(
         chalk.blue(
-          `Number of posts ${beforeAfter} ${date}: ${chalk.green(postCount)}`
+          `Number of ${entryType}s ${beforeAfter} ${date}: ${chalk.green(
+            postCount
+          )}`
         )
       );
       continueRequest = await promptAnotherRequest();
