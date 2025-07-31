@@ -23,24 +23,43 @@ let nextAction = "ask what next";
 let entryData = {};
 let { uniqueCategoryChoices, uniqueCategories } = getUniqueCategories();
 
+// Generate a date string that includes date and time in local timezone
+const getCurrentDateTimeString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000`;
+};
+
 // Function to generate a default date for the entry
 // The date should default to today's date in the format of YYYY-MM-DD
 const getDefaultDate = () => {
-  const currentDate = new Date();
-  const year = currentDate.getFullYear();
-  const month = String(currentDate.getMonth() + 1).padStart(2, "0");
-  const day = String(currentDate.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  return getCurrentDateTimeString();
+  // const currentDate = new Date();
+  // const year = currentDate.getFullYear();
+  // const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+  // const day = String(currentDate.getDate()).padStart(2, "0");
+  // return `${year}-${month}-${day}`;
 };
 
-// Function to validate date format and ensure it is no later than today
+// Function to validate date format
 const validateDate = (input) => {
+  // Accept YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.000
   const datePattern = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
-  if (!datePattern.test(input)) {
-    return "Please enter a valid date in YYYY-MM-DD format.";
+  const dateTimePattern =
+    /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T\d{2}:\d{2}:\d{2}\.\d{3}$/;
+
+  if (!datePattern.test(input) && !dateTimePattern.test(input)) {
+    return "Please enter a valid date in YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.000 format.";
   }
 
-  const [year, month, day] = input.split("-").map(Number);
+  // Parse the date part only for validation
+  const datePart = input.split("T")[0];
+  const [year, month, day] = datePart.split("-").map(Number);
   const date = new Date(year, month - 1, day);
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0); // Set time to 00:00:00 for accurate comparison
@@ -50,11 +69,7 @@ const validateDate = (input) => {
     date.getDate() !== day ||
     date.getFullYear() !== year
   ) {
-    return "Invalid date. Enter date in YYYY-MM-DD format.";
-  }
-
-  if (date > currentDate) {
-    return "Date cannot be later than today.";
+    return "Invalid date. Enter date in YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.000 format.";
   }
 
   return true;
@@ -203,7 +218,7 @@ const enterStarter = async () => {
 const editPost = async () => {
   const commonInfo = await promptCommonInfo("edit", entryData);
   const Date = await input({
-    message: "Date (YYYY-MM-DD):",
+    message: "Date:",
     default: entryData.Date,
     validate: validateDate,
   });
@@ -239,11 +254,17 @@ const editPost = async () => {
 // Function to EDIT site info
 const editSite = async () => {
   const commonInfo = await promptCommonInfo("edit", entryData);
+  const Date = await input({
+    message: "Date:",
+    default: getDefaultDate(),
+    validate: validateDate,
+  });
   entryData = {
     Issue: commonInfo.Issue,
     Type: "site",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
+    Date: Date,
   };
   return;
 };
@@ -252,7 +273,7 @@ const editSite = async () => {
 const editRelease = async () => {
   const commonInfo = await promptCommonInfo("edit", entryData);
   const Date = await input({
-    message: "Date (YYYY-MM-DD):",
+    message: "Date:",
     default: getDefaultDate(),
     validate: validateDate,
   });
