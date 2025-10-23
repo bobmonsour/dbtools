@@ -17,10 +17,19 @@ const openDbFileInVSCode = async () => {
 
     console.log("File opened successfully in a new VS Code window!");
 
-    // Close the terminal window after a brief delay
-    setTimeout(() => {
-      process.exit(0);
-    }, 1000); // Wait 1 second before closing
+    // Wait a moment for VS Code to open, then close the terminal window
+    setTimeout(async () => {
+      try {
+        // Close the terminal window using AppleScript
+        await execPromise(
+          `osascript -e 'tell application "Terminal" to close front window'`
+        );
+      } catch (err) {
+        // If AppleScript fails, just exit the process
+        console.log("Could not close terminal window automatically");
+        process.exit(0);
+      }
+    }, 2000); // Wait 2 seconds to ensure VS Code has time to open
   } catch (error) {
     console.error("Error opening file in VS Code:", error.message);
     console.log(
