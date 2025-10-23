@@ -20,9 +20,9 @@ const openDbFileInVSCode = async () => {
     // Wait a moment for VS Code to open, then close the terminal window
     setTimeout(async () => {
       try {
-        // Close the terminal window using AppleScript
+        // Force close the terminal window using AppleScript without confirmation
         await execPromise(
-          `osascript -e 'tell application "Terminal" to close front window'`
+          `osascript -e 'tell application "Terminal" to close (front window) saving no'`
         );
       } catch (err) {
         // If AppleScript fails, just exit the process
