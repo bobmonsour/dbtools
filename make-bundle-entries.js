@@ -10,6 +10,7 @@ import {
   getUniqueCategories,
 } from "./utils.js";
 import { config } from "./config.js";
+import { genIssueRecords } from "./genissuerecords.js";
 import { exec } from "child_process";
 import util from "util";
 
@@ -313,6 +314,7 @@ const afterEntry = async () => {
   switch (whatNext) {
     case "save & exit":
       await appendToJsonFile(entryData);
+      await genIssueRecords();
       return (nextAction = "exit");
     case "save & add another":
       await appendToJsonFile(entryData);
@@ -339,6 +341,7 @@ const afterEntry = async () => {
       }
     case "save, push, & exit": // New case added here
       await appendToJsonFile(entryData);
+      await genIssueRecords();
       await pushChanges();
       return (nextAction = "exit");
     default:

@@ -8,6 +8,8 @@ export const config = {
   dbFilePath: "/Users/Bob/Dropbox/Docs/Sites/11tybundledb/bundledb.json",
   dbBackupDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundledb/db_backups",
   badLinksDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundledb/badlinks",
+  issueRecordsPath:
+    "/Users/Bob/Dropbox/Docs/Sites/11tybundle.dev/content/_data/issuerecords.json",
 
   // Use the following for testing
   // dbFileDir: "/Users/Bob/Dropbox/Docs/Sites/dbtools/devdata",

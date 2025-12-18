@@ -8,7 +8,9 @@ import { config } from "./config.js";
 // checkForDuplicateUrl - Check for duplicate URL in the bundle database file
 // makeBackupFile - Create a backup of the bundle database file
 // getLatestIssueNumber - Get the latest Issue number from the bundle database
-// editJsonObject - Edit a JSON object interactively
+// countEntriesByIssue - Count entries by Issue number
+// countEntriesAsOfDate - Count entries of a specific type before or after a given date
+// getUniqueCategories - Get unique categories from the bundle database
 
 // Function to check for duplicate URL in the JSON file
 export const checkForDuplicateUrl = (url) => {
@@ -106,6 +108,9 @@ export const countEntriesByIssue = (issueNumber) => {
 
     // Filter and count the entries based on the given Issue number
     jsonData.forEach((item) => {
+      // Skip entries marked to be skipped
+      if (item?.Skip) return;
+
       if (item.Issue == issueNumber) {
         // Use loose equality to handle different types
         switch (item.Type) {
