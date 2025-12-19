@@ -8,18 +8,6 @@ import path from "path";
 import { promises as fs } from "fs";
 //*****
 
-// **************
-//   *** FULL DATASET, FETCHED FROM REMOTE REPO ***
-// **************
-const BUNDLEDB_URL =
-  "https://raw.githubusercontent.com/bobmonsour/11tybundledb/main/bundledb.json";
-// Fetch the json db from its remote repo
-const response = await fetch(BUNDLEDB_URL, {
-  signal: AbortSignal.timeout(3000), // 3 seconds
-});
-const bundleRecords = await response.json();
-// **************
-
 // generate issueRecords array from the bundleRecords
 // with each record containing the issue number and counts of
 // blog posts, releases, and sites for that issue
@@ -92,6 +80,10 @@ const writeIssueRecordsToFile = async (issueRecords) => {
 };
 
 export async function genIssueRecords() {
+  // Read the bundledb.json file from the configured location
+  const bundleDbData = await fs.readFile(config.dbFilePath, "utf8");
+  const bundleRecords = JSON.parse(bundleDbData);
+
   const issueRecords = await buildIssueRecords(bundleRecords);
   await writeIssueRecordsToFile(issueRecords);
 }
