@@ -109,6 +109,21 @@ const validateLink = async (input) => {
   return accessibilityValidation;
 };
 
+// Function to validate the Author site (optional field)
+const validateAuthorSite = async (input) => {
+  // Allow blank input (optional field)
+  if (!input || input.trim() === "") {
+    return true;
+  }
+  // If provided, validate format and accessibility
+  const formatValidation = validateUrlFormat(input);
+  if (formatValidation !== true) {
+    return formatValidation;
+  }
+  const accessibilityValidation = await validateUrlAccessibility(input);
+  return accessibilityValidation;
+};
+
 // Function to prompt for common information
 const promptCommonInfo = async (enterOrEdit, entryData) => {
   const latestIssueNumber = getLatestIssueNumber();
@@ -148,6 +163,10 @@ const enterPost = async () => {
     message: "Author:",
     validate: (input) => (input ? true : "Author is required."),
   });
+  const AuthorSite = await input({
+    message: "Author site (optional):",
+    validate: validateAuthorSite,
+  });
   const Categories = await checkbox({
     message: "Categories (1 or more):",
     pageSize: 10,
@@ -162,8 +181,12 @@ const enterPost = async () => {
     Link: commonInfo.Link,
     Date: Date,
     Author: Author,
-    Categories: Categories,
   };
+  // Only add AuthorSite if provided
+  if (AuthorSite && AuthorSite.trim() !== "") {
+    entryData.AuthorSite = AuthorSite;
+  }
+  entryData.Categories = Categories;
   return;
 };
 
@@ -228,6 +251,11 @@ const editPost = async () => {
     default: entryData.Author,
     validate: (input) => (input ? true : "Author is required."),
   });
+  const AuthorSite = await input({
+    message: "Author site (optional):",
+    default: entryData.AuthorSite || "",
+    validate: validateAuthorSite,
+  });
   const Categories = await checkbox({
     message: "Categories (1 or more):",
     pageSize: 10,
@@ -247,8 +275,12 @@ const editPost = async () => {
     Link: commonInfo.Link,
     Date: Date,
     Author: Author,
-    Categories: Categories,
   };
+  // Only add AuthorSite if provided
+  if (AuthorSite && AuthorSite.trim() !== "") {
+    entryData.AuthorSite = AuthorSite;
+  }
+  entryData.Categories = Categories;
   return;
 };
 
