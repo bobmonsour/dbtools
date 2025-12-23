@@ -454,6 +454,7 @@ const main = async () => {
       { value: "site" },
       { value: "release" },
       { value: "starter" },
+      { value: "Generate issue records" },
     ],
   });
 
@@ -470,6 +471,10 @@ const main = async () => {
     case "starter":
       await enterStarter();
       break;
+    case "Generate issue records":
+      await genIssueRecords();
+      console.log(chalk.green("Issue records generated successfully!"));
+      return;
     default:
       console.log("Invalid ENTRY type");
       return;
