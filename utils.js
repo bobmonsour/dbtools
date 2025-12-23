@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import fs from "fs";
 import path from "node:path";
+import { format, parseISO } from "date-fns";
 import { config } from "./config.js";
 
 // Utility functions for scripts to manage the 11ty Bundle database
@@ -11,6 +12,7 @@ import { config } from "./config.js";
 // countEntriesByIssue - Count entries by Issue number
 // countEntriesAsOfDate - Count entries of a specific type before or after a given date
 // getUniqueCategories - Get unique categories from the bundle database
+// formatItemDate - Format the date of an item in a readable format
 
 // Function to check for duplicate URL in the JSON file
 export const checkForDuplicateUrl = (url) => {
@@ -229,4 +231,12 @@ export const countEntriesAsOfDate = (date, condition, type) => {
     );
     return 0;
   }
+};
+
+// Format the date of the items that come from the database,
+// which arrive as strings, not dates; for use in the Bundle posts
+// dates are of the form of Dec 25, 2025
+export const formatItemDate = (date) => {
+  const parsedDate = parseISO(date);
+  return format(parsedDate, "MMM d, yyyy");
 };

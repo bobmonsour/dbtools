@@ -8,11 +8,13 @@ import {
   checkForDuplicateUrl,
   countEntriesByIssue,
   getUniqueCategories,
+  formatItemDate,
 } from "./utils.js";
 import { config } from "./config.js";
 import { genIssueRecords } from "./genissuerecords.js";
 import { exec } from "child_process";
 import util from "util";
+import slugify from "@sindresorhus/slugify";
 
 // Get the location of the bundle database file
 const dbFilePath = config.dbFilePath;
@@ -102,9 +104,9 @@ const validateLink = async (input) => {
   if (formatValidation !== true) {
     return formatValidation;
   }
-  // if (checkForDuplicateUrl(input)) {
-  // 	return "This Link already exists in the data!";
-  // }
+  if (checkForDuplicateUrl(input)) {
+    return "This Link already exists in the data!";
+  }
   const accessibilityValidation = await validateUrlAccessibility(input);
   return accessibilityValidation;
 };
@@ -181,6 +183,9 @@ const enterPost = async () => {
     Link: commonInfo.Link,
     Date: Date,
     Author: Author,
+    slugifiedTitle: slugify(commonInfo.Title),
+    slugifiedAuthor: slugify(Author),
+    formattedDate: formatItemDate(Date),
   };
   // Only add AuthorSite if provided
   if (AuthorSite && AuthorSite.trim() !== "") {
@@ -275,6 +280,9 @@ const editPost = async () => {
     Link: commonInfo.Link,
     Date: Date,
     Author: Author,
+    slugifiedTitle: slugify(commonInfo.Title),
+    slugifiedAuthor: slugify(Author),
+    formattedDate: formatItemDate(Date),
   };
   // Only add AuthorSite if provided
   if (AuthorSite && AuthorSite.trim() !== "") {
