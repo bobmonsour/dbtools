@@ -183,15 +183,15 @@ const enterPost = async () => {
     Link: commonInfo.Link,
     Date: Date,
     Author: Author,
-    slugifiedTitle: slugify(commonInfo.Title),
-    slugifiedAuthor: slugify(Author),
-    formattedDate: formatItemDate(Date),
   };
   // Only add AuthorSite if provided
   if (AuthorSite && AuthorSite.trim() !== "") {
     entryData.AuthorSite = AuthorSite;
   }
-  entryData.Categories = Categories;
+    Categories: Categories,
+    slugifiedTitle: slugify(commonInfo.Title),
+    slugifiedAuthor: slugify(Author),
+    formattedDate: formatItemDate(Date),
   return;
 };
 
