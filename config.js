@@ -3,13 +3,15 @@ export const config = {
   // Use the following for production
 
   // Moving db file to it's own repo, so updating paths
-  dbFileDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundledb",
+  dbFileDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb",
   dbFilename: "bundledb.json",
-  dbFilePath: "/Users/Bob/Dropbox/Docs/Sites/11tybundledb/bundledb.json",
-  dbBackupDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundledb/db_backups",
-  badLinksDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundledb/badlinks",
+  dbFilePath:
+    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/bundledb.json",
+  dbBackupDir:
+    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundle/11tybundledb/db_backups",
+  badLinksDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/badlinks",
   issueRecordsPath:
-    "/Users/Bob/Dropbox/Docs/Sites/11tybundledb/issuerecords.json",
+    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/issuerecords.json",
 
   // Use the following for testing
   // dbFileDir: "/Users/Bob/Dropbox/Docs/Sites/dbtools/devdata",
