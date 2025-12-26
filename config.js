@@ -2,69 +2,26 @@
 export const config = {
   // Use the following for production
 
-  // Moving db file to it's own repo, so updating paths
-  dbFileDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb",
-  dbFilename: "bundledb.json",
-  dbFilePath:
-    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/bundledb.json",
-  dbBackupDir:
-    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundle/11tybundledb/db_backups",
-  badLinksDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/badlinks",
-  issueRecordsPath:
-    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/issuerecords.json",
+  // dbFileDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb",
+  // dbFilename: "bundledb.json",
+  // dbFilePath:
+  //   "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/bundledb.json",
+  // dbBackupDir:
+  //   "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundle/11tybundledb/db_backups",
+  // badLinksDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/badlinks",
+  // issueRecordsPath:
+  //   "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/issuerecords.json",
 
   // Use the following for testing
-  // dbFileDir: "/Users/Bob/Dropbox/Docs/Sites/dbtools/devdata",
-  // dbFilename: "bundledb.json",
-  // dbFilePath: "/Users/Bob/Dropbox/Docs/Sites/dbtools/devdata/bundledb.json",
-  // dbBackupDir: "/Users/Bob/Dropbox/Docs/Sites/dbtools/devdata/bundledb-backups",
-  // badLinksDir: "/Users/Bob/Dropbox/Docs/Sites/dbtools/devdata/badlinks",
+  dbFileDir: "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata",
+  dbFilename: "bundledb.json",
+  dbFilePath:
+    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/bundledb.json",
+  dbBackupDir:
+    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/bundledb-backups",
+  badLinksDir:
+    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/badlinks",
+  issueRecordsPath:
+    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/issuerecords.json",
   //
-  // categories: [
-  //   { value: "11ty Conference 2024" },
-  //   { value: "Accessibility" },
-  //   { value: "Asset Pipelines" },
-  //   { value: "Blogging" },
-  //   { value: "CMS" },
-  //   { value: "CSS/Sass" },
-  //   { value: "Collections" },
-  //   { value: "Configuration" },
-  //   { value: "Data Cascade" },
-  //   { value: "Dates" },
-  //   { value: "Debugging" },
-  //   { value: "Deployment" },
-  //   { value: "Drafts" },
-  //   { value: "Edge Functions" },
-  //   { value: "Filters" },
-  //   { value: "From the Source" },
-  //   { value: "Front Matter" },
-  //   { value: "Getting Started" },
-  //   { value: "Global Data" },
-  //   { value: "How to..." },
-  //   { value: "Images" },
-  //   { value: "Image Galleries" },
-  //   { value: "Internationalization" },
-  //   { value: "Layouts" },
-  //   { value: "Markdown" },
-  //   { value: "Migrating to Eleventy" },
-  //   { value: "Navigation" },
-  //   { value: "Netlify" },
-  //   { value: "Now Page" },
-  //   { value: "Nunjucks/Macros" },
-  //   { value: "Pagination" },
-  //   { value: "Performance" },
-  //   { value: "Plugins" },
-  //   { value: "Permalinks" },
-  //   { value: "Remote Data" },
-  //   { value: "RSS" },
-  //   { value: "Scheduling" },
-  //   { value: "Search" },
-  //   { value: "Serverless" },
-  //   { value: "Shortcodes" },
-  //   { value: "Social Media" },
-  //   { value: "WebC" },
-  //   { value: "Webmentions" },
-  //   { value: "Why Eleventy?" },
-  //   { value: "YouTube" },
-  // ],
 };

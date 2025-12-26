@@ -786,5 +786,37 @@
       "Data Cascade",
       "Edge Functions"
     ]
+  },
+  {
+    "Issue": "4",
+    "Type": "blog post",
+    "Title": "Sounds of the Pacific",
+    "Link": "https://bobmonsour.com/blog/sounds-of-the-pacific/",
+    "Date": "2025-12-26T08:54:31.000",
+    "Author": "Bob Monsour",
+    "Categories": [
+      "Blogging",
+      "CSS/Sass"
+    ],
+    "slugifiedTitle": "sounds-of-the-pacific",
+    "slugifiedAuthor": "bob-monsour",
+    "formattedDate": "Dec 26, 2025",
+    "description": "At the beach today, I captured 2 minutes of waves crashing on the shore."
+  },
+  {
+    "Issue": "4",
+    "Type": "site",
+    "Title": "Bob Monsour",
+    "Link": "https://bobmonsour.com/",
+    "Date": "2025-12-26T08:55:39.000",
+    "description": "My personal website. Enjoying building websites with 11ty."
+  },
+  {
+    "Issue": "4",
+    "Type": "release",
+    "Title": "showcase",
+    "Link": "https://github.com/bobmonsour/",
+    "Date": "2025-12-26T08:56:49.000",
+    "description": "Retired web hobbyist. Creator of 11tybundle.dev. Brooklyn-born, New Jersey-raised, educated in Florida and Los Angeles, now in California. - bobmonsour"
   }
 ]
