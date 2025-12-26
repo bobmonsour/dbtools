@@ -75,7 +75,10 @@ export const getDescription = async (link) => {
   if (cache.isCacheValid(cacheDuration.descHtml)) {
     const cachedDescription = await cache.getCachedValue();
     if (cachedDescription !== undefined) {
-      return cachedDescription;
+      // Convert Buffer to string if needed
+      return typeof cachedDescription === "string"
+        ? cachedDescription
+        : cachedDescription.toString();
     }
   }
 

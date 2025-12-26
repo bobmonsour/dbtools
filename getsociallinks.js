@@ -2,7 +2,7 @@ import { AssetCache } from "@11ty/eleventy-fetch";
 import * as cheerio from "cheerio";
 import { fetchHtml } from "./fetchhtml.js";
 
-import { cacheDuration } from "../../_data/cacheconfig.js";
+import { cacheDuration } from "./cacheconfig.js";
 
 // Track origins that have failed to return social links in this session
 const failedOriginsThisSession = new Set();

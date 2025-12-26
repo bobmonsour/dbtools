@@ -71,7 +71,10 @@ export async function getRSSLink(siteOrigin) {
   if (cache.isCacheValid(cacheDuration.rssLinkHtml)) {
     const cachedRssLink = await cache.getCachedValue();
     if (cachedRssLink !== undefined) {
-      return cachedRssLink;
+      // Convert Buffer to string if needed
+      return typeof cachedRssLink === "string"
+        ? cachedRssLink
+        : cachedRssLink.toString();
     }
   }
 
