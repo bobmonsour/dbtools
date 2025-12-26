@@ -12,6 +12,7 @@ import {
 } from "./utils.js";
 import { config } from "./config.js";
 import { genIssueRecords } from "./genissuerecords.js";
+import { getDescription } from "./getdescription.js";
 import { exec } from "child_process";
 import util from "util";
 import slugify from "@sindresorhus/slugify";
@@ -183,15 +184,14 @@ const enterPost = async () => {
     Link: commonInfo.Link,
     Date: Date,
     Author: Author,
+    ...(AuthorSite && AuthorSite.trim() !== "" ? { AuthorSite } : {}),
     Categories: Categories,
     slugifiedTitle: slugify(commonInfo.Title),
     slugifiedAuthor: slugify(Author),
     formattedDate: formatItemDate(Date),
   };
-  // Only add AuthorSite if provided
-  if (AuthorSite && AuthorSite.trim() !== "") {
-    entryData.AuthorSite = AuthorSite;
-  }
+  // Add description as last property
+  entryData.description = await getDescription(entryData.Link);
   return;
 };
 
@@ -280,15 +280,14 @@ const editPost = async () => {
     Link: commonInfo.Link,
     Date: Date,
     Author: Author,
+    ...(AuthorSite && AuthorSite.trim() !== "" ? { AuthorSite } : {}),
     slugifiedTitle: slugify(commonInfo.Title),
     slugifiedAuthor: slugify(Author),
     formattedDate: formatItemDate(Date),
   };
-  // Only add AuthorSite if provided
-  if (AuthorSite && AuthorSite.trim() !== "") {
-    entryData.AuthorSite = AuthorSite;
-  }
   entryData.Categories = Categories;
+  // Add description as last property
+  entryData.description = await getDescription(entryData.Link);
   return;
 };
 
