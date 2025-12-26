@@ -210,6 +210,8 @@ const enterSite = async () => {
     Link: commonInfo.Link,
     Date: Date,
   };
+  // Add description as last property
+  entryData.description = await getDescription(entryData.Link);
   return;
 };
 
@@ -228,6 +230,8 @@ const enterRelease = async () => {
     Link: commonInfo.Link,
     Date: additionalInfo,
   };
+  // Add description as last property
+  entryData.description = await getDescription(entryData.Link);
   return;
 };
 
@@ -306,6 +310,8 @@ const editSite = async () => {
     Link: commonInfo.Link,
     Date: Date,
   };
+  // Add description as last property
+  entryData.description = await getDescription(entryData.Link);
   return;
 };
 
@@ -324,6 +330,8 @@ const editRelease = async () => {
     Link: commonInfo.Link,
     Date: Date,
   };
+  // Add description as last property
+  entryData.description = await getDescription(entryData.Link);
   return;
 };
 
