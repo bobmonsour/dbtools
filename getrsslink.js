@@ -48,12 +48,22 @@ const isFailureExpired = (failureDate) => {
 };
 
 //***************
-// given the origin of a site, attempt to extract a link
-// to the site's RSS feed by searching for the appropriate
+// given a URL or site origin, extract the origin and attempt to
+// find a link to the site's RSS feed by searching for the appropriate
 // link elements in the site's head element.
 //***************
 
-export async function getRSSLink(siteOrigin) {
+export async function getRSSLink(urlOrOrigin) {
+  // Extract the origin from the URL
+  let siteOrigin;
+  try {
+    const url = new URL(urlOrOrigin);
+    siteOrigin = url.origin;
+  } catch (error) {
+    console.log(`Invalid URL: ${urlOrOrigin}`);
+    return "";
+  }
+
   // Check persistent failure cache first
   if (failureCache[siteOrigin]) {
     const failureDate = failureCache[siteOrigin];
