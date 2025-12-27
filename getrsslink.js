@@ -8,10 +8,7 @@ import { cacheDuration } from "./cacheconfig.js";
 
 // Persistent failure cache across builds
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const failureCachePath = path.join(
-  __dirname,
-  ".cache/errorlogs/rss-fetch-failures.json"
-);
+const failureCachePath = path.join(__dirname, "./log/rss-fetch-failures.json");
 let failureCache = {};
 
 // Load failure cache from disk

@@ -112,7 +112,9 @@ export async function processDbEntries(options) {
       console.log(`${progress} Fetching: ${inputValue}`);
 
       try {
-        const result = await fetchFunction(inputValue);
+        const result = Array.isArray(inputValue)
+          ? await fetchFunction(...inputValue)
+          : await fetchFunction(inputValue);
 
         if (result) {
           item[propertyToAdd] = result;

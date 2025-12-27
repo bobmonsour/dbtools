@@ -10,10 +10,7 @@ import { cacheDuration, fetchTimeout } from "./cacheconfig.js";
 
 // Persistent failure cache across builds
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const failureCachePath = path.join(
-  __dirname,
-  "../../../.cache/errorlogs/html-fetch-failures.json"
-);
+const failureCachePath = path.join(__dirname, "./log/html-fetch-failures.json");
 let failureCache = {};
 
 // Load failure cache from disk

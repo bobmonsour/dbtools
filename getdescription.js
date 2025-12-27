@@ -10,7 +10,7 @@ import { cacheDuration } from "./cacheconfig.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const failureCachePath = path.join(
   __dirname,
-  ".cache/errorlogs/description-fetch-failures.json"
+  "./log/description-fetch-failures.json"
 );
 let failureCache = {};
 
