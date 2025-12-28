@@ -193,6 +193,7 @@
     "description": "",
     "Author": "Lewis Dale",
     "AuthorSite": "https://lewisdale.dev",
+    "AuthorSiteDescription": "",
     "Categories": [
       "WebC"
     ],
@@ -1559,6 +1560,7 @@
     "Date": "2022-01-04",
     "Author": "Josh Cunningham",
     "AuthorSite": "https://www.joshcanhelp.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Collections",
       "Layouts"
@@ -1611,6 +1613,7 @@
     "Date": "2022-09-26",
     "Author": "Shawn Wildermuth",
     "AuthorSite": "https://wildermuth.com/en/",
+    "AuthorSiteDescription": "",
     "Categories": [
       "YouTube"
     ],
@@ -2028,6 +2031,7 @@
     "description": "",
     "Author": "Heydon Pickering",
     "AuthorSite": "https://heydonworks.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Migrating to Eleventy"
     ],
@@ -2080,6 +2084,7 @@
     "description": "",
     "Author": "Jeremy Epstein",
     "AuthorSite": "https://greenash.net.au",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Why Eleventy?",
       "Migrating to Eleventy"
@@ -2341,6 +2346,7 @@
     "description": "",
     "Author": "Michelle Barker",
     "AuthorSite": "https://css-irl.info",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Migrating to Eleventy"
     ],
@@ -2497,6 +2503,7 @@
     "description": "",
     "Author": "Thomas Broyer",
     "AuthorSite": "https://blog.ltgt.net",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Migrating to Eleventy"
     ],
@@ -2628,6 +2635,7 @@
     "description": "",
     "Author": "Full Stack Digital",
     "AuthorSite": "https://fullstackdigital.io",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Getting Started"
     ],
@@ -2653,6 +2661,7 @@
     "description": "",
     "Author": "Rob Anderson",
     "AuthorSite": "https://blog.r0b.io",
+    "AuthorSiteDescription": "",
     "Categories": [
       "How to...",
       "Configuration"
@@ -2918,6 +2927,7 @@
     "description": "",
     "Author": "Raymond Camden",
     "AuthorSite": "https://cfjedimaster.github.io",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "How to...",
@@ -4316,6 +4326,7 @@
     "Date": "2023-07-21",
     "Author": "Lea Verou",
     "AuthorSite": "https://lea.verou.me",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Migrating to Eleventy",
       "Why Eleventy?"
@@ -4746,6 +4757,7 @@
     "Date": "2023-08-22",
     "Author": "Liam Bigelow",
     "AuthorSite": "https://bigelow.io/",
+    "AuthorSiteDescription": "",
     "Categories": [
       "How to...",
       "Search",
@@ -5210,6 +5222,7 @@
     "Date": "2023-10-06",
     "Author": "Albrecht Kohnlein",
     "AuthorSite": "https://www.koehnlein.eu",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Why Eleventy?"
     ],
@@ -5344,6 +5357,7 @@
     "description": "",
     "Author": "Harris Lapiroff",
     "AuthorSite": "https://chromamine.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Why Eleventy?"
     ],
@@ -5534,6 +5548,7 @@
     "description": "",
     "Author": "Micah Torcellini",
     "AuthorSite": "https://micah.torcellini.org",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Pagination",
       "How to...",
@@ -6190,6 +6205,7 @@
     "description": "",
     "Author": "Aleksandr Hovhannisyan",
     "AuthorSite": "https://www.aleksandrhovhannisyan.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "How to..."
     ],
@@ -6368,6 +6384,7 @@
     "description": "",
     "Author": "Andrea Berardi",
     "AuthorSite": "https://www.andberry.me",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Internationalization",
       "How to..."
@@ -6421,6 +6438,7 @@
     "description": "",
     "Author": "Angelique Weger",
     "AuthorSite": "https://angeliqueweger.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Migrating to Eleventy"
     ],
@@ -8071,6 +8089,7 @@
     "description": "",
     "Author": "Carol.gg",
     "AuthorSite": "https://carol.gg",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Migrating to Eleventy"
     ],
@@ -8816,6 +8835,7 @@
     "description": "",
     "Author": "crossingtheruby",
     "AuthorSite": "https://www.crossingtheruby.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "CMS",
       "How to..."
@@ -8944,9 +8964,10 @@
     "Title": "Filter an Eleventy Collection Using Your Own Custom Front Matter",
     "Link": "https://danurbanowicz.com/posts/2024/04/04/filter-an-eleventy-collection-using-your-own-custom-front-matter/",
     "Date": "2024-04-04",
-    "description": "",
+    "description": "Frontend Engineer. danurbanowicz has 37 repositories available. Follow their code on GitHub.",
     "Author": "Dan Urbanoicz",
     "AuthorSite": "https://danurbanowicz.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Front Matter",
       "How to...",
@@ -9315,6 +9336,7 @@
     "Date": "2020-03-27",
     "Author": "David Atanda",
     "AuthorSite": "https://css-tricks.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "How to...",
       "Remote Data"
@@ -9660,6 +9682,7 @@
     "description": "",
     "Author": "Deniz Akşimşek",
     "AuthorSite": "https://www.denizaksimsek.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "How to..."
     ],
@@ -10454,6 +10477,7 @@
     "Date": "2022-09-06",
     "Author": "Gerard Hynes",
     "AuthorSite": "https://www.freecodecamp.org",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Getting Started"
     ],
@@ -11306,6 +11330,7 @@
     "description": "",
     "Author": "John M. Wargo",
     "AuthorSite": "https://randomerrors.dev",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Debugging"
     ],
@@ -12944,6 +12969,7 @@
     "description": "",
     "Author": "Mark Thomas Miller",
     "AuthorSite": "https://mtm.dev",
+    "AuthorSiteDescription": "",
     "Categories": [
       "How to..."
     ],
@@ -13584,6 +13610,7 @@
     "description": "",
     "Author": "Michael Chan",
     "AuthorSite": "https://events.lunch.dev",
+    "AuthorSiteDescription": "",
     "Categories": [
       "How to..."
     ],
@@ -14132,6 +14159,7 @@
     "description": "",
     "Author": "Michael Scharnagl",
     "AuthorSite": "https://justmarkup.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "How to..."
     ],
@@ -14156,6 +14184,7 @@
     "Date": "2022-04-02",
     "Author": "Michele Nasti",
     "AuthorSite": "https://michelenasti.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "How to..."
     ],
@@ -14911,6 +14940,7 @@
     "description": "",
     "Author": "Ondřej Mirtes",
     "AuthorSite": "https://phpstan.org",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Social Media"
     ],
@@ -17625,6 +17655,7 @@
     "description": "",
     "Author": "Reg Hunt",
     "AuthorSite": "https://rphunt.github.io",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Getting Started"
     ],
@@ -17996,6 +18027,7 @@
     "Date": "2022-03-29",
     "Author": "Sandro Roth",
     "AuthorSite": "https://sandroroth.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "How to..."
     ],
@@ -19929,7 +19961,8 @@
     "Date": "2023-03-28",
     "description": "",
     "favicon": "/img/favicons/css-irl-info-favicon.png",
-    "formattedDate": "Mar 27, 2023"
+    "formattedDate": "Mar 27, 2023",
+    "rssLink": "https://css-irl.info/rss.xml"
   },
   {
     "Issue": "1",
@@ -19987,7 +20020,7 @@
     "Title": "Delete Twitter",
     "Link": "https://deletetwitter.com/",
     "Date": "2023-03-28",
-    "description": "",
+    "description": "Twitter was often a powerful tool for good, despite its numerous vices. It&#39;s time to figure out what comes next..",
     "Skip": true,
     "formattedDate": "Mar 27, 2023"
   },
@@ -20199,7 +20232,8 @@
     "Date": "2023-04-18",
     "description": "",
     "favicon": "/img/favicons/phpstan-org-favicon.png",
-    "formattedDate": "Apr 17, 2023"
+    "formattedDate": "Apr 17, 2023",
+    "rssLink": "https://phpstan.org/rss.xml"
   },
   {
     "Issue": "4",
@@ -20257,7 +20291,7 @@
     "Title": "Tom Roseveare",
     "Link": "https://www.tomroseveare.com/",
     "Date": "2023-05-01",
-    "description": "",
+    "description": "Tom is a British creative leader based in Tokyo, inspiring teams to craft memorable and easy-to-use digital experiences.",
     "Skip": true,
     "formattedDate": "Apr 30, 2023"
   },
@@ -20437,7 +20471,7 @@
     "Title": "wilks.co",
     "Link": "https://wilks.co/",
     "Date": "2023-06-20",
-    "description": "",
+    "description": "Tom Wilks is a remote web developer and Drupal specialist based in the UK.",
     "Skip": true,
     "formattedDate": "Jun 19, 2023"
   },
@@ -20469,7 +20503,9 @@
     "Date": "2023-07-06",
     "description": "Andreia Ramos. Psicóloga clínica em Viana do Castelo e Ponte de Lima. Consultas de psicologia online e presenciais. Marque a sua primeira consulta hoje",
     "favicon": "/img/favicons/andreiaramos-pt-favicon.png",
-    "formattedDate": "Jul 5, 2023"
+    "formattedDate": "Jul 5, 2023",
+    "rssLink": "https://andreiaramos.pt/feed.xml",
+    "AuthorSiteDescription": "Andreia Ramos. Psicóloga clínica em Viana do Castelo e Ponte de Lima. Consultas de psicologia online e presenciais. Marque a sua primeira consulta hoje"
   },
   {
     "Issue": "12",
@@ -20569,7 +20605,8 @@
     "Date": "2023-07-31",
     "description": "",
     "favicon": "/img/favicons/lea-verou-me-favicon.png",
-    "formattedDate": "Jul 30, 2023"
+    "formattedDate": "Jul 30, 2023",
+    "rssLink": "https://lea.verou.me/./feed.xml"
   },
   {
     "Issue": "14",
@@ -20597,7 +20634,7 @@
     "Title": "Jérôme Stephan (motion warning)",
     "Link": "https://jeromestephan.de/",
     "Date": "2023-08-11",
-    "description": "",
+    "description": "Jérôme Stephan is a programmer and artist based in and around Berlin, Germany. Keen on using every opportunity to learn more.",
     "Skip": true,
     "formattedDate": "Aug 10, 2023"
   },
@@ -20809,7 +20846,8 @@
     "Date": "2023-10-11",
     "description": "",
     "favicon": "/img/favicons/chromamine-com-favicon.png",
-    "formattedDate": "Oct 10, 2023"
+    "formattedDate": "Oct 10, 2023",
+    "rssLink": "https://chromamine.com/feeds/posts.xml"
   },
   {
     "Issue": "18",
@@ -20879,7 +20917,8 @@
     "Date": "2023-10-19",
     "description": "",
     "favicon": "/img/favicons/micah-torcellini-org-favicon.png",
-    "formattedDate": "Oct 18, 2023"
+    "formattedDate": "Oct 18, 2023",
+    "rssLink": "https://micah.torcellini.org/feed.xml"
   },
   {
     "Issue": "19",
@@ -21234,6 +21273,7 @@
     "description": "",
     "Author": "Whiona",
     "AuthorSite": "https://whiona.weblog.lol",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "Deployment",
@@ -21462,6 +21502,7 @@
     "Date": "2023-10-09T07:00:00.000Z",
     "Author": "Horacio Gonzalez",
     "AuthorSite": "https://lostinbrittany.dev",
+    "AuthorSiteDescription": "",
     "Categories": [
       "WebC",
       "Why Eleventy?"
@@ -21871,7 +21912,7 @@
     "Title": "Runaway Racing",
     "Link": "https://runawayracing.com/",
     "Date": "2023-11-21",
-    "description": "",
+    "description": "Runaway Racing has been organising trail running events since 2017, including seven annual ultra marathons such as the popular Chiltern Ridge 50K.",
     "Skip": true,
     "formattedDate": "Nov 20, 2023"
   },
@@ -21903,7 +21944,8 @@
     "Date": "2023-11-21",
     "description": "",
     "favicon": "/img/favicons/kromatic-fr-favicon.png",
-    "formattedDate": "Nov 20, 2023"
+    "formattedDate": "Nov 20, 2023",
+    "rssLink": "https://kromatic.fr/feed/"
   },
   {
     "Issue": "22",
@@ -22263,6 +22305,7 @@
     "description": "",
     "Author": "Sophie Koonin",
     "AuthorSite": "https://localghost.dev",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "Collections",
@@ -22567,6 +22610,7 @@
     "Date": "2023-11-23T08:00:00.000Z",
     "Author": "Grigør",
     "AuthorSite": "https://grgml.xyz",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Deployment",
       "How to..."
@@ -24420,6 +24464,7 @@
     "description": "",
     "Author": "Josh Ghent",
     "AuthorSite": "https://joshghent.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "Migrating to Eleventy",
@@ -24700,7 +24745,8 @@
     "Date": "2024-01-08",
     "description": "",
     "favicon": "/img/favicons/scrambletheduck-org-favicon.png",
-    "formattedDate": "Jan 7, 2024"
+    "formattedDate": "Jan 7, 2024",
+    "rssLink": "https://scrambletheduck.org/feed.xml"
   },
   {
     "Issue": "26",
@@ -24711,6 +24757,7 @@
     "description": "",
     "Author": "Dipesh Kumar",
     "AuthorSite": "https://dipeshkr.me",
+    "AuthorSiteDescription": "",
     "Categories": [
       "CSS/Sass",
       "Why Eleventy?"
@@ -25585,6 +25632,7 @@
     "description": "",
     "Author": "Antonio Rodrigues",
     "AuthorSite": "https://antonio.is",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Data Cascade",
       "Global Data"
@@ -26471,6 +26519,7 @@
     "description": "",
     "Author": "anh",
     "AuthorSite": "https://anhvn.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "How to...",
       "Markdown"
@@ -27976,6 +28025,7 @@
     "description": "",
     "Author": "Piper Haywood",
     "AuthorSite": "https://piperhaywood.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Performance"
     ],
@@ -29440,9 +29490,10 @@
     "Title": "C^2",
     "Link": "https://www.conor.zone/en/",
     "Date": "2024-04-09",
-    "description": "",
+    "description": "Fullstack Web Developer. Sitting on an idea? Reach out and let&#39;s bring it to life!",
     "Skip": true,
-    "formattedDate": "Apr 8, 2024"
+    "formattedDate": "Apr 8, 2024",
+    "AuthorSiteDescription": "Fullstack Web Developer. Sitting on an idea? Reach out and let&#39;s bring it to life!"
   },
   {
     "Issue": "38",
@@ -30286,6 +30337,7 @@
     "description": "",
     "Author": "Jakob Schwanenberg",
     "AuthorSite": "https://jak2k.eu",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Migrating to Eleventy",
       "Why Eleventy?"
@@ -30371,6 +30423,7 @@
     "description": "",
     "Author": "Blake Watson",
     "AuthorSite": "https://blakewatson.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "Migrating to Eleventy",
@@ -30682,6 +30735,7 @@
     "description": "",
     "Author": "Dan Sinker",
     "AuthorSite": "https://dansinker.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "The 11ty Conference 2024"
     ],
@@ -31409,7 +31463,8 @@
     "Date": "2024-05-28",
     "description": "",
     "favicon": "/img/favicons/2024-xoxofest-com-favicon.png",
-    "formattedDate": "May 27, 2024"
+    "formattedDate": "May 27, 2024",
+    "rssLink": "https://2024.xoxofest.com/rss.xml"
   },
   {
     "Issue": "45",
@@ -32172,6 +32227,7 @@
     "description": "",
     "Author": "Timothy Miller",
     "AuthorSite": "https://timothymiller.dev",
+    "AuthorSiteDescription": "",
     "Categories": [
       "How to...",
       "Plugins",
@@ -32255,6 +32311,7 @@
     "description": "",
     "Author": "Keith Wagner",
     "AuthorSite": "https://kpwags.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "How to...",
@@ -33093,6 +33150,7 @@
     "description": "",
     "Author": "Peter Sefton",
     "AuthorSite": "https://ptsefton.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Collections",
       "How to...",
@@ -33136,7 +33194,8 @@
     "Date": "2024-07-02",
     "description": "",
     "favicon": "/img/favicons/gaffen-co-uk-favicon.png",
-    "formattedDate": "Jul 1, 2024"
+    "formattedDate": "Jul 1, 2024",
+    "rssLink": "https://gaffen.co.uk/rss.xml"
   },
   {
     "Issue": "50",
@@ -33314,7 +33373,7 @@
     "Title": "Raphaëlle Kerbrat",
     "Link": "https://raphaellekerbrat.com/en/",
     "Date": "2024-07-02",
-    "description": "",
+    "description": "Discover the website of artist and researcher Raphaëlle Kerbrat, whose work dialog between art, science and technology. Her installations aim to make the imperceptible visible, revealing the materiality of the digital in a sensitive and poetic way. The artifacts she develops raise the paradox of dig",
     "Skip": true,
     "formattedDate": "Jul 1, 2024"
   },
@@ -33422,7 +33481,8 @@
     "Date": "2024-07-02",
     "description": "",
     "favicon": "/img/favicons/www-jacky-wtf-favicon.jpg",
-    "formattedDate": "Jul 1, 2024"
+    "formattedDate": "Jul 1, 2024",
+    "rssLink": "https://www.jacky.wtf/essays/feed.atom"
   },
   {
     "Issue": "50",
@@ -35087,7 +35147,8 @@
     "Date": "2024-08-06",
     "description": "",
     "favicon": "#icon-globe",
-    "formattedDate": "Aug 5, 2024"
+    "formattedDate": "Aug 5, 2024",
+    "rssLink": "https://vaettr.com/feed.xml"
   },
   {
     "Issue": "54",
@@ -35098,6 +35159,7 @@
     "description": "",
     "Author": "Nathan Smith",
     "AuthorSite": "https://nathan-smith.org",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Drafts",
       "How to..."
@@ -35522,6 +35584,7 @@
     "description": "",
     "Author": "Arnaught",
     "AuthorSite": "https://arnaught.neocities.org",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "Dates",
@@ -35577,7 +35640,8 @@
     "Date": "2024-09-03",
     "description": "",
     "favicon": "/img/favicons/eastford-news-favicon.png",
-    "formattedDate": "Sep 2, 2024"
+    "formattedDate": "Sep 2, 2024",
+    "rssLink": "https://eastford.news/feed.xml"
   },
   {
     "Issue": "56",
@@ -35757,7 +35821,7 @@
     "Title": "Agiletto",
     "Link": "https://agiletto.se/",
     "Date": "2024-09-03",
-    "description": "",
+    "description": "We specialize in leadership beyond agile, innovation, and teal organizations, helping companies grow and innovate through sustainable, people-oriented practices.",
     "Skip": true,
     "formattedDate": "Sep 2, 2024"
   },
@@ -35767,7 +35831,7 @@
     "Title": "Evans Theatre",
     "Link": "https://evanstheatre.ca/",
     "Date": "2024-09-13",
-    "description": "",
+    "description": "Brandon&#39;s Indiest Indie Cinema",
     "Skip": true,
     "formattedDate": "Sep 12, 2024"
   },
@@ -36413,6 +36477,7 @@
     "Date": "2024-09-26",
     "Author": "Helen Chong",
     "AuthorSite": "https://helenchong.omg.lol/",
+    "AuthorSiteDescription": "",
     "Categories": [
       "How to...",
       "Upgrading"
@@ -37133,6 +37198,7 @@
     "Date": "2024-10-19",
     "Author": "Sebin Nyshkim",
     "AuthorSite": "https://blog.sebin-nyshkim.net",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "CSS/Sass",
@@ -37688,6 +37754,7 @@
     "description": "",
     "Author": "Michael Engen",
     "AuthorSite": "https://michaelengen.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "CSS/Sass",
       "Global Data",
@@ -37916,7 +37983,8 @@
     "Date": "2024-11-26",
     "description": "",
     "favicon": "/img/favicons/alprado-com-favicon.jpg",
-    "formattedDate": "Nov 25, 2024"
+    "formattedDate": "Nov 25, 2024",
+    "rssLink": "https://alprado.com/feed/"
   },
   {
     "Issue": "61",
@@ -38454,7 +38522,8 @@
     "Link": "https://aaronmorey.com/",
     "Date": null,
     "description": "",
-    "favicon": "/img/favicons/aaronmorey-com-favicon.png"
+    "favicon": "/img/favicons/aaronmorey-com-favicon.png",
+    "rssLink": "https://aaronmorey.com/feed.xml"
   },
   {
     "Issue": "62",
@@ -39980,6 +40049,7 @@
     "description": "",
     "Author": "Oliver Boermans",
     "AuthorSite": "https://ollicle.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Configuration",
       "Front Matter",
@@ -40063,7 +40133,7 @@
     "Title": "FutureScale",
     "Link": "https://futurescale.com/",
     "Date": "2025-01-07",
-    "description": "",
+    "description": "Software, precisely built.",
     "Skip": true,
     "formattedDate": "Jan 6, 2025"
   },
@@ -40154,6 +40224,7 @@
     "Date": "2024-12-28",
     "Author": "Sainthood",
     "AuthorSite": "https://sainthood.xyz",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Accessibility",
       "Global Data",
@@ -40190,9 +40261,11 @@
     "Title": "damien's zone",
     "Link": "https://damien.zone/",
     "Date": "2025-01-07",
-    "description": "",
+    "description": "french software engineer living and working in the Bay Area on web stuff",
     "Skip": true,
-    "formattedDate": "Jan 6, 2025"
+    "formattedDate": "Jan 6, 2025",
+    "rssLink": "https://damien.zone/feed.xml",
+    "AuthorSiteDescription": "french software engineer living and working in the Bay Area on web stuff"
   },
   {
     "Issue": "64",
@@ -40831,7 +40904,8 @@
     "Date": "2025-01-21",
     "description": "",
     "favicon": "/img/favicons/rkar-org-favicon.png",
-    "formattedDate": "Jan 20, 2025"
+    "formattedDate": "Jan 20, 2025",
+    "rssLink": "https://rkar.org/index.xml"
   },
   {
     "Issue": "65",
@@ -40852,6 +40926,7 @@
     "description": "",
     "Author": "Aaron Morey",
     "AuthorSite": "https://aaronmorey.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Configuration",
       "How to..."
@@ -41482,7 +41557,8 @@
     "Date": "2025-02-04",
     "description": "",
     "favicon": "/img/favicons/www-forresto-com-favicon.png",
-    "formattedDate": "Feb 3, 2025"
+    "formattedDate": "Feb 3, 2025",
+    "rssLink": "https://www.forresto.com/./feed.xml"
   },
   {
     "Issue": "66",
@@ -41633,6 +41709,7 @@
     "Date": "2025-02-02",
     "Author": "Abdullah Yahya",
     "AuthorSite": "https://abdullahyahya.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "CSS/Sass",
       "Deployment",
@@ -42491,6 +42568,7 @@
     "description": "",
     "Author": "La màquina de Turing",
     "AuthorSite": "https://lamaquinadeturing.su",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Migrating to Eleventy",
       "Why Eleventy?"
@@ -42620,6 +42698,7 @@
     "description": "",
     "Author": "Hieu Le Van",
     "AuthorSite": "https://heterl0.live",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "Deployment",
@@ -43211,6 +43290,7 @@
     "Date": "2025-02-01",
     "Author": "Schalk Neethling",
     "AuthorSite": "https://schalkneethling.com/",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Getting Started",
       "YouTube"
@@ -43445,6 +43525,7 @@
     "description": "",
     "Author": "Brian Kardell",
     "AuthorSite": "https://bkardell.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Configuration",
       "How to...",
@@ -43558,6 +43639,7 @@
     "description": "",
     "Author": "Ryan Himmelwright",
     "AuthorSite": "https://ryan.himmelwright.net",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Collections",
       "Configuration",
@@ -43682,9 +43764,11 @@
     "Title": "Working Draft",
     "Link": "https://workingdraft.de/",
     "Date": "2025-04-01",
-    "description": "",
+    "description": "Wöchentlicher Podcast für Frontend Devs, Design Engineers und Web-Entwickler:innen",
     "Skip": true,
-    "formattedDate": "Mar 31, 2025"
+    "formattedDate": "Mar 31, 2025",
+    "rssLink": "https://workingdraft.de/feed/",
+    "AuthorSiteDescription": "Wöchentlicher Podcast für Frontend Devs, Design Engineers und Web-Entwickler:innen"
   },
   {
     "Issue": "70",
@@ -43810,6 +43894,7 @@
     "description": "",
     "Author": "Sacha Chua",
     "AuthorSite": "https://sachachua.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Dates",
       "How to..."
@@ -43950,6 +44035,7 @@
     "description": "",
     "Author": "Austin Carr",
     "AuthorSite": "https://www.simplethread.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "Collections",
@@ -44191,7 +44277,8 @@
     "Date": "2025-04-01",
     "description": "",
     "favicon": "#icon-globe",
-    "formattedDate": "Mar 31, 2025"
+    "formattedDate": "Mar 31, 2025",
+    "rssLink": "https://example.chobble.com/feed.xml"
   },
   {
     "Issue": "70",
@@ -44359,6 +44446,7 @@
     "description": "",
     "Author": "LD Stephens",
     "AuthorSite": "https://ldstephens.net",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "Configuration",
@@ -44378,7 +44466,7 @@
       "linkedin": ""
     },
     "favicon": "/img/favicons/ldstephens-net-favicon.png",
-    "rssLink": ""
+    "rssLink": "https://ldstephens.net/feed/feed.xml"
   },
   {
     "Issue": "",
@@ -44682,6 +44770,7 @@
     "description": "",
     "Author": "Denis Ricard",
     "AuthorSite": "https://hexaedre.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "Migrating to Eleventy",
@@ -44766,7 +44855,8 @@
     "Date": "2025-04-15",
     "description": "",
     "favicon": "#icon-globe",
-    "formattedDate": "Apr 14, 2025"
+    "formattedDate": "Apr 14, 2025",
+    "rssLink": "https://hexaedre.com/feed.xml"
   },
   {
     "Issue": "71",
@@ -45338,7 +45428,7 @@
       "linkedin": ""
     },
     "favicon": "/img/favicons/ldstephens-net-favicon.png",
-    "rssLink": ""
+    "rssLink": "https://ldstephens.net/feed/feed.xml"
   },
   {
     "Issue": "72",
@@ -45787,6 +45877,7 @@
     "Date": "2025-04-24",
     "Author": "Michael Delaney",
     "AuthorSite": "https://mwdelaney.me/",
+    "AuthorSiteDescription": "",
     "Categories": [
       "CMS",
       "Configuration",
@@ -46333,7 +46424,7 @@
       "linkedin": ""
     },
     "favicon": "/img/favicons/ldstephens-net-favicon.png",
-    "rssLink": ""
+    "rssLink": "https://ldstephens.net/feed/feed.xml"
   },
   {
     "Issue": "74",
@@ -46719,6 +46810,7 @@
     "description": "",
     "Author": "Josh Sherman",
     "AuthorSite": "https://joshtronic.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "Migrating to Eleventy"
@@ -48581,6 +48673,7 @@
     "Date": "2025-07-25",
     "Author": "Rigotti",
     "AuthorSite": "https://rigotti.nl",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Configuration",
       "How to...",
@@ -48833,7 +48926,7 @@
     "Title": "UrbanFlow",
     "Link": "https://urbanflow.art/",
     "Date": "2025-08-03T10:11:44.000",
-    "description": "",
+    "description": "We are two passionate media artists creating organically flowing realtime animations and sound spaces with a background in stage design and architecture.",
     "Skip": true,
     "formattedDate": "Aug 3, 2025"
   },
@@ -49431,7 +49524,8 @@
     "Date": "2025-08-19T15:42:35.000",
     "description": "",
     "favicon": "/img/favicons/csenf-de-favicon.jpg",
-    "formattedDate": "Aug 19, 2025"
+    "formattedDate": "Aug 19, 2025",
+    "rssLink": "https://csenf.de/feed/rss.xml"
   },
   {
     "Issue": "78",
@@ -49759,7 +49853,8 @@
     "Date": "2025-08-26T21:48:20.000",
     "description": "",
     "favicon": "/img/favicons/www-billvinson-com-favicon.png",
-    "formattedDate": "Aug 26, 2025"
+    "formattedDate": "Aug 26, 2025",
+    "rssLink": "https://www.billvinson.com/feed/feed.xml"
   },
   {
     "Issue": "78",
@@ -49844,7 +49939,8 @@
     "Date": "2025-08-30T17:46:56.000",
     "description": "",
     "favicon": "#icon-globe",
-    "formattedDate": "Aug 30, 2025"
+    "formattedDate": "Aug 30, 2025",
+    "rssLink": "https://chrishannah.me/feed"
   },
   {
     "Issue": "78",
@@ -50641,6 +50737,7 @@
     "description": "",
     "Author": "Sam Ruby",
     "AuthorSite": "https://intertwingly.net",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Configuration",
       "Drafts",
@@ -51024,6 +51121,7 @@
     "description": "",
     "Author": "SamJC",
     "AuthorSite": "https://thetangent.space",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "Front Matter",
@@ -51068,7 +51166,7 @@
       "linkedin": ""
     },
     "favicon": "/img/favicons/ldstephens-net-favicon.png",
-    "rssLink": ""
+    "rssLink": "https://ldstephens.net/feed/feed.xml"
   },
   {
     "Issue": "80",
@@ -51143,6 +51241,7 @@
     "description": "",
     "Author": "DSri Seah",
     "AuthorSite": "https://dsriseah.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Blogging",
       "Configuration",
@@ -51672,6 +51771,7 @@
     "Date": "2025-11-05T13:23:35.000",
     "Author": "Tim Klapdor",
     "AuthorSite": "https://timklapdor.me/",
+    "AuthorSiteDescription": "",
     "Categories": [
       "Why Eleventy?",
       "YouTube"
@@ -52066,7 +52166,8 @@
     "Date": "2025-11-24T08:48:11.000",
     "description": "",
     "favicon": "#icon-globe",
-    "formattedDate": "Nov 24, 2025"
+    "formattedDate": "Nov 24, 2025",
+    "rssLink": "https://flyingsquirrel.ca/feed.rss"
   },
   {
     "Issue": "81",
@@ -52302,6 +52403,7 @@
     "description": "",
     "Author": "Minesh Shah",
     "AuthorSite": "https://world.optimizely.com",
+    "AuthorSiteDescription": "",
     "Categories": [
       "CMS",
       "Performance",
@@ -52828,7 +52930,7 @@
       "linkedin": ""
     },
     "favicon": "/img/favicons/ldstephens-net-favicon.png",
-    "rssLink": ""
+    "rssLink": "https://ldstephens.net/feed/feed.xml"
   },
   {
     "Issue": "82",
