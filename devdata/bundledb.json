@@ -51004,15 +51004,6 @@
   },
   {
     "Issue": "82",
-    "Type": "release",
-    "Title": "Pre-release: Eleventy v4.0.0-alpha.6",
-    "Link": "https://github.com/11ty/eleventy/releases/tag/v4.0.0-alpha.6",
-    "Date": "2025-12-11T15:27:02.000",
-    "description": "A simpler site generator. Transforms a directory of templates (of varying types) into HTML. - Release Pre-release: Eleventy v4.0.0-alpha.6 · 11ty/eleventy",
-    "formattedDate": "Dec 11, 2025"
-  },
-  {
-    "Issue": "82",
     "Type": "blog post",
     "Title": "My portfolio",
     "Link": "https://jessieheald.com/projects/my-portfolio/",
@@ -51311,5 +51302,14 @@
     "description": "Sabiedriski aktīvs IT eksperts, humānists. Domnīcas Profectus dibinātājs, nākotnes politikas pētnieks",
     "favicon": "/img/favicons/lastguru-lv-favicon.jpg",
     "formattedDate": "Dec 24, 2025"
+  },
+  {
+    "Issue": "82",
+    "Type": "release",
+    "Title": "Pre-release: Eleventy v4.0.0-alpha.6",
+    "Link": "https://github.com/11ty/eleventy/releases/tag/v4.0.0-alpha.6",
+    "Date": "2025-12-11",
+    "description": "A simpler site generator. Transforms a directory of templates (of varying types) into HTML. - Release Pre-release: Eleventy v4.0.0-alpha.6 · 11ty/eleventy",
+    "formattedDate": "Dec 11, 2025"
   }
 ]

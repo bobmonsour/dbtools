@@ -12,6 +12,9 @@ import {
 } from "./utils.js";
 import { config } from "./config.js";
 import { genIssueRecords } from "./genissuerecords.js";
+import { getRSSLink } from "./getrsslink.js";
+import { getFavicon } from "./getfavicon.js";
+import { getSocialLinks } from "./getsociallinks.js";
 import { getDescription } from "./getdescription.js";
 import { exec } from "child_process";
 import util from "util";
@@ -37,6 +40,15 @@ const getCurrentDateTimeString = () => {
   const minutes = String(now.getMinutes()).padStart(2, "0");
   const seconds = String(now.getSeconds()).padStart(2, "0");
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000`;
+};
+
+// Helper to extract origin from URL
+const getOriginFromUrl = (url) => {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return "";
+  }
 };
 
 // Function to generate a default date for the entry
@@ -166,8 +178,10 @@ const enterPost = async () => {
     message: "Author:",
     validate: (input) => (input ? true : "Author is required."),
   });
+  const defaultAuthorSite = getOriginFromUrl(commonInfo.Link);
   const AuthorSite = await input({
     message: "Author site (optional):",
+    default: defaultAuthorSite,
     validate: validateAuthorSite,
   });
   const Categories = await checkbox({
@@ -177,21 +191,70 @@ const enterPost = async () => {
     validate: (input) =>
       input.length > 0 ? true : "At least one category must be selected.",
   });
+
+  // Fetch metadata
+  console.log(chalk.blue("Fetching metadata..."));
+  let description = "";
+  let rssLink = "";
+  let socialLinks = {
+    mastodon: "",
+    bluesky: "",
+    youtube: "",
+    github: "",
+    linkedin: "",
+  };
+  let favicon = "";
+
+  try {
+    description = (await getDescription(commonInfo.Link)) || "";
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch description:", error.message));
+  }
+
+  const siteToFetch =
+    AuthorSite && AuthorSite.trim() !== "" ? AuthorSite : commonInfo.Link;
+
+  try {
+    rssLink = (await getRSSLink(siteToFetch)) || "";
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch RSS link:", error.message));
+  }
+
+  try {
+    socialLinks = (await getSocialLinks(siteToFetch)) || socialLinks;
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch social links:", error.message));
+  }
+
+  try {
+    favicon = (await getFavicon(siteToFetch, "post")) || "";
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch favicon:", error.message));
+  }
+
   entryData = {
     Issue: commonInfo.Issue,
     Type: "blog post",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
     Date: Date,
+    description: description || "",
     Author: Author,
     ...(AuthorSite && AuthorSite.trim() !== "" ? { AuthorSite } : {}),
     Categories: Categories,
     slugifiedTitle: slugify(commonInfo.Title),
     slugifiedAuthor: slugify(Author),
     formattedDate: formatItemDate(Date),
+    socialLinks: socialLinks || {
+      mastodon: "",
+      bluesky: "",
+      youtube: "",
+      github: "",
+      linkedin: "",
+    },
+    favicon: favicon || "",
+    rssLink: rssLink || "",
   };
-  // Add description as last property
-  entryData.description = await getDescription(entryData.Link);
   return;
 };
 
@@ -203,15 +266,34 @@ const enterSite = async () => {
     default: getDefaultDate(),
     validate: validateDate,
   });
+
+  // Fetch metadata
+  console.log(chalk.blue("Fetching metadata..."));
+  let description = "";
+  let favicon = "";
+
+  try {
+    description = (await getDescription(commonInfo.Link)) || "";
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch description:", error.message));
+  }
+
+  try {
+    favicon = (await getFavicon(commonInfo.Link, "site")) || "";
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch favicon:", error.message));
+  }
+
   entryData = {
     Issue: commonInfo.Issue,
     Type: "site",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
     Date: Date,
+    description: description || "",
+    favicon: favicon || "",
+    formattedDate: formatItemDate(Date),
   };
-  // Add description as last property
-  entryData.description = await getDescription(entryData.Link);
   return;
 };
 
@@ -223,15 +305,23 @@ const enterRelease = async () => {
     default: getDefaultDate(),
     validate: validateDate,
   });
+  // Fetch description
+  let description = "";
+  try {
+    description = (await getDescription(commonInfo.Link)) || "";
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch description:", error.message));
+  }
+
   entryData = {
     Issue: commonInfo.Issue,
     Type: "release",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
     Date: additionalInfo,
+    description: description,
+    formattedDate: formatItemDate(additionalInfo),
   };
-  // Add description as last property
-  entryData.description = await getDescription(entryData.Link);
   return;
 };
 
@@ -260,9 +350,11 @@ const editPost = async () => {
     default: entryData.Author,
     validate: (input) => (input ? true : "Author is required."),
   });
+  const defaultAuthorSite =
+    entryData.AuthorSite || getOriginFromUrl(commonInfo.Link);
   const AuthorSite = await input({
     message: "Author site (optional):",
-    default: entryData.AuthorSite || "",
+    default: defaultAuthorSite,
     validate: validateAuthorSite,
   });
   const Categories = await checkbox({
@@ -277,21 +369,70 @@ const editPost = async () => {
     validate: (input) =>
       input.length > 0 ? true : "At least one category must be selected.",
   });
+
+  // Fetch metadata
+  console.log(chalk.blue("Fetching metadata..."));
+  let description = "";
+  let rssLink = "";
+  let socialLinks = {
+    mastodon: "",
+    bluesky: "",
+    youtube: "",
+    github: "",
+    linkedin: "",
+  };
+  let favicon = "";
+
+  try {
+    description = (await getDescription(commonInfo.Link)) || "";
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch description:", error.message));
+  }
+
+  const siteToFetch =
+    AuthorSite && AuthorSite.trim() !== "" ? AuthorSite : commonInfo.Link;
+
+  try {
+    rssLink = (await getRSSLink(siteToFetch)) || "";
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch RSS link:", error.message));
+  }
+
+  try {
+    socialLinks = (await getSocialLinks(siteToFetch)) || socialLinks;
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch social links:", error.message));
+  }
+
+  try {
+    favicon = (await getFavicon(siteToFetch, "post")) || "";
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch favicon:", error.message));
+  }
+
   entryData = {
     Issue: commonInfo.Issue,
     Type: "blog post",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
     Date: Date,
+    description: description || "",
     Author: Author,
     ...(AuthorSite && AuthorSite.trim() !== "" ? { AuthorSite } : {}),
+    Categories: Categories,
     slugifiedTitle: slugify(commonInfo.Title),
     slugifiedAuthor: slugify(Author),
     formattedDate: formatItemDate(Date),
+    socialLinks: socialLinks || {
+      mastodon: "",
+      bluesky: "",
+      youtube: "",
+      github: "",
+      linkedin: "",
+    },
+    favicon: favicon || "",
+    rssLink: rssLink || "",
   };
-  entryData.Categories = Categories;
-  // Add description as last property
-  entryData.description = await getDescription(entryData.Link);
   return;
 };
 
@@ -300,18 +441,37 @@ const editSite = async () => {
   const commonInfo = await promptCommonInfo("edit", entryData);
   const Date = await input({
     message: "Date:",
-    default: getDefaultDate(),
+    default: entryData.Date,
     validate: validateDate,
   });
+
+  // Fetch metadata
+  console.log(chalk.blue("Fetching metadata..."));
+  let description = "";
+  let favicon = "";
+
+  try {
+    description = (await getDescription(commonInfo.Link)) || "";
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch description:", error.message));
+  }
+
+  try {
+    favicon = (await getFavicon(commonInfo.Link, "site")) || "";
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch favicon:", error.message));
+  }
+
   entryData = {
     Issue: commonInfo.Issue,
     Type: "site",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
     Date: Date,
+    description: description || "",
+    favicon: favicon || "",
+    formattedDate: formatItemDate(Date),
   };
-  // Add description as last property
-  entryData.description = await getDescription(entryData.Link);
   return;
 };
 
@@ -323,15 +483,23 @@ const editRelease = async () => {
     default: getDefaultDate(),
     validate: validateDate,
   });
+  // Fetch description
+  let description = "";
+  try {
+    description = (await getDescription(commonInfo.Link)) || "";
+  } catch (error) {
+    console.log(chalk.yellow("Could not fetch description:", error.message));
+  }
+
   entryData = {
     Issue: commonInfo.Issue,
     Type: "release",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
     Date: Date,
+    description: description,
+    formattedDate: formatItemDate(Date),
   };
-  // Add description as last property
-  entryData.description = await getDescription(entryData.Link);
   return;
 };
 
