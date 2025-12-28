@@ -8,10 +8,7 @@ import { cacheDuration } from "./cacheconfig.js";
 
 // Persistent failure cache across builds
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const failureCachePath = path.join(
-  __dirname,
-  ".cache/errorlogs/rss-fetch-failures.json"
-);
+const failureCachePath = path.join(__dirname, "./log/rss-fetch-failures.json");
 let failureCache = {};
 
 // Load failure cache from disk
@@ -48,12 +45,22 @@ const isFailureExpired = (failureDate) => {
 };
 
 //***************
-// given the origin of a site, attempt to extract a link
-// to the site's RSS feed by searching for the appropriate
+// given a URL or site origin, extract the origin and attempt to
+// find a link to the site's RSS feed by searching for the appropriate
 // link elements in the site's head element.
 //***************
 
-export async function getRSSLink(siteOrigin) {
+export async function getRSSLink(urlOrOrigin) {
+  // Extract the origin from the URL
+  let siteOrigin;
+  try {
+    const url = new URL(urlOrOrigin);
+    siteOrigin = url.origin;
+  } catch (error) {
+    console.log(`Invalid URL: ${urlOrOrigin}`);
+    return "";
+  }
+
   // Check persistent failure cache first
   if (failureCache[siteOrigin]) {
     const failureDate = failureCache[siteOrigin];
@@ -71,7 +78,10 @@ export async function getRSSLink(siteOrigin) {
   if (cache.isCacheValid(cacheDuration.rssLinkHtml)) {
     const cachedRssLink = await cache.getCachedValue();
     if (cachedRssLink !== undefined) {
-      return cachedRssLink;
+      // Convert Buffer to string if needed
+      return typeof cachedRssLink === "string"
+        ? cachedRssLink
+        : cachedRssLink.toString();
     }
   }
 
