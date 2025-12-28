@@ -195,6 +195,7 @@ const enterPost = async () => {
   // Fetch metadata
   console.log(chalk.blue("Fetching metadata..."));
   let description = "";
+  let authorSiteDescription = "";
   let rssLink = "";
   let socialLinks = {
     mastodon: "",
@@ -213,6 +214,17 @@ const enterPost = async () => {
 
   const siteToFetch =
     AuthorSite && AuthorSite.trim() !== "" ? AuthorSite : commonInfo.Link;
+
+  // Fetch AuthorSiteDescription if AuthorSite exists
+  if (AuthorSite && AuthorSite.trim() !== "") {
+    try {
+      authorSiteDescription = (await getDescription(AuthorSite)) || "";
+    } catch (error) {
+      console.log(
+        chalk.yellow("Could not fetch author site description:", error.message)
+      );
+    }
+  }
 
   try {
     rssLink = (await getRSSLink(siteToFetch)) || "";
@@ -241,6 +253,9 @@ const enterPost = async () => {
     description: description || "",
     Author: Author,
     ...(AuthorSite && AuthorSite.trim() !== "" ? { AuthorSite } : {}),
+    ...(AuthorSite && AuthorSite.trim() !== ""
+      ? { AuthorSiteDescription: authorSiteDescription }
+      : {}),
     Categories: Categories,
     slugifiedTitle: slugify(commonInfo.Title),
     slugifiedAuthor: slugify(Author),
@@ -373,6 +388,7 @@ const editPost = async () => {
   // Fetch metadata
   console.log(chalk.blue("Fetching metadata..."));
   let description = "";
+  let authorSiteDescription = "";
   let rssLink = "";
   let socialLinks = {
     mastodon: "",
@@ -391,6 +407,17 @@ const editPost = async () => {
 
   const siteToFetch =
     AuthorSite && AuthorSite.trim() !== "" ? AuthorSite : commonInfo.Link;
+
+  // Fetch AuthorSiteDescription if AuthorSite exists
+  if (AuthorSite && AuthorSite.trim() !== "") {
+    try {
+      authorSiteDescription = (await getDescription(AuthorSite)) || "";
+    } catch (error) {
+      console.log(
+        chalk.yellow("Could not fetch author site description:", error.message)
+      );
+    }
+  }
 
   try {
     rssLink = (await getRSSLink(siteToFetch)) || "";
@@ -419,6 +446,9 @@ const editPost = async () => {
     description: description || "",
     Author: Author,
     ...(AuthorSite && AuthorSite.trim() !== "" ? { AuthorSite } : {}),
+    ...(AuthorSite && AuthorSite.trim() !== ""
+      ? { AuthorSiteDescription: authorSiteDescription }
+      : {}),
     Categories: Categories,
     slugifiedTitle: slugify(commonInfo.Title),
     slugifiedAuthor: slugify(Author),

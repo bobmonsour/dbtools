@@ -5,3 +5,5 @@ temp/
 issuedates/
 .cache/
 one-offs/
+temp/
+log/
