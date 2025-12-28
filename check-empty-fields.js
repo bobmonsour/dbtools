@@ -31,12 +31,28 @@ async function main() {
 
     console.log(`Total entries in database: ${bundledb.length}\n`);
 
+    // Start the processing loop
+    await processLoop(bundledb);
+
+    rl.close();
+  } catch (error) {
+    console.error("Error:", error.message);
+    console.error(error.stack);
+    rl.close();
+    process.exit(1);
+  }
+}
+
+// Processing loop function
+async function processLoop(bundledb) {
+  while (true) {
     // Prompt user for processing option
     const choice = await question(
       "Do you want to process:\n" +
         "  1. Entire file\n" +
         "  2. Only a particular domain\n" +
-        "Enter choice (1 or 2): "
+        "  3. Exit\n" +
+        "Enter choice (1, 2, or 3): "
     );
 
     let entriesToProcess = [];
@@ -56,9 +72,24 @@ async function main() {
       const domainEntries = filterByDomain(bundledb, domain.trim());
       fullDataset = domainEntries;
 
+      console.log(`\n=== Domain: ${domain.trim()} ===\n`);
+
+      // Get entries with empty fields for display
+      const domainEntriesWithEmpty = getEntriesWithEmptyFields(domainEntries);
+
+      // Always show the summary for domain before asking what to do
+      displayEmptyFieldsSummary(fullDataset, domainEntriesWithEmpty);
+      console.log();
+
+      // If there are no entries with empty fields, loop back to start
+      if (domainEntriesWithEmpty.length === 0) {
+        console.log("✓ No entries found with empty fields for this domain.\n");
+        continue; // Go back to the start
+      }
+
       // Ask user how they want to process the domain
       const domainChoice = await question(
-        "\nDo you want to:\n" +
+        "Do you want to:\n" +
           "  1. Process all empty fields\n" +
           "  2. Enter an RSS link\n" +
           "Enter choice (1 or 2): "
@@ -66,8 +97,8 @@ async function main() {
 
       if (domainChoice.trim() === "1") {
         // Process all empty fields as normal
-        entriesToProcess = getEntriesWithEmptyFields(domainEntries);
-        console.log(`\n=== Processing Domain: ${domain.trim()} ===\n`);
+        entriesToProcess = domainEntriesWithEmpty;
+        console.log(`\n=== Processing All Empty Fields ===\n`);
       } else if (domainChoice.trim() === "2") {
         // Get RSS link from user and apply to all empty rssLink fields
         manualRssLink = await question("\nEnter the RSS link to use: ");
@@ -80,31 +111,46 @@ async function main() {
         console.log(
           `\n=== Processing Domain: ${domain.trim()} (Manual RSS Link) ===\n`
         );
+
+        if (entriesToProcess.length === 0) {
+          console.log(
+            "✓ No entries found with empty rssLink field for this domain.\n"
+          );
+          continue; // Go back to the start
+        }
+
+        console.log(
+          `Found ${entriesToProcess.length} entries with empty rssLink field.\n`
+        );
+        console.log(`RSS link to be applied: ${manualRssLink}\n`);
       } else {
         console.log("\nInvalid choice. Exiting.");
-        rl.close();
         return;
       }
+    } else if (choice.trim() === "3") {
+      // Exit option
+      console.log("\nExiting...\n");
+      return;
     } else {
       console.log("\nInvalid choice. Exiting.");
-      rl.close();
       return;
     }
 
     if (entriesToProcess.length === 0) {
       console.log("✓ No entries found with empty fields.\n");
-      rl.close();
-      return;
+      continue; // Go back to the start
     }
 
-    // Display what will be processed
-    if (manualRssLink) {
-      console.log(
-        `Found ${entriesToProcess.length} entries with empty rssLink field.\n`
-      );
-      console.log(`RSS link to be applied: ${manualRssLink}\n`);
-    } else {
-      displayEmptyFieldsSummary(fullDataset, entriesToProcess);
+    // Display what will be processed for entire file
+    if (choice.trim() === "1") {
+      if (manualRssLink) {
+        console.log(
+          `Found ${entriesToProcess.length} entries with empty rssLink field.\n`
+        );
+        console.log(`RSS link to be applied: ${manualRssLink}\n`);
+      } else {
+        displayEmptyFieldsSummary(fullDataset, entriesToProcess);
+      }
     }
 
     // Confirm processing
@@ -117,8 +163,7 @@ async function main() {
       confirm.trim().toLowerCase() !== "y"
     ) {
       console.log("\nCancelled. No changes made.\n");
-      rl.close();
-      return;
+      continue; // Go back to the start
     }
 
     // Create backup before processing
@@ -134,12 +179,8 @@ async function main() {
     fs.writeFileSync(config.dbFilePath, JSON.stringify(bundledb, null, 2));
     console.log("✓ Successfully saved updated bundledb\n");
 
-    rl.close();
-  } catch (error) {
-    console.error("Error:", error.message);
-    console.error(error.stack);
-    rl.close();
-    process.exit(1);
+    // After successful processing, exit the loop
+    return;
   }
 }
 
