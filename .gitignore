@@ -6,4 +6,4 @@ issuedates/
 .cache/
 one-offs/
 temp/
-log/
+log/*
