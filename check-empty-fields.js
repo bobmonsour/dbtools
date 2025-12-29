@@ -7,6 +7,45 @@ import { getDescription } from "./getdescription.js";
 import { getRSSLink } from "./getrsslink.js";
 import { makeBackupFile } from "./utils.js";
 
+// Check for help flag
+if (process.argv.includes("-h") || process.argv.includes("--help")) {
+  console.log(`
+Check Empty Fields
+==================
+
+Interactive script to find and fill empty description and rssLink fields
+in the bundledb database by fetching data from the web.
+
+USAGE:
+  node check-empty-fields.js [OPTIONS]
+
+OPTIONS:
+  -h, --help     Show this help message
+
+DESCRIPTION:
+  This script provides an interactive menu to:
+
+  1. Process the entire database
+     - Scans all entries for empty description or rssLink fields
+     - Attempts to fetch missing data from the web
+
+  2. Process a specific domain
+     - Filter entries by domain (e.g., benmyers.dev)
+     - Choose to auto-fetch all empty fields, or
+     - Manually provide an RSS link for all entries from that domain
+
+  The script creates a backup before making any changes and provides
+  a summary of what will be updated before proceeding.
+
+DATABASE:
+  ${config.dbFilePath}
+
+EXAMPLES:
+  node check-empty-fields.js    # Start interactive mode
+`);
+  process.exit(0);
+}
+
 // Create readline interface for user input
 const rl = readline.createInterface({
   input: process.stdin,

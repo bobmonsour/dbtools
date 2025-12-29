@@ -4,6 +4,47 @@ import fs from "fs";
 import path from "path";
 import { config } from "./config.js";
 
+// Check for help flag
+if (process.argv.includes("-h") || process.argv.includes("--help")) {
+  console.log(`
+Check Link Errors
+=================
+
+Scans all links in the bundledb database to detect broken or problematic URLs.
+
+USAGE:
+  node check-link-errors.js [OPTIONS]
+
+OPTIONS:
+  -h, --help     Show this help message
+
+DESCRIPTION:
+  This script checks all links in the database (excluding those with a Skip
+  property) for HTTP errors and connection issues. It categorizes errors into:
+
+  PERMANENT ERRORS:
+  - 404 Not Found, 410 Gone, 403 Forbidden
+  - DNS resolution failures
+  These indicate content is likely permanently unavailable.
+
+  TEMPORARY ERRORS:
+  - 5xx Server Errors, 429 Too Many Requests
+  - Timeouts, Connection Refused, SSL/Certificate issues
+  These may resolve on their own and should be rechecked later.
+
+  Results are saved to:
+  - log/permanent-errors.txt
+  - log/temporary-errors.txt
+
+DATABASE:
+  ${config.dbFilePath}
+
+EXAMPLES:
+  node check-link-errors.js    # Check all links in database
+`);
+  process.exit(0);
+}
+
 console.log("\n=== Check for Link Errors ===\n");
 
 // Read the bundledb file

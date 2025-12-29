@@ -4,6 +4,43 @@ import fs from "fs";
 import { config } from "./config.js";
 import { makeBackupFile } from "./utils.js";
 
+// Check for help flag
+if (process.argv.includes("-h") || process.argv.includes("--help")) {
+  console.log(`
+Add Empty AuthorSiteDescription Property
+=========================================
+
+Adds an empty AuthorSiteDescription property to blog post entries that
+don't already have one.
+
+USAGE:
+  node add-empty-authorsitedesc.js [OPTIONS]
+
+OPTIONS:
+  -h, --help     Show this help message
+
+DESCRIPTION:
+  This script ensures all blog posts in the database have an
+  AuthorSiteDescription property, even if initially empty. It:
+
+  - Scans for blog post entries missing the AuthorSiteDescription property
+  - Creates a backup of the database before making changes
+  - Adds an empty AuthorSiteDescription field (set to "")
+  - Places it immediately after the AuthorSite property
+  - Updates the bundledb.json file
+
+  This is useful for database schema updates when adding a new field
+  to existing records.
+
+DATABASE:
+  ${config.dbFilePath}
+
+EXAMPLES:
+  node add-empty-authorsitedesc.js    # Add missing properties
+`);
+  process.exit(0);
+}
+
 console.log("\n=== Add Empty AuthorSiteDescription Property ===\n");
 
 // Read the bundledb file
