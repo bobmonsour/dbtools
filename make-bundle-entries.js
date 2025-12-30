@@ -248,18 +248,17 @@ const enterPost = async () => {
     Issue: commonInfo.Issue,
     Type: "blog post",
     Title: commonInfo.Title,
+    slugifiedTitle: slugify(commonInfo.Title),
     Link: commonInfo.Link,
     Date: Date,
+    formattedDate: formatItemDate(Date),
     description: description || "",
     Author: Author,
+    slugifiedAuthor: slugify(Author),
     ...(AuthorSite && AuthorSite.trim() !== "" ? { AuthorSite } : {}),
     ...(AuthorSite && AuthorSite.trim() !== ""
       ? { AuthorSiteDescription: authorSiteDescription }
       : {}),
-    Categories: Categories,
-    slugifiedTitle: slugify(commonInfo.Title),
-    slugifiedAuthor: slugify(Author),
-    formattedDate: formatItemDate(Date),
     socialLinks: socialLinks || {
       mastodon: "",
       bluesky: "",
@@ -269,6 +268,7 @@ const enterPost = async () => {
     },
     favicon: favicon || "",
     rssLink: rssLink || "",
+    Categories: Categories,
   };
   return;
 };
@@ -303,11 +303,11 @@ const enterSite = async () => {
     Issue: commonInfo.Issue,
     Type: "site",
     Title: commonInfo.Title,
+    description: description || "",
     Link: commonInfo.Link,
     Date: Date,
-    description: description || "",
-    favicon: favicon || "",
     formattedDate: formatItemDate(Date),
+    favicon: favicon || "",
   };
   return;
 };
@@ -332,9 +332,9 @@ const enterRelease = async () => {
     Issue: commonInfo.Issue,
     Type: "release",
     Title: commonInfo.Title,
+    description: description,
     Link: commonInfo.Link,
     Date: additionalInfo,
-    description: description,
     formattedDate: formatItemDate(additionalInfo),
   };
   return;
@@ -441,18 +441,17 @@ const editPost = async () => {
     Issue: commonInfo.Issue,
     Type: "blog post",
     Title: commonInfo.Title,
+    slugifiedTitle: slugify(commonInfo.Title),
     Link: commonInfo.Link,
     Date: Date,
+    formattedDate: formatItemDate(Date),
     description: description || "",
     Author: Author,
+    slugifiedAuthor: slugify(Author),
     ...(AuthorSite && AuthorSite.trim() !== "" ? { AuthorSite } : {}),
     ...(AuthorSite && AuthorSite.trim() !== ""
       ? { AuthorSiteDescription: authorSiteDescription }
       : {}),
-    Categories: Categories,
-    slugifiedTitle: slugify(commonInfo.Title),
-    slugifiedAuthor: slugify(Author),
-    formattedDate: formatItemDate(Date),
     socialLinks: socialLinks || {
       mastodon: "",
       bluesky: "",
@@ -462,6 +461,7 @@ const editPost = async () => {
     },
     favicon: favicon || "",
     rssLink: rssLink || "",
+    Categories: Categories,
   };
   return;
 };
@@ -496,11 +496,11 @@ const editSite = async () => {
     Issue: commonInfo.Issue,
     Type: "site",
     Title: commonInfo.Title,
+    description: description || "",
     Link: commonInfo.Link,
     Date: Date,
-    description: description || "",
-    favicon: favicon || "",
     formattedDate: formatItemDate(Date),
+    favicon: favicon || "",
   };
   return;
 };
@@ -525,9 +525,9 @@ const editRelease = async () => {
     Issue: commonInfo.Issue,
     Type: "release",
     Title: commonInfo.Title,
+    description: description,
     Link: commonInfo.Link,
     Date: Date,
-    description: description,
     formattedDate: formatItemDate(Date),
   };
   return;
