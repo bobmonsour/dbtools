@@ -125,6 +125,7 @@ const initializeSyncMetadata = (showcaseData) => {
   const metadata = {
     lastBundledbSync: mostRecentBundledbDate.toISOString(),
     lastCommunitySync: mostRecentCommunityDate.toISOString(),
+    knownCommunityFiles: [],
     lastSyncDate: new Date().toISOString(),
     totalShowcaseEntries: showcaseData.length,
   };
@@ -144,7 +145,8 @@ const updateSyncMetadata = (
   metadata,
   newBundledbDate = null,
   newCommunityDate = null,
-  totalEntries = null
+  totalEntries = null,
+  newCommunityFiles = null
 ) => {
   if (newBundledbDate) {
     metadata.lastBundledbSync = newBundledbDate;
@@ -154,6 +156,9 @@ const updateSyncMetadata = (
   }
   if (totalEntries !== null) {
     metadata.totalShowcaseEntries = totalEntries;
+  }
+  if (newCommunityFiles !== null) {
+    metadata.knownCommunityFiles = newCommunityFiles;
   }
   metadata.lastSyncDate = new Date().toISOString();
 
@@ -1127,7 +1132,7 @@ const updateWithCommunityEntries = async () => {
   const lastSyncDate = new Date(metadata.lastCommunitySync);
 
   // Fetch from GitHub
-  console.log(chalk.cyan("Fetching from GitHub..."));
+  console.log(chalk.cyan("Fetching GitHub directory tree..."));
   let githubFiles;
   try {
     githubFiles = await fetchGitHubDirectoryContents();
@@ -1141,70 +1146,91 @@ const updateWithCommunityEntries = async () => {
     return;
   }
 
-  // Process GitHub files to find new entries
-  console.log(chalk.gray("Checking for new entries...\n"));
+  // Get cached known filenames (initialize if doesn't exist)
+  if (!metadata.knownCommunityFiles) {
+    metadata.knownCommunityFiles = [];
+  }
+  const knownFilenames = new Set(metadata.knownCommunityFiles);
+
+  // Identify NEW files only
+  const newFiles = githubFiles.filter((file) => !knownFilenames.has(file.name));
+
+  console.log(
+    chalk.gray(
+      `Known files in cache: ${knownFilenames.size}, New files: ${newFiles.length}\n`
+    )
+  );
+
+  if (newFiles.length === 0) {
+    console.log(
+      chalk.green(
+        "✓ No new files found in GitHub repo. Files are up to date!\n"
+      )
+    );
+    await showMainMenu();
+    return;
+  }
+
+  console.log(chalk.yellow(`Processing ${newFiles.length} new files...\n`));
+
+  // Process ONLY new files
   const newCommunityEntries = [];
   const existingCommunityUrls = new Set(
     communityData.map((e) => normalizeUrl(e.url)).filter((u) => u)
   );
 
-  let filesChecked = 0;
-  for (const file of githubFiles) {
+  let filesProcessed = 0;
+  for (const file of newFiles) {
     try {
-      filesChecked++;
-      if (filesChecked % 100 === 0) {
-        console.log(
-          chalk.gray(`  Checked ${filesChecked}/${githubFiles.length} files...`)
-        );
-      }
+      filesProcessed++;
+      console.log(
+        chalk.gray(
+          `[${filesProcessed}/${newFiles.length}] Fetching: ${file.name}`
+        )
+      );
 
       const content = await fetchGitHubFileContent(
         file.download_url,
         file.path
       );
 
-      // Check if this is a new entry
-      if (!content._github_last_modified) {
-        continue;
-      }
-
-      const entryDate = new Date(content._github_last_modified);
-      if (entryDate <= lastSyncDate) {
-        continue;
-      }
-
       // Check if URL already exists in our community data
       const normalizedUrl = normalizeUrl(content.url);
       if (existingCommunityUrls.has(normalizedUrl)) {
+        console.log(chalk.yellow(`  → Duplicate URL, skipping\n`));
         continue;
       }
 
       newCommunityEntries.push(content);
       existingCommunityUrls.add(normalizedUrl);
+      console.log(chalk.green(`  ✓ New entry found\n`));
     } catch (err) {
       logError(`Error processing GitHub file ${file.name}`, err);
+      console.log(chalk.red(`  ✗ Error (logged)\n`));
     }
   }
 
   console.log(
     chalk.gray(
-      `\nChecked ${filesChecked} files, found ${newCommunityEntries.length} new entries\n`
+      `\nProcessed ${filesProcessed} new files, found ${newCommunityEntries.length} valid entries\n`
     )
   );
 
   if (newCommunityEntries.length === 0) {
     console.log(
-      chalk.green("✓ No new community entries found. Files are up to date!\n")
+      chalk.yellow(
+        "⚠ New files found but no valid entries to add (all were duplicates or errors).\n"
+      )
     );
+    // Still update cache with new filenames even if entries were duplicates
+    const updatedFilenames = [
+      ...metadata.knownCommunityFiles,
+      ...newFiles.map((f) => f.name),
+    ];
+    updateSyncMetadata(metadata, null, null, null, updatedFilenames);
     await showMainMenu();
     return;
   }
-
-  console.log(
-    chalk.yellow(
-      `Found ${newCommunityEntries.length} new community entries to process\n`
-    )
-  );
 
   // Build showcase URL set for duplicate checking
   const showcaseUrls = new Set(
@@ -1347,12 +1373,17 @@ const updateWithCommunityEntries = async () => {
     )
   );
 
-  // Update sync metadata
+  // Update sync metadata with new filenames
+  const updatedFilenames = [
+    ...metadata.knownCommunityFiles,
+    ...newFiles.map((f) => f.name),
+  ];
   updateSyncMetadata(
     metadata,
     null,
     mostRecentDate.toISOString(),
-    updatedShowcaseData.length
+    updatedShowcaseData.length,
+    updatedFilenames
   );
   console.log(chalk.green(`✓ Sync metadata updated\n`));
 
@@ -1360,9 +1391,11 @@ const updateWithCommunityEntries = async () => {
   console.log(chalk.blue("=".repeat(60)));
   console.log(chalk.blue.bold("  Update Summary"));
   console.log(chalk.blue("=".repeat(60)));
-  console.log(chalk.cyan(`GitHub files checked: ${filesChecked}`));
+  console.log(chalk.cyan(`Total files in GitHub repo: ${githubFiles.length}`));
+  console.log(chalk.cyan(`Files in cache: ${knownFilenames.size}`));
+  console.log(chalk.cyan(`New files found: ${newFiles.length}`));
   console.log(
-    chalk.cyan(`New community entries found: ${newCommunityEntries.length}`)
+    chalk.cyan(`New community entries processed: ${newCommunityEntries.length}`)
   );
   console.log(
     chalk[showcaseNewEntries.length > 0 ? "green" : "red"](
