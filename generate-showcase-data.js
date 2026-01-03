@@ -23,6 +23,7 @@ let config = {
   dbFilePath: "",
   communityDataPath: "",
   showcaseDataPath: "",
+  syncMetadataPath: "",
   useTestData: true,
 };
 
@@ -64,7 +65,80 @@ const logError = (message, error = null) => {
 
   stats.errors++;
 };
+// Load or create sync metadata file
+const loadSyncMetadata = () => {
+  if (fs.existsSync(config.syncMetadataPath)) {
+    return JSON.parse(fs.readFileSync(config.syncMetadataPath, "utf-8"));
+  }
+  return null;
+};
 
+// Initialize metadata by scanning showcase-data.json for most recent dates
+const initializeSyncMetadata = (showcaseData) => {
+  console.log(
+    chalk.gray("Initializing sync metadata from showcase-data.json...")
+  );
+
+  let mostRecentBundledbDate = null;
+  let mostRecentCommunityDate = null;
+
+  for (const entry of showcaseData) {
+    const entryDate = entry.date;
+    if (entryDate) {
+      const date = new Date(entryDate);
+
+      // Track most recent bundledb entry (has Link property in original)
+      if (!mostRecentBundledbDate || date > mostRecentBundledbDate) {
+        mostRecentBundledbDate = date;
+      }
+    }
+  }
+
+  // Default to very old date if no entries found
+  if (!mostRecentBundledbDate) {
+    mostRecentBundledbDate = new Date("2020-01-01T00:00:00.000Z");
+  }
+  if (!mostRecentCommunityDate) {
+    mostRecentCommunityDate = new Date("2020-01-01T00:00:00.000Z");
+  }
+
+  const metadata = {
+    lastBundledbSync: mostRecentBundledbDate.toISOString(),
+    lastCommunitySync: mostRecentCommunityDate.toISOString(),
+    lastSyncDate: new Date().toISOString(),
+    totalShowcaseEntries: showcaseData.length,
+  };
+
+  fs.writeFileSync(config.syncMetadataPath, JSON.stringify(metadata, null, 2));
+
+  console.log(
+    chalk.green(
+      `✓ Metadata initialized with bundledb sync: ${metadata.lastBundledbSync}`
+    )
+  );
+  return metadata;
+};
+
+// Update sync metadata after successful sync
+const updateSyncMetadata = (
+  metadata,
+  newBundledbDate = null,
+  newCommunityDate = null,
+  totalEntries = null
+) => {
+  if (newBundledbDate) {
+    metadata.lastBundledbSync = newBundledbDate;
+  }
+  if (newCommunityDate) {
+    metadata.lastCommunitySync = newCommunityDate;
+  }
+  if (totalEntries !== null) {
+    metadata.totalShowcaseEntries = totalEntries;
+  }
+  metadata.lastSyncDate = new Date().toISOString();
+
+  fs.writeFileSync(config.syncMetadataPath, JSON.stringify(metadata, null, 2));
+};
 // Normalize URL for comparison (strip www, normalize protocol)
 const normalizeUrl = (url) => {
   try {
@@ -76,8 +150,26 @@ const normalizeUrl = (url) => {
       hostname = hostname.substring(4);
     }
 
+    let pathname = urlObj.pathname;
+    // Remove trailing slash unless it's the root path
+    if (pathname.length > 1 && pathname.endsWith("/")) {
+      pathname = pathname.slice(0, -1);
+    }
+    // Normalize root path to empty string for consistency
+    if (pathname === "/") {
+      pathname = "";
+    }
+
+    // Include search params (sorted for consistency) but ignore hash
+    let search = "";
+    if (urlObj.search) {
+      const params = new URLSearchParams(urlObj.search);
+      params.sort();
+      search = "?" + params.toString();
+    }
+
     // Always use https for comparison
-    return `https://${hostname}${urlObj.pathname}${urlObj.search}`;
+    return `https://${hostname}${pathname}${search}`;
   } catch (e) {
     logError(`Failed to normalize URL: ${url}`, e);
     return url;
@@ -651,6 +743,204 @@ const printSummaryReport = () => {
   console.log(chalk.blue("=".repeat(60) + "\n"));
 };
 
+// Update showcase-data.json with new entries from bundledb.json
+const updateWithBundledbEntries = async () => {
+  console.log(
+    chalk.blue(
+      "\n🔄 Updating showcase-data.json with new bundledb entries...\n"
+    )
+  );
+
+  // Check if showcase-data.json exists
+  if (!fs.existsSync(config.showcaseDataPath)) {
+    console.log(
+      chalk.red(
+        `✗ showcase-data.json not found at ${config.showcaseDataPath}\n` +
+          `  Please create it first using "Create from scratch" option.\n`
+      )
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // Load existing showcase-data.json
+  console.log(chalk.gray("Loading showcase-data.json..."));
+  const showcaseData = JSON.parse(
+    fs.readFileSync(config.showcaseDataPath, "utf-8")
+  );
+  console.log(
+    chalk.gray(`Found ${showcaseData.length} entries in showcase-data\n`)
+  );
+
+  // Load or initialize sync metadata
+  let metadata = loadSyncMetadata();
+  if (!metadata) {
+    metadata = initializeSyncMetadata(showcaseData);
+    console.log();
+  } else {
+    console.log(
+      chalk.gray(`Last bundledb sync: ${metadata.lastBundledbSync}\n`)
+    );
+  }
+
+  const lastSyncDate = new Date(metadata.lastBundledbSync);
+
+  // Load bundledb.json
+  console.log(chalk.gray("Loading bundledb.json..."));
+  const bundledb = JSON.parse(fs.readFileSync(config.dbFilePath, "utf-8"));
+
+  // Extract site entries from bundledb
+  const bundledbSites = bundledb.filter((entry) => entry.Type === "site");
+  console.log(
+    chalk.gray(`Found ${bundledbSites.length} total site entries in bundledb\n`)
+  );
+
+  // Filter for entries newer than last sync
+  const newEntries = bundledbSites
+    .filter((entry) => new Date(entry.Date) > lastSyncDate)
+    .sort((a, b) => new Date(b.Date) - new Date(a.Date));
+
+  console.log(
+    chalk.gray(`Entries newer than last sync: ${newEntries.length}\n`)
+  );
+
+  if (newEntries.length === 0) {
+    console.log(
+      chalk.green("✓ No new entries found. showcase-data.json is up to date!\n")
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // Build set of normalized URLs from showcase for duplicate safety check
+  const showcaseUrls = new Set(
+    showcaseData.map((entry) => normalizeUrl(entry.link || entry.url))
+  );
+
+  // Process new entries - transform to showcase format
+  console.log(chalk.gray("Processing new entries...\n"));
+  const processedEntries = [];
+  let processedCount = 0;
+  let errorCount = 0;
+  let duplicateCount = 0;
+  let mostRecentDate = lastSyncDate;
+
+  for (const entry of newEntries) {
+    try {
+      processedCount++;
+
+      // Duplicate safety check
+      const normalizedUrl = normalizeUrl(entry.Link);
+      if (showcaseUrls.has(normalizedUrl)) {
+        duplicateCount++;
+        logError(
+          `Duplicate URL detected during bundledb update: ${entry.Link}`,
+          new Error("Duplicate skipped")
+        );
+        console.log(
+          chalk.yellow(
+            `[${processedCount}/${newEntries.length}] Skipping duplicate: ${entry.Link}\n`
+          )
+        );
+        continue;
+      }
+
+      console.log(
+        chalk.gray(
+          `[${processedCount}/${newEntries.length}] Processing: ${entry.Link}`
+        )
+      );
+
+      // Transform to showcase format (lowercase properties, remove Issue/Type)
+      const showcaseEntry = transformToShowcaseFormat(entry);
+
+      // Check for leaderboard link
+      const leaderboardLink = await hasLeaderboardLink(entry.Link);
+      if (leaderboardLink) {
+        showcaseEntry.leaderboardLink = leaderboardLink;
+      }
+
+      processedEntries.push(showcaseEntry);
+      showcaseUrls.add(normalizedUrl); // Add to set to catch duplicates in this batch
+
+      // Track most recent date
+      const entryDate = new Date(entry.Date);
+      if (entryDate > mostRecentDate) {
+        mostRecentDate = entryDate;
+      }
+
+      console.log(chalk.green(`  ✓ Processed successfully\n`));
+    } catch (err) {
+      errorCount++;
+      logError(`Error processing bundledb entry: ${entry.Link}`, err);
+      console.log(chalk.red(`  ✗ Error processing (logged)\n`));
+    }
+  }
+
+  if (processedEntries.length === 0) {
+    console.log(
+      chalk.red("✗ No entries were successfully processed. No changes made.\n")
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // Prepend new entries to showcase data
+  const updatedShowcaseData = [...processedEntries, ...showcaseData];
+
+  // Create backup before writing
+  createBackup(config.showcaseDataPath);
+
+  // Write updated showcase-data.json
+  console.log(chalk.gray("\nWriting updated showcase-data.json..."));
+  fs.writeFileSync(
+    config.showcaseDataPath,
+    JSON.stringify(updatedShowcaseData, null, 2)
+  );
+  console.log(chalk.green(`✓ showcase-data.json updated successfully\n`));
+
+  // Update sync metadata
+  updateSyncMetadata(
+    metadata,
+    mostRecentDate.toISOString(),
+    null,
+    updatedShowcaseData.length
+  );
+  console.log(chalk.green(`✓ Sync metadata updated\n`));
+
+  // Print summary report
+  console.log(chalk.blue("=".repeat(60)));
+  console.log(chalk.blue.bold("  Update Summary"));
+  console.log(chalk.blue("=".repeat(60)));
+  console.log(
+    chalk.cyan(`Total bundledb site entries: ${bundledbSites.length}`)
+  );
+  console.log(chalk.cyan(`Entries newer than last sync: ${newEntries.length}`));
+  console.log(
+    chalk[processedEntries.length > 0 ? "green" : "red"](
+      `Successfully processed: ${processedEntries.length}`
+    )
+  );
+  if (duplicateCount > 0) {
+    console.log(chalk.yellow(`Duplicates skipped: ${duplicateCount}`));
+  }
+  console.log(chalk[errorCount > 0 ? "red" : "green"](`Errors: ${errorCount}`));
+  if (errorCount > 0) {
+    console.log(chalk.yellow(`  See ${errorLogPath} for error details`));
+  }
+  console.log(
+    chalk.blue(
+      `\nTotal entries in showcase-data.json: ${updatedShowcaseData.length}`
+    )
+  );
+  console.log(
+    chalk.cyan(`New last sync timestamp: ${mostRecentDate.toISOString()}`)
+  );
+  console.log(chalk.blue("=".repeat(60) + "\n"));
+
+  await showMainMenu();
+};
+
 // Main menu
 const showMainMenu = async () => {
   console.log(chalk.blue.bold("\n📦 Showcase Data Generator\n"));
@@ -659,18 +949,23 @@ const showMainMenu = async () => {
     message: "Choose an operation:",
     choices: [
       {
-        name: "Create showcase-data.json from scratch",
+        name: "1. Create showcase-data.json from scratch",
         value: "create",
         description:
           "Generate complete showcase data from bundledb + community data",
       },
       {
-        name: "Generate screenshots for showcase entries",
+        name: "2. Generate screenshots for showcase entries",
         value: "screenshots",
         description: "Capture website screenshots for all showcase entries",
       },
       {
-        name: "Exit",
+        name: "3. Update with new bundledb entries",
+        value: "update-bundledb",
+        description: "Add new site entries from bundledb to showcase-data.json",
+      },
+      {
+        name: "4. Exit",
         value: "exit",
       },
     ],
@@ -682,6 +977,9 @@ const showMainMenu = async () => {
       break;
     case "screenshots":
       await generateScreenshots();
+      break;
+    case "update-bundledb":
+      await updateWithBundledbEntries();
       break;
     case "exit":
       console.log(chalk.gray("Goodbye!"));
@@ -720,6 +1018,8 @@ const init = async () => {
         "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/community-data.json",
       showcaseDataPath:
         "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/showcase-data.json",
+      syncMetadataPath:
+        "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/showcase-sync-metadata.json",
       useTestData: true,
     };
   } else {
@@ -730,6 +1030,8 @@ const init = async () => {
         "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/community-data.json",
       showcaseDataPath:
         "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/showcase-data.json",
+      syncMetadataPath:
+        "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/showcase-sync-metadata.json",
       useTestData: false,
     };
   }

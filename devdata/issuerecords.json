@@ -219,7 +219,7 @@
     "issue": 37,
     "blogPosts": 6,
     "releases": 0,
-    "sites": 4
+    "sites": 3
   },
   {
     "issue": 38,
@@ -351,7 +351,7 @@
     "issue": 59,
     "blogPosts": 7,
     "releases": 4,
-    "sites": 13
+    "sites": 12
   },
   {
     "issue": 60,
@@ -363,7 +363,7 @@
     "issue": 61,
     "blogPosts": 17,
     "releases": 12,
-    "sites": 19
+    "sites": 17
   },
   {
     "issue": 62,
@@ -411,7 +411,7 @@
     "issue": 69,
     "blogPosts": 9,
     "releases": 3,
-    "sites": 14
+    "sites": 13
   },
   {
     "issue": 70,
@@ -487,8 +487,8 @@
   },
   {
     "issue": 82,
-    "blogPosts": 9,
+    "blogPosts": 10,
     "releases": 2,
-    "sites": 6
+    "sites": 8
   }
 ]
