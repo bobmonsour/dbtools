@@ -573,6 +573,33 @@ const generateScreenshots = async () => {
 const createShowcaseFromScratch = async () => {
   console.log(chalk.blue("\n🚀 Creating showcase-data.json from scratch...\n"));
 
+  // Display severe warning
+  console.log(chalk.red.bold("⚠️  WARNING ⚠️"));
+  console.log(
+    chalk.yellow(
+      "\nThis operation will rebuild the entire showcase-data.json file from scratch."
+    )
+  );
+  console.log(
+    chalk.yellow(
+      "It is a LONG PROCESS that will fetch metadata for all entries."
+    )
+  );
+  console.log(
+    chalk.yellow("This may take 30+ minutes depending on network conditions.\n")
+  );
+
+  const confirmProceed = await confirm({
+    message: "Are you SURE you want to proceed with this operation?",
+    default: false,
+  });
+
+  if (!confirmProceed) {
+    console.log(chalk.yellow("Operation cancelled.\n"));
+    await showMainMenu();
+    return;
+  }
+
   // Check if showcase-data.json already exists
   if (fs.existsSync(config.showcaseDataPath)) {
     const overwrite = await confirm({
@@ -1702,7 +1729,7 @@ const copyToProduction = async () => {
 
   // 4. Define target paths
   const targetShowcase =
-    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundle.dev/content/_data/showcase-data.json";
+    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/showcase-data.json";
   const targetScreenshots =
     "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundle.dev/content/screenshots";
 
@@ -1880,25 +1907,25 @@ const showMainMenu = async () => {
     message: "Choose an operation:",
     choices: [
       {
-        name: "1. Create showcase-data.json from scratch",
-        value: "create",
-        description:
-          "Generate complete showcase data from bundledb + community data",
-      },
-      {
-        name: "2. Generate screenshots for showcase entries",
-        value: "screenshots",
-        description: "Capture website screenshots for all showcase entries",
-      },
-      {
-        name: "3. Update with new bundledb entries",
+        name: "1. Update with new bundledb entries",
         value: "update-bundledb",
         description: "Add new site entries from bundledb to showcase-data.json",
       },
       {
-        name: "4. Update with new community entries",
+        name: "2. Update with new community entries",
         value: "update-community",
         description: "Add new entries from GitHub community repo",
+      },
+      {
+        name: "3. Generate screenshots for showcase entries",
+        value: "screenshots",
+        description: "Capture website screenshots for all showcase entries",
+      },
+      {
+        name: "4. Copy to production",
+        value: "copy-production",
+        description:
+          "Copy showcase-data.json and screenshots to production website (test mode only)",
       },
       {
         name: "5. Remove failed screenshot entries",
@@ -1907,10 +1934,10 @@ const showMainMenu = async () => {
           "Remove entries that failed screenshot generation from both data files",
       },
       {
-        name: "6. Copy to production",
-        value: "copy-production",
+        name: "6. Create showcase-data.json from scratch",
+        value: "create",
         description:
-          "Copy showcase-data.json and screenshots to production website (test mode only)",
+          "Generate complete showcase data from bundledb + community data",
       },
       {
         name: "7. Exit",
