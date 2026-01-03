@@ -1641,6 +1641,237 @@ const removeFailedEntries = async () => {
   await showMainMenu();
 };
 
+// Copy showcase-data.json and screenshots to production locations
+const copyToProduction = async () => {
+  console.log(chalk.blue("\n=== Copy to Production ===\n"));
+
+  // 1. Verify test mode
+  if (!config.useTestData) {
+    console.log(
+      chalk.yellow("This operation is only available in TEST mode.\n")
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // 2. Verify source files exist
+  const sourceShowcase = config.showcaseDataPath;
+  const sourceScreenshots = screenshotDir;
+
+  if (!fs.existsSync(sourceShowcase)) {
+    console.error(
+      chalk.red(`Source showcase-data.json not found at: ${sourceShowcase}\n`)
+    );
+    await showMainMenu();
+    return;
+  }
+
+  if (!fs.existsSync(sourceScreenshots)) {
+    console.error(
+      chalk.red(
+        `Source screenshots directory not found at: ${sourceScreenshots}\n`
+      )
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // 3. Validate showcase-data.json
+  let showcaseData;
+  try {
+    showcaseData = JSON.parse(fs.readFileSync(sourceShowcase, "utf-8"));
+    if (!Array.isArray(showcaseData) || showcaseData.length === 0) {
+      console.error(
+        chalk.red(
+          "Invalid showcase-data.json format: must be non-empty array\n"
+        )
+      );
+      await showMainMenu();
+      return;
+    }
+    console.log(
+      chalk.green(`✓ Source file validated: ${showcaseData.length} entries`)
+    );
+  } catch (err) {
+    console.error(
+      chalk.red(`Invalid JSON in showcase-data.json: ${err.message}\n`)
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // 4. Define target paths
+  const targetShowcase =
+    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundle.dev/content/_data/showcase-data.json";
+  const targetScreenshots =
+    "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundle.dev/content/screenshots";
+
+  console.log(chalk.gray("\nTarget paths:"));
+  console.log(chalk.gray(`  Data: ${targetShowcase}`));
+  console.log(chalk.gray(`  Screenshots: ${targetScreenshots}/\n`));
+
+  // 5. Get screenshot copy mode
+  const screenshotMode = await select({
+    message: "Screenshot copy mode:",
+    choices: [
+      {
+        name: "Copy only missing screenshots",
+        value: "missing",
+        description: "Skip files that already exist in target",
+      },
+      {
+        name: "Copy all screenshots (overwrite)",
+        value: "all",
+        description: "Overwrite existing files in target",
+      },
+    ],
+  });
+
+  // 6. Count screenshots to copy
+  let sourceFiles;
+  try {
+    sourceFiles = fs
+      .readdirSync(sourceScreenshots)
+      .filter((f) => f.endsWith(".jpg"));
+  } catch (err) {
+    console.error(
+      chalk.red(`Failed to read screenshots directory: ${err.message}\n`)
+    );
+    await showMainMenu();
+    return;
+  }
+
+  let filesToCopy = sourceFiles;
+
+  if (screenshotMode === "missing") {
+    // Check which files don't exist in target
+    if (fs.existsSync(targetScreenshots)) {
+      const existingFiles = new Set(fs.readdirSync(targetScreenshots));
+      filesToCopy = sourceFiles.filter((f) => !existingFiles.has(f));
+    }
+  }
+
+  // 7. Show summary and confirm
+  console.log(chalk.cyan("\nCopy Summary:"));
+  console.log(
+    chalk.cyan(`  showcase-data.json (${showcaseData.length} entries)`)
+  );
+  console.log(
+    chalk.cyan(
+      `  ${filesToCopy.length} of ${sourceFiles.length} screenshots ${
+        screenshotMode === "missing" ? "(missing only)" : "(all)"
+      }`
+    )
+  );
+
+  if (filesToCopy.length === 0 && screenshotMode === "missing") {
+    console.log(
+      chalk.yellow(
+        "\nNo missing screenshots to copy. All screenshots already exist in target.\n"
+      )
+    );
+    const copyDataOnly = await confirm({
+      message: "Copy showcase-data.json only?",
+      default: true,
+    });
+    if (!copyDataOnly) {
+      console.log(chalk.yellow("Operation cancelled\n"));
+      await showMainMenu();
+      return;
+    }
+  } else {
+    console.log("");
+    const confirmed = await confirm({
+      message: "Proceed with copy?",
+      default: false,
+    });
+
+    if (!confirmed) {
+      console.log(chalk.yellow("\nOperation cancelled\n"));
+      await showMainMenu();
+      return;
+    }
+  }
+
+  // 8. Create target directories
+  console.log("");
+  try {
+    fs.mkdirSync(path.dirname(targetShowcase), { recursive: true });
+    console.log(chalk.gray("✓ Target data directory ready"));
+  } catch (err) {
+    console.error(
+      chalk.red(`Failed to create target data directory: ${err.message}\n`)
+    );
+    await showMainMenu();
+    return;
+  }
+
+  if (filesToCopy.length > 0) {
+    try {
+      fs.mkdirSync(targetScreenshots, { recursive: true });
+      console.log(chalk.gray("✓ Target screenshots directory ready"));
+    } catch (err) {
+      console.error(
+        chalk.red(
+          `Failed to create target screenshots directory: ${err.message}\n`
+        )
+      );
+      await showMainMenu();
+      return;
+    }
+  }
+
+  // 9. Copy showcase-data.json
+  console.log("");
+  try {
+    fs.copyFileSync(sourceShowcase, targetShowcase);
+    console.log(chalk.green("✓ showcase-data.json copied"));
+  } catch (err) {
+    console.error(
+      chalk.red(`Failed to copy showcase-data.json: ${err.message}\n`)
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // 10. Copy screenshots with progress
+  if (filesToCopy.length > 0) {
+    console.log(chalk.gray("\nCopying screenshots..."));
+    try {
+      for (let i = 0; i < filesToCopy.length; i++) {
+        const file = filesToCopy[i];
+        fs.copyFileSync(
+          path.join(sourceScreenshots, file),
+          path.join(targetScreenshots, file)
+        );
+
+        // Show progress every 50 files
+        if ((i + 1) % 50 === 0 || i === filesToCopy.length - 1) {
+          console.log(chalk.gray(`  Progress: ${i + 1}/${filesToCopy.length}`));
+        }
+      }
+    } catch (err) {
+      console.error(chalk.red(`\nFailed to copy screenshot: ${err.message}`));
+      console.error(
+        chalk.red(`Aborted at file ${filesToCopy[i] || "unknown"}\n`)
+      );
+      await showMainMenu();
+      return;
+    }
+  }
+
+  console.log(chalk.green("\n✓ Copy to production complete!"));
+  if (filesToCopy.length > 0) {
+    console.log(
+      chalk.gray(`  ${filesToCopy.length} screenshots copied successfully\n`)
+    );
+  } else {
+    console.log(chalk.gray("  No screenshots needed copying\n"));
+  }
+
+  await showMainMenu();
+};
+
 // Main menu
 const showMainMenu = async () => {
   console.log(chalk.blue.bold("\n📦 Showcase Data Generator\n"));
@@ -1676,7 +1907,13 @@ const showMainMenu = async () => {
           "Remove entries that failed screenshot generation from both data files",
       },
       {
-        name: "6. Exit",
+        name: "6. Copy to production",
+        value: "copy-production",
+        description:
+          "Copy showcase-data.json and screenshots to production website (test mode only)",
+      },
+      {
+        name: "7. Exit",
         value: "exit",
       },
     ],
@@ -1697,6 +1934,9 @@ const showMainMenu = async () => {
       break;
     case "remove-failed":
       await removeFailedEntries();
+      break;
+    case "copy-production":
+      await copyToProduction();
       break;
     case "exit":
       console.log(chalk.gray("Goodbye!"));
