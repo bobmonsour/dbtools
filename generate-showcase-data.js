@@ -1061,9 +1061,7 @@ const fetchGitHubFileContent = async (downloadUrl, filePath) => {
 // Update showcase-data.json with new entries from GitHub community data
 const updateWithCommunityEntries = async () => {
   console.log(
-    chalk.blue(
-      "\n🌐 Updating with new entries from GitHub community data...\n"
-    )
+    chalk.blue("\n🌐 Updating with new entries from GitHub community data...\n")
   );
 
   // Check if files exist
@@ -1138,9 +1136,7 @@ const updateWithCommunityEntries = async () => {
     );
   } catch (err) {
     logError("Failed to fetch GitHub directory contents", err);
-    console.log(
-      chalk.red(`✗ Failed to fetch from GitHub: ${err.message}\n`)
-    );
+    console.log(chalk.red(`✗ Failed to fetch from GitHub: ${err.message}\n`));
     await showMainMenu();
     return;
   }
