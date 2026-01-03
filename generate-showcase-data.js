@@ -4,6 +4,7 @@ import path from "path";
 import chalk from "chalk";
 import { AssetCache } from "@11ty/eleventy-fetch";
 import puppeteer from "puppeteer";
+import "dotenv/config";
 import { cacheDuration, fetchTimeout } from "./cacheconfig.js";
 import { getOrigin } from "./getorigin.js";
 import { getTitle } from "./gettitle.js";
@@ -32,6 +33,25 @@ const errorLogPath = path.join(
   path.dirname(new URL(import.meta.url).pathname),
   "./log/showcase-data-errors.log"
 );
+
+// GitHub API configuration
+const GITHUB_API_BASE = "https://api.github.com";
+const REPO_OWNER = "11ty";
+const REPO_NAME = "11ty-community";
+const DIRECTORY_PATH = "built-with-eleventy";
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+
+// GitHub API headers
+const getGitHubHeaders = () => {
+  const headers = {
+    Accept: "application/vnd.github.v3+json",
+    "User-Agent": "11ty-showcase",
+  };
+  if (GITHUB_TOKEN) {
+    headers.Authorization = `token ${GITHUB_TOKEN}`;
+  }
+  return headers;
+};
 
 // Statistics for reporting
 let stats = {
@@ -941,6 +961,443 @@ const updateWithBundledbEntries = async () => {
   await showMainMenu();
 };
 
+// GitHub API helper functions for fetching community data
+const getDefaultBranch = async () => {
+  const url = `${GITHUB_API_BASE}/repos/${REPO_OWNER}/${REPO_NAME}`;
+  const response = await fetch(url, {
+    headers: getGitHubHeaders(),
+    signal: AbortSignal.timeout(fetchTimeout.screenshot || 10000),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch repo info: ${response.status} ${response.statusText}`
+    );
+  }
+
+  const data = await response.json();
+  return data.default_branch;
+};
+
+const fetchGitHubDirectoryContents = async () => {
+  const branch = await getDefaultBranch();
+  console.log(chalk.gray(`  Using branch: ${branch}`));
+
+  const treeUrl = `${GITHUB_API_BASE}/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/${branch}?recursive=1`;
+
+  const response = await fetch(treeUrl, {
+    headers: getGitHubHeaders(),
+    signal: AbortSignal.timeout(fetchTimeout.screenshot || 10000),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch tree: ${response.status} ${response.statusText}`
+    );
+  }
+
+  const treeData = await response.json();
+
+  const directoryFiles = treeData.tree
+    .filter(
+      (item) =>
+        item.type === "blob" &&
+        item.path.startsWith(DIRECTORY_PATH + "/") &&
+        item.path.endsWith(".json")
+    )
+    .map((item) => ({
+      name: item.path.split("/").pop(),
+      path: item.path,
+      sha: item.sha,
+      download_url: `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${branch}/${item.path}`,
+    }));
+
+  return directoryFiles;
+};
+
+const fetchFileCommitDate = async (filePath) => {
+  const url = `${GITHUB_API_BASE}/repos/${REPO_OWNER}/${REPO_NAME}/commits?path=${filePath}&per_page=1`;
+
+  const response = await fetch(url, {
+    headers: getGitHubHeaders(),
+    signal: AbortSignal.timeout(fetchTimeout.screenshot || 10000),
+  });
+
+  if (!response.ok) {
+    console.warn(chalk.yellow(`  Could not fetch commit date for ${filePath}`));
+    return null;
+  }
+
+  const commits = await response.json();
+  if (commits.length === 0) {
+    return null;
+  }
+
+  return commits[0].commit.author.date;
+};
+
+const fetchGitHubFileContent = async (downloadUrl, filePath) => {
+  const response = await fetch(downloadUrl, {
+    signal: AbortSignal.timeout(fetchTimeout.screenshot || 10000),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch file: ${response.status} ${response.statusText}`
+    );
+  }
+
+  const content = await response.json();
+
+  // Add commit date information
+  const lastModified = await fetchFileCommitDate(filePath);
+  if (lastModified) {
+    content._github_last_modified = lastModified;
+  }
+
+  return content;
+};
+
+// Update showcase-data.json with new entries from GitHub community data
+const updateWithCommunityEntries = async () => {
+  console.log(
+    chalk.blue(
+      "\n🌐 Updating with new entries from GitHub community data...\n"
+    )
+  );
+
+  // Check if files exist
+  if (!fs.existsSync(config.showcaseDataPath)) {
+    console.log(
+      chalk.red(
+        `✗ showcase-data.json not found at ${config.showcaseDataPath}\n` +
+          `  Please create it first using "Create from scratch" option.\n`
+      )
+    );
+    await showMainMenu();
+    return;
+  }
+
+  if (!fs.existsSync(config.communityDataPath)) {
+    console.log(
+      chalk.red(
+        `✗ community-data.json not found at ${config.communityDataPath}\n` +
+          `  Please run fetch-community-data.js first.\n`
+      )
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // Check for GitHub token
+  if (!GITHUB_TOKEN) {
+    console.log(
+      chalk.red(
+        "✗ GITHUB_TOKEN not found in .env file\n" +
+          "  GitHub API access requires authentication.\n"
+      )
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // Load existing files
+  console.log(chalk.gray("Loading local files..."));
+  const showcaseData = JSON.parse(
+    fs.readFileSync(config.showcaseDataPath, "utf-8")
+  );
+  const communityData = JSON.parse(
+    fs.readFileSync(config.communityDataPath, "utf-8")
+  );
+  console.log(
+    chalk.gray(
+      `  Showcase: ${showcaseData.length} entries, Community: ${communityData.length} entries\n`
+    )
+  );
+
+  // Load or initialize sync metadata
+  let metadata = loadSyncMetadata();
+  if (!metadata) {
+    metadata = initializeSyncMetadata(showcaseData);
+    console.log();
+  } else {
+    console.log(
+      chalk.gray(`Last community sync: ${metadata.lastCommunitySync}\n`)
+    );
+  }
+
+  const lastSyncDate = new Date(metadata.lastCommunitySync);
+
+  // Fetch from GitHub
+  console.log(chalk.cyan("Fetching from GitHub..."));
+  let githubFiles;
+  try {
+    githubFiles = await fetchGitHubDirectoryContents();
+    console.log(
+      chalk.gray(`  Found ${githubFiles.length} files in GitHub repo\n`)
+    );
+  } catch (err) {
+    logError("Failed to fetch GitHub directory contents", err);
+    console.log(
+      chalk.red(`✗ Failed to fetch from GitHub: ${err.message}\n`)
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // Process GitHub files to find new entries
+  console.log(chalk.gray("Checking for new entries...\n"));
+  const newCommunityEntries = [];
+  const existingCommunityUrls = new Set(
+    communityData.map((e) => normalizeUrl(e.url)).filter((u) => u)
+  );
+
+  let filesChecked = 0;
+  for (const file of githubFiles) {
+    try {
+      filesChecked++;
+      if (filesChecked % 100 === 0) {
+        console.log(
+          chalk.gray(`  Checked ${filesChecked}/${githubFiles.length} files...`)
+        );
+      }
+
+      const content = await fetchGitHubFileContent(
+        file.download_url,
+        file.path
+      );
+
+      // Check if this is a new entry
+      if (!content._github_last_modified) {
+        continue;
+      }
+
+      const entryDate = new Date(content._github_last_modified);
+      if (entryDate <= lastSyncDate) {
+        continue;
+      }
+
+      // Check if URL already exists in our community data
+      const normalizedUrl = normalizeUrl(content.url);
+      if (existingCommunityUrls.has(normalizedUrl)) {
+        continue;
+      }
+
+      newCommunityEntries.push(content);
+      existingCommunityUrls.add(normalizedUrl);
+    } catch (err) {
+      logError(`Error processing GitHub file ${file.name}`, err);
+    }
+  }
+
+  console.log(
+    chalk.gray(
+      `\nChecked ${filesChecked} files, found ${newCommunityEntries.length} new entries\n`
+    )
+  );
+
+  if (newCommunityEntries.length === 0) {
+    console.log(
+      chalk.green("✓ No new community entries found. Files are up to date!\n")
+    );
+    await showMainMenu();
+    return;
+  }
+
+  console.log(
+    chalk.yellow(
+      `Found ${newCommunityEntries.length} new community entries to process\n`
+    )
+  );
+
+  // Build showcase URL set for duplicate checking
+  const showcaseUrls = new Set(
+    showcaseData.map((entry) => normalizeUrl(entry.link || entry.url))
+  );
+
+  // Process new entries for showcase
+  console.log(chalk.gray("Processing new entries for showcase...\n"));
+  const showcaseNewEntries = [];
+  let processedCount = 0;
+  let errorCount = 0;
+  let duplicateCount = 0;
+  let mostRecentDate = lastSyncDate;
+
+  for (const communityEntry of newCommunityEntries) {
+    try {
+      processedCount++;
+      const url = communityEntry.url;
+
+      // Duplicate safety check against showcase
+      const normalizedUrl = normalizeUrl(url);
+      if (showcaseUrls.has(normalizedUrl)) {
+        duplicateCount++;
+        logError(
+          `Duplicate URL detected during community update: ${url}`,
+          new Error("Duplicate skipped")
+        );
+        console.log(
+          chalk.yellow(
+            `[${processedCount}/${newCommunityEntries.length}] Skipping duplicate: ${url}\n`
+          )
+        );
+        continue;
+      }
+
+      console.log(
+        chalk.gray(
+          `[${processedCount}/${newCommunityEntries.length}] Processing: ${url}`
+        )
+      );
+
+      // Check URL accessibility
+      try {
+        const response = await fetch(url, {
+          method: "HEAD",
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!response.ok) {
+          logError(`URL not accessible (${response.status}): ${url}`);
+          console.log(chalk.yellow(`  ⚠ URL not accessible, skipping\n`));
+          errorCount++;
+          continue;
+        }
+      } catch (err) {
+        logError(`URL not accessible (${err.message}): ${url}`);
+        console.log(chalk.yellow(`  ⚠ URL not accessible, skipping\n`));
+        errorCount++;
+        continue;
+      }
+
+      // Fetch metadata
+      let title = await getTitle(url);
+      if (!title) {
+        title = url;
+      }
+
+      const description = await getDescription(url);
+      const favicon = await getFavicon(url, "site");
+
+      // Format date from _github_last_modified
+      const date = communityEntry._github_last_modified.split("T")[0];
+      const formattedDate = formatItemDate(date);
+
+      // Check for leaderboard link
+      const leaderboardLink = await hasLeaderboardLink(url);
+
+      // Create showcase entry
+      const showcaseEntry = {
+        title: title,
+        description: description || "",
+        link: url,
+        date: date,
+        formattedDate: formattedDate,
+        favicon: favicon || "",
+      };
+
+      if (leaderboardLink) {
+        showcaseEntry.leaderboardLink = leaderboardLink;
+      }
+
+      showcaseNewEntries.push(showcaseEntry);
+      showcaseUrls.add(normalizedUrl);
+
+      // Track most recent date
+      const entryDate = new Date(communityEntry._github_last_modified);
+      if (entryDate > mostRecentDate) {
+        mostRecentDate = entryDate;
+      }
+
+      console.log(chalk.green(`  ✓ Processed successfully\n`));
+    } catch (err) {
+      errorCount++;
+      logError(`Error processing community entry: ${communityEntry.url}`, err);
+      console.log(chalk.red(`  ✗ Error processing (logged)\n`));
+    }
+  }
+
+  if (showcaseNewEntries.length === 0) {
+    console.log(
+      chalk.red("✗ No entries were successfully processed. No changes made.\n")
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // Update both files
+  // 1. Prepend to community-data.json
+  const updatedCommunityData = [...newCommunityEntries, ...communityData];
+  createBackup(config.communityDataPath);
+  fs.writeFileSync(
+    config.communityDataPath,
+    JSON.stringify(updatedCommunityData, null, 2)
+  );
+  console.log(
+    chalk.green(
+      `✓ community-data.json updated: ${updatedCommunityData.length} entries\n`
+    )
+  );
+
+  // 2. Prepend to showcase-data.json
+  const updatedShowcaseData = [...showcaseNewEntries, ...showcaseData];
+  createBackup(config.showcaseDataPath);
+  fs.writeFileSync(
+    config.showcaseDataPath,
+    JSON.stringify(updatedShowcaseData, null, 2)
+  );
+  console.log(
+    chalk.green(
+      `✓ showcase-data.json updated: ${updatedShowcaseData.length} entries\n`
+    )
+  );
+
+  // Update sync metadata
+  updateSyncMetadata(
+    metadata,
+    null,
+    mostRecentDate.toISOString(),
+    updatedShowcaseData.length
+  );
+  console.log(chalk.green(`✓ Sync metadata updated\n`));
+
+  // Print summary report
+  console.log(chalk.blue("=".repeat(60)));
+  console.log(chalk.blue.bold("  Update Summary"));
+  console.log(chalk.blue("=".repeat(60)));
+  console.log(chalk.cyan(`GitHub files checked: ${filesChecked}`));
+  console.log(
+    chalk.cyan(`New community entries found: ${newCommunityEntries.length}`)
+  );
+  console.log(
+    chalk[showcaseNewEntries.length > 0 ? "green" : "red"](
+      `Successfully added to showcase: ${showcaseNewEntries.length}`
+    )
+  );
+  if (duplicateCount > 0) {
+    console.log(chalk.yellow(`Duplicates skipped: ${duplicateCount}`));
+  }
+  console.log(chalk[errorCount > 0 ? "red" : "green"](`Errors: ${errorCount}`));
+  if (errorCount > 0) {
+    console.log(chalk.yellow(`  See ${errorLogPath} for error details`));
+  }
+  console.log(
+    chalk.blue(
+      `\nTotal entries in community-data.json: ${updatedCommunityData.length}`
+    )
+  );
+  console.log(
+    chalk.blue(
+      `Total entries in showcase-data.json: ${updatedShowcaseData.length}`
+    )
+  );
+  console.log(
+    chalk.cyan(`New last sync timestamp: ${mostRecentDate.toISOString()}`)
+  );
+  console.log(chalk.blue("=".repeat(60) + "\n"));
+
+  await showMainMenu();
+};
+
 // Main menu
 const showMainMenu = async () => {
   console.log(chalk.blue.bold("\n📦 Showcase Data Generator\n"));
@@ -965,7 +1422,12 @@ const showMainMenu = async () => {
         description: "Add new site entries from bundledb to showcase-data.json",
       },
       {
-        name: "4. Exit",
+        name: "4. Update with new community entries",
+        value: "update-community",
+        description: "Add new entries from GitHub community repo",
+      },
+      {
+        name: "5. Exit",
         value: "exit",
       },
     ],
@@ -980,6 +1442,9 @@ const showMainMenu = async () => {
       break;
     case "update-bundledb":
       await updateWithBundledbEntries();
+      break;
+    case "update-community":
+      await updateWithCommunityEntries();
       break;
     case "exit":
       console.log(chalk.gray("Goodbye!"));
