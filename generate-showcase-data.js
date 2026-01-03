@@ -284,6 +284,68 @@ const screenshotErrorLogPath = path.join(
 const imageWidth = 1920;
 const imageHeight = 1080;
 
+// Extract failed URLs from screenshot error log
+const extractFailedUrlsFromLog = (logPath) => {
+  try {
+    const logContent = fs.readFileSync(logPath, "utf-8");
+    const lines = logContent.split("\n").filter((line) => line.trim());
+    const urlRegex = /Screenshot failed for (https?:\/\/[^\s:]+)/;
+    const urls = [];
+
+    for (const line of lines) {
+      const match = line.match(urlRegex);
+      if (match && match[1]) {
+        urls.push(match[1]);
+      }
+    }
+
+    return urls;
+  } catch (err) {
+    logError("Failed to extract URLs from error log", err);
+    return [];
+  }
+};
+
+// Find entries matching the failed URLs (using normalized comparison)
+const findMatchingEntries = (dataArray, failedUrls, urlProperty) => {
+  const normalizedFailedUrls = failedUrls.map((url) => normalizeUrl(url));
+  const matchingIndices = [];
+
+  dataArray.forEach((entry, index) => {
+    const entryUrl = entry[urlProperty];
+    if (entryUrl) {
+      const normalizedEntryUrl = normalizeUrl(entryUrl);
+      if (normalizedFailedUrls.includes(normalizedEntryUrl)) {
+        matchingIndices.push(index);
+      }
+    }
+  });
+
+  return matchingIndices;
+};
+
+// Remove entries at specified indices
+const removeMatchingEntries = (dataArray, indicesToRemove) => {
+  return dataArray.filter((_, index) => !indicesToRemove.includes(index));
+};
+
+// Log removal summary to showcase-data-errors.log
+const logRemovalSummary = (
+  totalFailedUrls,
+  showcaseRemoved,
+  communityRemoved
+) => {
+  const timestamp = new Date().toISOString();
+  const summaryMessage = `[${timestamp}] REMOVAL SUMMARY: Processed ${totalFailedUrls} failed URLs. Removed ${showcaseRemoved} entries from showcase-data.json and ${communityRemoved} entries from community-data.json.\n`;
+
+  try {
+    fs.mkdirSync(path.dirname(errorLogPath), { recursive: true });
+    fs.appendFileSync(errorLogPath, summaryMessage);
+  } catch (err) {
+    console.error("Failed to write removal summary to error log:", err.message);
+  }
+};
+
 // Transform bundledb entry to showcase format (lowercase properties, remove Issue/Type)
 const transformToShowcaseFormat = (entry) => {
   const showcase = {
@@ -1427,6 +1489,158 @@ const updateWithCommunityEntries = async () => {
   await showMainMenu();
 };
 
+// Remove entries that failed screenshot generation
+const removeFailedEntries = async () => {
+  console.log(chalk.blue("\n=== Remove Failed Screenshot Entries ===\n"));
+
+  // 1. Check if screenshot-errors.log exists
+  const screenshotLogPath = path.join(__dirname, "log/screenshot-errors.log");
+  if (!fs.existsSync(screenshotLogPath)) {
+    console.log(chalk.yellow("No screenshot-errors.log file found."));
+    console.log(
+      chalk.gray(
+        "This file is created when screenshot generation encounters errors.\n"
+      )
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // 2. Parse error log and extract URLs
+  const failedUrls = extractFailedUrlsFromLog(screenshotLogPath);
+  if (failedUrls.length === 0) {
+    console.log(chalk.yellow("No failed URLs found in error log.\n"));
+    await showMainMenu();
+    return;
+  }
+
+  console.log(
+    chalk.gray(`Found ${failedUrls.length} failed URLs in error log:`)
+  );
+  failedUrls.forEach((url, i) => {
+    console.log(chalk.gray(`  ${i + 1}. ${url}`));
+  });
+  console.log("");
+
+  // 3. Check if showcase-data.json and community-data.json exist
+  if (!fs.existsSync(config.showcaseDataPath)) {
+    console.log(
+      chalk.red(`Showcase data file not found at: ${config.showcaseDataPath}\n`)
+    );
+    await showMainMenu();
+    return;
+  }
+
+  if (!fs.existsSync(config.communityDataPath)) {
+    console.log(
+      chalk.red(
+        `Community data file not found at: ${config.communityDataPath}\n`
+      )
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // 4. Load data files
+  const showcaseData = JSON.parse(
+    fs.readFileSync(config.showcaseDataPath, "utf-8")
+  );
+  const communityData = JSON.parse(
+    fs.readFileSync(config.communityDataPath, "utf-8")
+  );
+
+  // 5. Find matching entries using normalized URLs
+  const showcaseMatches = findMatchingEntries(showcaseData, failedUrls, "link");
+  const communityMatches = findMatchingEntries(
+    communityData,
+    failedUrls,
+    "url"
+  );
+
+  // 6. Show preview and confirm
+  console.log(chalk.cyan("\nWill remove:"));
+  console.log(
+    chalk.cyan(`  ${showcaseMatches.length} entries from showcase-data.json`)
+  );
+  console.log(
+    chalk.cyan(`  ${communityMatches.length} entries from community-data.json`)
+  );
+
+  if (showcaseMatches.length === 0 && communityMatches.length === 0) {
+    console.log(
+      chalk.yellow(
+        "\nNo matching entries found in data files. URLs may have already been removed.\n"
+      )
+    );
+    await showMainMenu();
+    return;
+  }
+
+  console.log("");
+  const confirmed = await confirm({
+    message: "Proceed with removal?",
+    default: false,
+  });
+
+  if (!confirmed) {
+    console.log(chalk.yellow("\nOperation cancelled\n"));
+    await showMainMenu();
+    return;
+  }
+
+  // 7. Create backups
+  console.log("");
+  createBackup(config.showcaseDataPath);
+  createBackup(config.communityDataPath);
+
+  // 8. Remove entries
+  const updatedShowcaseData = removeMatchingEntries(
+    showcaseData,
+    showcaseMatches
+  );
+  const updatedCommunityData = removeMatchingEntries(
+    communityData,
+    communityMatches
+  );
+
+  // 9. Save files
+  try {
+    fs.writeFileSync(
+      config.showcaseDataPath,
+      JSON.stringify(updatedShowcaseData, null, 2)
+    );
+    fs.writeFileSync(
+      config.communityDataPath,
+      JSON.stringify(updatedCommunityData, null, 2)
+    );
+
+    // 10. Log summary
+    logRemovalSummary(
+      failedUrls.length,
+      showcaseMatches.length,
+      communityMatches.length
+    );
+
+    console.log(chalk.green("\n✓ Failed entries removed successfully"));
+    console.log(
+      chalk.gray(
+        `  Showcase entries: ${showcaseData.length} → ${updatedShowcaseData.length}`
+      )
+    );
+    console.log(
+      chalk.gray(
+        `  Community entries: ${communityData.length} → ${updatedCommunityData.length}\n`
+      )
+    );
+  } catch (err) {
+    logError("Failed to save updated data files", err);
+    console.error(chalk.red("\n✗ Failed to save updated data files"));
+    console.error(chalk.red(`  Error: ${err.message}\n`));
+  }
+
+  await showMainMenu();
+};
+
 // Main menu
 const showMainMenu = async () => {
   console.log(chalk.blue.bold("\n📦 Showcase Data Generator\n"));
@@ -1456,7 +1670,13 @@ const showMainMenu = async () => {
         description: "Add new entries from GitHub community repo",
       },
       {
-        name: "5. Exit",
+        name: "5. Remove failed screenshot entries",
+        value: "remove-failed",
+        description:
+          "Remove entries that failed screenshot generation from both data files",
+      },
+      {
+        name: "6. Exit",
         value: "exit",
       },
     ],
@@ -1474,6 +1694,9 @@ const showMainMenu = async () => {
       break;
     case "update-community":
       await updateWithCommunityEntries();
+      break;
+    case "remove-failed":
+      await removeFailedEntries();
       break;
     case "exit":
       console.log(chalk.gray("Goodbye!"));
