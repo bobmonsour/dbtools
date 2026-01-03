@@ -32,4 +32,5 @@ export const fetchTimeout = {
   rssLinkHtml: 3000, // 3 seconds
   socialHtml: 3000, // 3 seconds
   socialLinks: 3000, // 3 seconds
+  screenshot: 10000, // 10 seconds
 };

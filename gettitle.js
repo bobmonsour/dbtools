@@ -10,7 +10,7 @@ import { cacheDuration } from "./cacheconfig.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const failureCachePath = path.join(
   __dirname,
-  "./log/description-fetch-failures.json"
+  "./log/title-fetch-failures.json"
 );
 let failureCache = {};
 
@@ -29,7 +29,7 @@ const saveFailureCache = async () => {
     await fs.mkdir(path.dirname(failureCachePath), { recursive: true });
     await fs.writeFile(failureCachePath, JSON.stringify(failureCache, null, 2));
   } catch (error) {
-    console.error("Failed to save description failure cache:", error.message);
+    console.error("Failed to save title failure cache:", error.message);
   }
 };
 
@@ -48,16 +48,12 @@ const isFailureExpired = (failureDate) => {
 };
 
 //***************
-// given a url, this filter extracts the meta
-// description from within the <head> element of a web page
+// given a url, this function extracts the title
+// from the <title> element within the <head> of a web page
 // using the cheerio library.
 //***************
 
-export const getDescription = async (link) => {
-  if (link.includes("youtube.com")) {
-    return "YouTube video";
-  }
-
+export const getTitle = async (link) => {
   // Check persistent failure cache first
   if (failureCache[link]) {
     const failureDate = failureCache[link];
@@ -68,29 +64,30 @@ export const getDescription = async (link) => {
     // If 30+ days old, we'll retry (continue to fetch below)
   }
 
-  // Check AssetCache for previously extracted description
-  const cacheKey = `description-${link}`;
+  // Check AssetCache for previously extracted title
+  const cacheKey = `title-${link}`;
   const cache = new AssetCache(cacheKey, ".cache");
 
   if (cache.isCacheValid(cacheDuration.descHtml)) {
-    const cachedDescription = await cache.getCachedValue();
-    if (cachedDescription !== undefined) {
+    const cachedTitle = await cache.getCachedValue();
+    if (cachedTitle !== undefined) {
       // Convert Buffer to string if needed
-      return typeof cachedDescription === "string"
-        ? cachedDescription
-        : cachedDescription.toString();
+      return typeof cachedTitle === "string"
+        ? cachedTitle
+        : cachedTitle.toString();
     }
   }
 
   try {
     let htmlcontent = await fetchHtml(link, "descHtml");
     const $ = cheerio.load(htmlcontent);
-    let description = $("meta[name=description]").attr("content");
-    if (description == undefined) {
+    let title = $("title").text();
+
+    if (!title || title.trim() === "") {
       // Don't cache empty results - AssetCache doesn't accept empty strings
       return "";
     } else {
-      let text = description
+      let text = title
         .replace(/[<>]/g, "") // Remove angle brackets
         .replace(/&(?!(?:[a-z\d]+|#\d+|#x[a-f\d]+);)/gi, "&amp;") // Escape unencoded ampersands
         .replace(/"/g, "&quot;") // Escape quotes
@@ -106,19 +103,9 @@ export const getDescription = async (link) => {
         .replace(/[\u2060]/g, "") // Remove word joiners
         .replace(/[\uFFF9-\uFFFB]/g, "") // Remove interlinear annotation characters
         .trim()
-        .substring(0, 300); // Reasonable length limit for descriptions
+        .substring(0, 200); // Reasonable length limit for titles
 
-      // looking for markdown links
-      // fast bail-out if no opening bracket present
-      if (!text.includes("[")) {
-        description = text;
-      } else {
-        // Regex: [link text](url) → <a href="url">link text</a>
-        description = text.replace(
-          /\[([^\]]+)\]\(([^)]+)\)/g,
-          '<a href="$2">$1</a>'
-        );
-      }
+      title = text;
     }
 
     // Success! Remove from failure cache if it was there
@@ -127,11 +114,11 @@ export const getDescription = async (link) => {
       await saveFailureCache();
     }
 
-    // Cache the extracted description
-    await cache.save(description, "text");
-    return description;
+    // Cache the extracted title
+    await cache.save(title, "text");
+    return title;
   } catch (e) {
-    console.log("Error fetching description for " + link + " " + e.message);
+    console.log("Error fetching title for " + link + " " + e.message);
 
     // Add to persistent failure cache with current date
     failureCache[link] = getCurrentDate();

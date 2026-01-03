@@ -15,6 +15,10 @@ if (useTestData) {
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/badlinks",
     issueRecordsPath:
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/issuerecords.json",
+    communityDataPath:
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/community-data.json",
+    showcaseDataPath:
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/showcase-data.json",
   };
 } else {
   config = {
@@ -28,6 +32,10 @@ if (useTestData) {
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/badlinks",
     issueRecordsPath:
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/issuerecords.json",
+    communityDataPath:
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/community-data.json",
+    showcaseDataPath:
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/showcase-data.json",
   };
 }
 

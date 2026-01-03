@@ -55,7 +55,7 @@ const saveFailureCache = async () => {
     await fs.mkdir(path.dirname(failureCachePath), { recursive: true });
     await fs.writeFile(failureCachePath, JSON.stringify(failureCache, null, 2));
   } catch (error) {
-    console.error("Failed to save favicon failure cache:", error.message);
+    // Silently continue on failure
   }
 };
 
@@ -82,7 +82,7 @@ const initializeResizeLog = async () => {
     const formattedDate = now.toLocaleDateString("en-US", options);
     await fs.writeFile(resizeLogPath, `${formattedDate}\n\n`);
   } catch (error) {
-    console.error("Failed to initialize resize log:", error.message);
+    // Silently continue on failure
   }
 };
 
@@ -96,7 +96,7 @@ const logResize = async (origin, originalWidth, originalHeight, operation) => {
     const logEntry = `- [${operation}] ${origin}: ${originalWidth}x${originalHeight} → ${targetSize}x${targetSize}\n`;
     await fs.appendFile(resizeLogPath, logEntry);
   } catch (error) {
-    console.error("Failed to log resize:", error.message);
+    // Silently continue on failure
   }
 };
 
@@ -224,9 +224,7 @@ const fetchAndSaveFavicon = async (origin, domain) => {
               // Valid cached image, use it
               return cachedData.localPath;
             } catch (validationError) {
-              console.error(
-                `Cached favicon invalid for ${origin}, will re-fetch`
-              );
+              // Cached favicon invalid, will re-fetch
               await fs.unlink(outputPath).catch(() => {});
             }
           } else {
@@ -235,9 +233,7 @@ const fetchAndSaveFavicon = async (origin, domain) => {
           }
         }
       } catch (cacheError) {
-        console.error(
-          `Error using cached favicon for ${origin}: ${cacheError.message}`
-        );
+        // Silently continue on cache error
       }
     }
   }
@@ -324,10 +320,6 @@ const fetchAndSaveFavicon = async (origin, domain) => {
         }
       } catch (sharpError) {
         // If Sharp processing fails, use original buffer
-        console.error(
-          `Sharp processing failed for ${origin}:`,
-          sharpError.message
-        );
       }
     }
 
@@ -352,9 +344,7 @@ const fetchAndSaveFavicon = async (origin, domain) => {
       try {
         await sharp(outputPath).metadata();
       } catch (validationError) {
-        console.error(
-          `Invalid image file for ${origin}: ${validationError.message}`
-        );
+        // Invalid image file
         await fs.unlink(outputPath).catch(() => {});
         failureCache[origin] = getCurrentDate();
         await saveFailureCache();
@@ -391,9 +381,6 @@ const fetchAndSaveFavicon = async (origin, domain) => {
     return localPath;
   } catch (error) {
     // Google API failed, try extracting from HTML
-    console.error(
-      `Google favicon failed for ${origin}, trying HTML extraction: ${error.message}`
-    );
 
     try {
       // Fetch HTML and extract favicon link
@@ -482,10 +469,7 @@ const fetchAndSaveFavicon = async (origin, domain) => {
                 .toBuffer();
             }
           } catch (sharpError) {
-            console.error(
-              `Sharp processing failed for ${origin}:`,
-              sharpError.message
-            );
+            // Sharp processing failed, use original buffer
           }
         }
 
@@ -508,9 +492,7 @@ const fetchAndSaveFavicon = async (origin, domain) => {
           try {
             await sharp(outputPath).metadata();
           } catch (validationError) {
-            console.error(
-              `Invalid image file from HTML extraction for ${origin}: ${validationError.message}`
-            );
+            // Invalid image file from HTML extraction
             await fs.unlink(outputPath).catch(() => {});
             failureCache[origin] = getCurrentDate();
             await saveFailureCache();
@@ -523,8 +505,6 @@ const fetchAndSaveFavicon = async (origin, domain) => {
           delete failureCache[origin];
           await saveFailureCache();
         }
-
-        console.log(`Successfully extracted favicon from HTML for ${origin}`);
 
         // Cache the processed favicon for future builds
         const cachedFilePath = path.join(
@@ -549,9 +529,7 @@ const fetchAndSaveFavicon = async (origin, domain) => {
         return localPath;
       }
     } catch (htmlError) {
-      console.error(
-        `HTML favicon extraction also failed for ${origin}: ${htmlError.message}`
-      );
+      // HTML favicon extraction also failed
     }
 
     // Both methods failed, use default
