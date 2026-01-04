@@ -1899,6 +1899,215 @@ const copyToProduction = async () => {
   await showMainMenu();
 };
 
+//***************
+// Check for Duplicate Entries
+//***************
+const checkDuplicates = async () => {
+  console.log(chalk.blue("\n🔍 Checking for duplicate entries...\n"));
+
+  // Load showcase data
+  if (!fs.existsSync(config.showcaseDataPath)) {
+    console.log(
+      chalk.red("✗ showcase-data.json not found. Please create it first.")
+    );
+    await showMainMenu();
+    return;
+  }
+
+  const showcaseData = JSON.parse(
+    fs.readFileSync(config.showcaseDataPath, "utf-8")
+  );
+
+  // Extract hostname from URL
+  const extractHostname = (url) => {
+    try {
+      const urlObj = new URL(url);
+      let hostname = urlObj.hostname.toLowerCase();
+      // Strip www. prefix
+      if (hostname.startsWith("www.")) {
+        hostname = hostname.substring(4);
+      }
+      return hostname;
+    } catch (e) {
+      logError(`Failed to extract hostname from URL: ${url}`, e);
+      return null;
+    }
+  };
+
+  // Check if URL is root (just hostname with or without trailing slash)
+  const isRootUrl = (url) => {
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+      return pathname === "/" || pathname === "";
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Group entries by hostname
+  const hostnameGroups = {};
+  showcaseData.forEach((entry, index) => {
+    const url = entry.link || entry.url;
+    if (!url) return;
+
+    const hostname = extractHostname(url);
+    if (!hostname) return;
+
+    if (!hostnameGroups[hostname]) {
+      hostnameGroups[hostname] = [];
+    }
+
+    hostnameGroups[hostname].push({
+      index,
+      url,
+      title: entry.title || "Untitled",
+      date: entry.date || "",
+      isRoot: isRootUrl(url),
+    });
+  });
+
+  // Find duplicates and determine which to keep
+  const duplicateGroups = [];
+  const indicesToDelete = [];
+
+  Object.entries(hostnameGroups).forEach(([hostname, entries]) => {
+    if (entries.length <= 1) return;
+
+    // Sort entries: root entries first, then by date (most recent first)
+    entries.sort((a, b) => {
+      if (a.isRoot && !b.isRoot) return -1;
+      if (!a.isRoot && b.isRoot) return 1;
+      // Both root or both non-root, sort by date
+      return (b.date || "").localeCompare(a.date || "");
+    });
+
+    const hasRootEntry = entries.some((e) => e.isRoot);
+
+    let toKeep = [];
+    let toDelete = [];
+
+    if (hasRootEntry) {
+      // Case A & B: Has root entry, keep only the first root entry (most recent if multiple)
+      toKeep = [entries.find((e) => e.isRoot)];
+      toDelete = entries.filter((e) => e !== toKeep[0]);
+    } else {
+      // Case C: No root entry, delete all
+      toDelete = entries;
+    }
+
+    duplicateGroups.push({
+      hostname,
+      totalEntries: entries.length,
+      hasRootEntry,
+      entries: entries.map((e) => ({
+        url: e.url,
+        title: e.title,
+        date: e.date,
+        isRoot: e.isRoot,
+        action: toKeep.includes(e) ? "KEEP" : "DELETE",
+      })),
+    });
+
+    toDelete.forEach((entry) => {
+      indicesToDelete.push(entry.index);
+    });
+  });
+
+  // Display results
+  if (duplicateGroups.length === 0) {
+    console.log(chalk.green("✓ No duplicate hostnames found!\n"));
+    await showMainMenu();
+    return;
+  }
+
+  console.log(
+    chalk.yellow(
+      `Found ${duplicateGroups.length} hostname(s) with duplicate entries:\n`
+    )
+  );
+
+  duplicateGroups.forEach((group, i) => {
+    console.log(
+      chalk.bold(
+        `${i + 1}. ${group.hostname} (${group.totalEntries} entries${
+          group.hasRootEntry ? ", has root" : ", NO root"
+        })`
+      )
+    );
+    group.entries.forEach((entry) => {
+      const actionColor = entry.action === "KEEP" ? chalk.green : chalk.red;
+      const rootLabel = entry.isRoot ? " [ROOT]" : "";
+      console.log(`   ${actionColor(entry.action)}${rootLabel}: ${entry.url}`);
+      console.log(chalk.gray(`        "${entry.title}" (${entry.date})`));
+    });
+    console.log();
+  });
+
+  // Summary
+  console.log(
+    chalk.yellow.bold(`Total entries to delete: ${indicesToDelete.length}\n`)
+  );
+
+  // Log to error file
+  const logMessage = `
+====================================
+Duplicate Check Report
+Date: ${new Date().toISOString()}
+====================================
+Found ${duplicateGroups.length} hostname(s) with duplicates
+Total entries to delete: ${indicesToDelete.length}
+
+${duplicateGroups
+  .map(
+    (g) =>
+      `${g.hostname} (${g.totalEntries} entries):\n${g.entries
+        .map((e) => `  ${e.action}: ${e.url} - "${e.title}"`)
+        .join("\n")}`
+  )
+  .join("\n\n")}
+====================================
+`;
+  fs.appendFileSync(errorLogPath, logMessage);
+  console.log(chalk.gray(`Results logged to: ${errorLogPath}`));
+
+  // Confirm deletion
+  const shouldDelete = await confirm({
+    message: `Delete ${indicesToDelete.length} duplicate entries from showcase-data.json?`,
+    default: false,
+  });
+
+  if (!shouldDelete) {
+    console.log(chalk.gray("Deletion cancelled.\n"));
+    await showMainMenu();
+    return;
+  }
+
+  // Perform deletion
+  const updatedData = showcaseData.filter(
+    (_, index) => !indicesToDelete.includes(index)
+  );
+
+  // Write updated data
+  fs.writeFileSync(
+    config.showcaseDataPath,
+    JSON.stringify(updatedData, null, 2)
+  );
+
+  console.log(
+    chalk.green(
+      `\n✓ Successfully deleted ${indicesToDelete.length} duplicate entries!`
+    )
+  );
+  console.log(
+    chalk.gray(
+      `  Remaining entries: ${updatedData.length} (was ${showcaseData.length})\n`
+    )
+  );
+
+  await showMainMenu();
+};
+
 // Main menu
 const showMainMenu = async () => {
   console.log(chalk.blue.bold("\n📦 Showcase Data Generator\n"));
@@ -1934,13 +2143,19 @@ const showMainMenu = async () => {
           "Remove entries that failed screenshot generation from both data files",
       },
       {
-        name: "6. Create showcase-data.json from scratch",
+        name: "6. Check for duplicate entries",
+        value: "check-duplicates",
+        description:
+          "Find and remove duplicate entries based on normalized hostnames",
+      },
+      {
+        name: "7. Create showcase-data.json from scratch",
         value: "create",
         description:
           "Generate complete showcase data from bundledb + community data",
       },
       {
-        name: "7. Exit",
+        name: "8. Exit",
         value: "exit",
       },
     ],
@@ -1964,6 +2179,9 @@ const showMainMenu = async () => {
       break;
     case "copy-production":
       await copyToProduction();
+      break;
+    case "check-duplicates":
+      await checkDuplicates();
       break;
     case "exit":
       console.log(chalk.gray("Goodbye!"));
