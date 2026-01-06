@@ -2251,6 +2251,10 @@ const showMainMenu = async () => {
     message: "Choose an operation:",
     choices: [
       {
+        name: "0. Exit",
+        value: "exit",
+      },
+      {
         name: "1. Update with new bundledb entries",
         value: "update-bundledb",
         description: "Add new site entries from bundledb to showcase-data.json",
@@ -2294,10 +2298,6 @@ const showMainMenu = async () => {
         value: "create",
         description:
           "Generate complete showcase data from bundledb + community data",
-      },
-      {
-        name: "9. Exit",
-        value: "exit",
       },
     ],
   });

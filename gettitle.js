@@ -81,7 +81,14 @@ export const getTitle = async (link) => {
   try {
     let htmlcontent = await fetchHtml(link, "descHtml");
     const $ = cheerio.load(htmlcontent);
-    let title = $("title").text();
+
+    // Try to get title from <head><title> first
+    let title = $("head title").first().text();
+
+    // If no title in head, fall back to og:title meta tag
+    if (!title || title.trim() === "") {
+      title = $('meta[property="og:title"]').attr("content") || "";
+    }
 
     if (!title || title.trim() === "") {
       // Don't cache empty results - AssetCache doesn't accept empty strings
