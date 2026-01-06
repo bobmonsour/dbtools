@@ -1,4 +1,4 @@
-import { select, confirm } from "@inquirer/prompts";
+import { select, confirm, input } from "@inquirer/prompts";
 import fs from "fs";
 import path from "path";
 import chalk from "chalk";
@@ -2108,6 +2108,141 @@ ${duplicateGroups
   await showMainMenu();
 };
 
+// Generate a single screenshot
+const generateSingleScreenshot = async () => {
+  console.log(chalk.blue("\n📸 Generate Single Screenshot\n"));
+
+  // Prompt for URL
+  const url = await input({
+    message: "Enter the URL to capture:",
+    validate: (value) => {
+      if (!value) return "URL is required";
+      try {
+        new URL(value);
+        return true;
+      } catch {
+        return "Please enter a valid URL (including http:// or https://)";
+      }
+    },
+  });
+
+  console.log(chalk.gray(`\nProcessing: ${url}`));
+
+  // Validate URL accessibility
+  try {
+    console.log(chalk.gray("Checking URL accessibility..."));
+    const response = await fetch(url, {
+      method: "HEAD",
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!response.ok) {
+      console.log(
+        chalk.red(
+          `\n✗ URL not accessible (HTTP ${response.status}). Cannot generate screenshot.\n`
+        )
+      );
+      await showMainMenu();
+      return;
+    }
+    console.log(chalk.green("✓ URL is accessible\n"));
+  } catch (err) {
+    console.log(
+      chalk.red(
+        `\n✗ URL not accessible (${err.message}). Cannot generate screenshot.\n`
+      )
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // Generate filename
+  console.log(chalk.gray("Generating filename..."));
+  const { domain, filename } = await genScreenshotFilename(url);
+  const fullPath = path.join(screenshotDir, filename);
+  console.log(chalk.gray(`Target file: ${filename}\n`));
+
+  // Check if file exists and rename if necessary
+  if (fs.existsSync(fullPath)) {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    const timestamp = `${year}-${month}-${day}--${hours}${minutes}${seconds}`;
+
+    const ext = path.extname(filename);
+    const base = path.basename(filename, ext);
+    const renamedFile = `${base}-${timestamp}${ext}`;
+    const renamedPath = path.join(screenshotDir, renamedFile);
+
+    try {
+      fs.renameSync(fullPath, renamedPath);
+      console.log(chalk.yellow(`⚠ Existing file renamed to: ${renamedFile}\n`));
+    } catch (err) {
+      console.log(
+        chalk.red(`✗ Failed to rename existing file: ${err.message}\n`)
+      );
+      await showMainMenu();
+      return;
+    }
+  }
+
+  // Create screenshots directory if needed
+  try {
+    fs.mkdirSync(screenshotDir, { recursive: true });
+  } catch (err) {
+    console.log(
+      chalk.red(`✗ Failed to create screenshots directory: ${err.message}\n`)
+    );
+    await showMainMenu();
+    return;
+  }
+
+  // Capture screenshot
+  console.log(chalk.cyan("Launching browser..."));
+  const browser = await puppeteer.launch();
+
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({ width: imageWidth, height: imageHeight });
+
+    console.log(chalk.cyan("Loading page (20 second timeout)..."));
+    await page.goto(url, {
+      waitUntil: "networkidle0",
+      timeout: fetchTimeout.singleScreenshot,
+    });
+
+    console.log(chalk.cyan("Waiting for page to fully render..."));
+    await new Promise((resolve) =>
+      setTimeout(resolve, fetchTimeout.screenshotDelay)
+    );
+
+    console.log(chalk.cyan("Capturing screenshot..."));
+    await page.screenshot({
+      path: fullPath,
+      type: "jpeg",
+      quality: 100,
+    });
+
+    await page.close();
+    await browser.close();
+
+    console.log(chalk.green(`\n✓ Screenshot saved successfully!`));
+    console.log(chalk.gray(`  Location: ${fullPath}\n`));
+  } catch (err) {
+    await browser.close();
+    const timestamp = new Date().toISOString();
+    const errorMessage = `[${timestamp}] Single screenshot failed for ${url}: ${err.message}\n`;
+    fs.appendFileSync(screenshotErrorLogPath, errorMessage);
+    console.log(chalk.red(`\n✗ Screenshot failed: ${err.message}`));
+    console.log(chalk.gray(`  Error logged to: ${screenshotErrorLogPath}\n`));
+  }
+
+  await showMainMenu();
+};
+
 // Main menu
 const showMainMenu = async () => {
   console.log(chalk.blue.bold("\n📦 Showcase Data Generator\n"));
@@ -2149,13 +2284,19 @@ const showMainMenu = async () => {
           "Find and remove duplicate entries based on normalized hostnames",
       },
       {
-        name: "7. Create showcase-data.json from scratch",
+        name: "7. Generate a single screenshot",
+        value: "single-screenshot",
+        description:
+          "Capture a screenshot for a single URL with extended timeout",
+      },
+      {
+        name: "8. Create showcase-data.json from scratch",
         value: "create",
         description:
           "Generate complete showcase data from bundledb + community data",
       },
       {
-        name: "8. Exit",
+        name: "9. Exit",
         value: "exit",
       },
     ],
@@ -2182,6 +2323,9 @@ const showMainMenu = async () => {
       break;
     case "check-duplicates":
       await checkDuplicates();
+      break;
+    case "single-screenshot":
+      await generateSingleScreenshot();
       break;
     case "exit":
       console.log(chalk.gray("Goodbye!"));

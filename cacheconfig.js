@@ -33,4 +33,6 @@ export const fetchTimeout = {
   socialHtml: 3000, // 3 seconds
   socialLinks: 3000, // 3 seconds
   screenshot: 10000, // 10 seconds
+  singleScreenshot: 20000, // 20 seconds
+  screenshotDelay: 3000, // 3 seconds - additional wait after page load before screenshot
 };
