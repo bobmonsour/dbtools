@@ -1,5 +1,5 @@
 // Set up required configuration to support the 11ty Bundle database utilities
-const useTestData = true; // Set to false to use production data
+const useTestData = false; // Set to false to use production data
 let config;
 
 if (useTestData) {

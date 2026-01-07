@@ -272,6 +272,10 @@ const hasLeaderboardLink = async (link) => {
 // Screenshot directory (relative to dbtools)
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 const screenshotDir = path.join(__dirname, "screenshots");
+const productionScreenshotDir = path.join(
+  __dirname,
+  "../11tybundle.dev/content/screenshots"
+);
 
 // Error log file path for screenshots
 const screenshotErrorLogPath = path.join(
@@ -342,6 +346,59 @@ const logRemovalSummary = (
     fs.appendFileSync(errorLogPath, summaryMessage);
   } catch (err) {
     console.error("Failed to write removal summary to error log:", err.message);
+  }
+};
+
+// Helper function to capture a screenshot for a URL
+const captureScreenshot = async (url, browser) => {
+  try {
+    // Generate filename
+    const { domain, filename } = await genScreenshotFilename(url);
+    const screenshotPath = `/screenshots/${filename}`;
+    const localPath = path.join(screenshotDir, filename);
+    const productionPath = path.join(productionScreenshotDir, filename);
+
+    // Check if screenshot already exists in local directory
+    if (fs.existsSync(localPath)) {
+      // Screenshot exists, just ensure it's in production too
+      if (!fs.existsSync(productionPath)) {
+        fs.mkdirSync(path.dirname(productionPath), { recursive: true });
+        fs.copyFileSync(localPath, productionPath);
+      }
+      return screenshotPath;
+    }
+
+    // Create a new page
+    const page = await browser.newPage();
+    await page.setViewport({ width: imageWidth, height: imageHeight });
+
+    try {
+      await page.goto(url, {
+        waitUntil: "networkidle2",
+        timeout: fetchTimeout.screenshot,
+      });
+
+      // Ensure local directory exists
+      fs.mkdirSync(screenshotDir, { recursive: true });
+
+      // Capture screenshot to local directory
+      await page.screenshot({
+        path: localPath,
+        type: "jpeg",
+        quality: 100,
+      });
+
+      // Copy to production directory
+      fs.mkdirSync(path.dirname(productionPath), { recursive: true });
+      fs.copyFileSync(localPath, productionPath);
+
+      return screenshotPath;
+    } finally {
+      await page.close();
+    }
+  } catch (error) {
+    logError(`Screenshot generation failed for ${url}`, error);
+    return null;
   }
 };
 
@@ -936,58 +993,82 @@ const updateWithBundledbEntries = async () => {
   let processedCount = 0;
   let errorCount = 0;
   let duplicateCount = 0;
+  let screenshotSuccessCount = 0;
+  let screenshotFailCount = 0;
   let mostRecentDate = lastSyncDate;
 
-  for (const entry of newEntries) {
-    try {
-      processedCount++;
+  // Initialize browser for screenshots
+  console.log(chalk.cyan("Launching browser for screenshots...\n"));
+  const browser = await puppeteer.launch();
 
-      // Duplicate safety check
-      const normalizedUrl = normalizeUrl(entry.Link);
-      if (showcaseUrls.has(normalizedUrl)) {
-        duplicateCount++;
-        logError(
-          `Duplicate URL detected during bundledb update: ${entry.Link}`,
-          new Error("Duplicate skipped")
-        );
+  try {
+    for (const entry of newEntries) {
+      try {
+        processedCount++;
+
+        // Duplicate safety check
+        const normalizedUrl = normalizeUrl(entry.Link);
+        if (showcaseUrls.has(normalizedUrl)) {
+          duplicateCount++;
+          logError(
+            `Duplicate URL detected during bundledb update: ${entry.Link}`,
+            new Error("Duplicate skipped")
+          );
+          console.log(
+            chalk.yellow(
+              `[${processedCount}/${newEntries.length}] Skipping duplicate: ${entry.Link}\n`
+            )
+          );
+          continue;
+        }
+
         console.log(
-          chalk.yellow(
-            `[${processedCount}/${newEntries.length}] Skipping duplicate: ${entry.Link}\n`
+          chalk.gray(
+            `[${processedCount}/${newEntries.length}] Processing: ${entry.Link}`
           )
         );
-        continue;
+
+        // Transform to showcase format (lowercase properties, remove Issue/Type)
+        const showcaseEntry = transformToShowcaseFormat(entry);
+
+        // Check for leaderboard link
+        const leaderboardLink = await hasLeaderboardLink(entry.Link);
+        if (leaderboardLink) {
+          showcaseEntry.leaderboardLink = leaderboardLink;
+        }
+
+        // Generate screenshot
+        const screenshotPath = await captureScreenshot(entry.Link, browser);
+        if (screenshotPath) {
+          showcaseEntry.screenshotpath = screenshotPath;
+          screenshotSuccessCount++;
+          console.log(chalk.green(`  ✓ Screenshot captured`));
+        } else {
+          screenshotFailCount++;
+          console.log(chalk.red(`  ✗ Screenshot failed - entry not added\n`));
+          continue; // Skip this entry, don't add it
+        }
+
+        processedEntries.push(showcaseEntry);
+        showcaseUrls.add(normalizedUrl); // Add to set to catch duplicates in this batch
+
+        // Track most recent date
+        const entryDate = new Date(entry.Date);
+        if (entryDate > mostRecentDate) {
+          mostRecentDate = entryDate;
+        }
+
+        console.log(chalk.green(`  ✓ Processed successfully\n`));
+      } catch (err) {
+        errorCount++;
+        logError(`Error processing bundledb entry: ${entry.Link}`, err);
+        console.log(chalk.red(`  ✗ Error processing (logged)\n`));
       }
-
-      console.log(
-        chalk.gray(
-          `[${processedCount}/${newEntries.length}] Processing: ${entry.Link}`
-        )
-      );
-
-      // Transform to showcase format (lowercase properties, remove Issue/Type)
-      const showcaseEntry = transformToShowcaseFormat(entry);
-
-      // Check for leaderboard link
-      const leaderboardLink = await hasLeaderboardLink(entry.Link);
-      if (leaderboardLink) {
-        showcaseEntry.leaderboardLink = leaderboardLink;
-      }
-
-      processedEntries.push(showcaseEntry);
-      showcaseUrls.add(normalizedUrl); // Add to set to catch duplicates in this batch
-
-      // Track most recent date
-      const entryDate = new Date(entry.Date);
-      if (entryDate > mostRecentDate) {
-        mostRecentDate = entryDate;
-      }
-
-      console.log(chalk.green(`  ✓ Processed successfully\n`));
-    } catch (err) {
-      errorCount++;
-      logError(`Error processing bundledb entry: ${entry.Link}`, err);
-      console.log(chalk.red(`  ✗ Error processing (logged)\n`));
     }
+  } finally {
+    // Close browser
+    await browser.close();
+    console.log(chalk.cyan("\n✓ Browser closed\n"));
   }
 
   if (processedEntries.length === 0) {
@@ -1034,6 +1115,10 @@ const updateWithBundledbEntries = async () => {
       `Successfully processed: ${processedEntries.length}`
     )
   );
+  console.log(chalk.green(`Screenshots captured: ${screenshotSuccessCount}`));
+  if (screenshotFailCount > 0) {
+    console.log(chalk.yellow(`Screenshots failed: ${screenshotFailCount}`));
+  }
   if (duplicateCount > 0) {
     console.log(chalk.yellow(`Duplicates skipped: ${duplicateCount}`));
   }

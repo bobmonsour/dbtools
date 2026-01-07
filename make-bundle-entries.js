@@ -437,6 +437,60 @@ const editPost = async () => {
     console.log(chalk.yellow("Could not fetch favicon:", error.message));
   }
 
+  // Prompt for enrichment data editing
+  console.log(
+    chalk.blue(
+      "\nReview and edit enrichment data (press Enter to keep fetched value):"
+    )
+  );
+
+  description = await input({
+    message: "Post description:",
+    default: description,
+  });
+
+  if (AuthorSite && AuthorSite.trim() !== "") {
+    authorSiteDescription = await input({
+      message: "Author site description:",
+      default: authorSiteDescription,
+    });
+  }
+
+  favicon = await input({
+    message: "Favicon:",
+    default: favicon,
+  });
+
+  rssLink = await input({
+    message: "RSS link:",
+    default: rssLink,
+  });
+
+  socialLinks.mastodon = await input({
+    message: "Mastodon:",
+    default: socialLinks.mastodon || "",
+  });
+
+  socialLinks.bluesky = await input({
+    message: "Bluesky:",
+    default: socialLinks.bluesky || "",
+  });
+
+  socialLinks.youtube = await input({
+    message: "YouTube:",
+    default: socialLinks.youtube || "",
+  });
+
+  socialLinks.github = await input({
+    message: "GitHub:",
+    default: socialLinks.github || "",
+  });
+
+  socialLinks.linkedin = await input({
+    message: "LinkedIn:",
+    default: socialLinks.linkedin || "",
+  });
+
   entryData = {
     Issue: commonInfo.Issue,
     Type: "blog post",
@@ -492,6 +546,23 @@ const editSite = async () => {
     console.log(chalk.yellow("Could not fetch favicon:", error.message));
   }
 
+  // Prompt for enrichment data editing
+  console.log(
+    chalk.blue(
+      "\nReview and edit enrichment data (press Enter to keep fetched value):"
+    )
+  );
+
+  description = await input({
+    message: "Description:",
+    default: description,
+  });
+
+  favicon = await input({
+    message: "Favicon:",
+    default: favicon,
+  });
+
   entryData = {
     Issue: commonInfo.Issue,
     Type: "site",
@@ -520,6 +591,18 @@ const editRelease = async () => {
   } catch (error) {
     console.log(chalk.yellow("Could not fetch description:", error.message));
   }
+
+  // Prompt for enrichment data editing
+  console.log(
+    chalk.blue(
+      "\nReview and edit enrichment data (press Enter to keep fetched value):"
+    )
+  );
+
+  description = await input({
+    message: "Description:",
+    default: description,
+  });
 
   entryData = {
     Issue: commonInfo.Issue,
