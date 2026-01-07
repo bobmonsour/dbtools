@@ -27,7 +27,7 @@ if (useTestData) {
     dbFilePath:
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/bundledb.json",
     dbBackupDir:
-      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundle/11tybundledb/db_backups",
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/db_backups",
     badLinksDir:
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/badlinks",
     issueRecordsPath:

@@ -1,5 +1,5 @@
 import { AssetCache } from "@11ty/eleventy-fetch";
-import { cacheDuration } from "../../_data/config.js";
+import { cacheDuration } from "./cacheconfig.js";
 import { appendFileSync } from "fs";
 
 let leaderboardCounter = 0;

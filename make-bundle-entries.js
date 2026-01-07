@@ -1,7 +1,10 @@
-import { input, rawlist, checkbox } from "@inquirer/prompts";
+import { input, rawlist, checkbox, confirm } from "@inquirer/prompts";
 import axios from "axios";
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import chalk from "chalk";
+import puppeteer from "puppeteer";
 import {
   makeBackupFile,
   getLatestIssueNumber,
@@ -11,23 +14,35 @@ import {
   formatItemDate,
 } from "./utils.js";
 import { config } from "./config.js";
+import { fetchTimeout } from "./cacheconfig.js";
 import { genIssueRecords } from "./genissuerecords.js";
 import { getRSSLink } from "./getrsslink.js";
 import { getFavicon } from "./getfavicon.js";
 import { getSocialLinks } from "./getsociallinks.js";
 import { getDescription } from "./getdescription.js";
+import { hasLeaderboardLink } from "./hasleaderboardlink.js";
+import { genScreenshotFilename } from "./genscreenshotfilename.js";
 import { exec } from "child_process";
 import util from "util";
 import slugify from "@sindresorhus/slugify";
 
 // Get the location of the bundle database file
 const dbFilePath = config.dbFilePath;
+const showcaseDataPath = config.showcaseDataPath;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const screenshotDir = path.join(__dirname, "screenshots");
+const productionScreenshotDir = path.join(
+  __dirname,
+  "../11tybundle.dev/content/screenshots"
+);
 // Set db file backup state
 let backedUp = false;
 // Set next action after initial entry
 let nextAction = "ask what next";
 // Create the entry data object
 let entryData = {};
+// Global browser instance for screenshot capture
+let browser = null;
 let { uniqueCategoryChoices, uniqueCategories } = getUniqueCategories();
 
 // Generate a date string that includes date and time in local timezone
@@ -49,6 +64,191 @@ const getOriginFromUrl = (url) => {
   } catch {
     return "";
   }
+};
+
+// Normalize URL for comparison (strip www, normalize protocol)
+const normalizeUrl = (url) => {
+  try {
+    const urlObj = new URL(url);
+    let hostname = urlObj.hostname.toLowerCase();
+
+    // Remove www. prefix
+    if (hostname.startsWith("www.")) {
+      hostname = hostname.substring(4);
+    }
+
+    // Normalize protocol to https
+    const normalized = `https://${hostname}${urlObj.pathname}`;
+
+    // Remove trailing slash
+    return normalized.endsWith("/") && normalized.length > 1
+      ? normalized.slice(0, -1)
+      : normalized;
+  } catch (e) {
+    return url.toLowerCase();
+  }
+};
+
+// Initialize browser for screenshot capture (lazy loading)
+const initBrowser = async () => {
+  if (!browser) {
+    console.log(chalk.cyan("Launching browser for screenshots..."));
+    browser = await puppeteer.launch();
+  }
+  return browser;
+};
+
+// Close browser on exit
+const closeBrowser = async () => {
+  if (browser) {
+    await browser.close();
+    browser = null;
+  }
+};
+
+// Rename existing screenshot file with timestamp
+const renameExistingScreenshot = (screenshotPath) => {
+  if (!fs.existsSync(screenshotPath)) {
+    return;
+  }
+
+  const timestamp = new Date()
+    .toISOString()
+    .replace(/:/g, "-")
+    .replace(/\..+/, "")
+    .replace("T", "-");
+  const ext = path.extname(screenshotPath);
+  const base = path.basename(screenshotPath, ext);
+  const dir = path.dirname(screenshotPath);
+  const newName = `${base}-${timestamp}${ext}`;
+  const newPath = path.join(dir, newName);
+
+  try {
+    fs.renameSync(screenshotPath, newPath);
+    console.log(chalk.gray(`  Renamed old screenshot to: ${newName}`));
+  } catch (error) {
+    console.log(
+      chalk.yellow(`  Could not rename old screenshot: ${error.message}`)
+    );
+  }
+};
+
+// Capture screenshot for a URL
+const captureScreenshot = async (url, filename) => {
+  try {
+    const browserInstance = await initBrowser();
+    const page = await browserInstance.newPage();
+
+    // Set viewport dimensions
+    await page.setViewport({ width: 1920, height: 1080 });
+
+    // Navigate to URL with timeout
+    await page.goto(url, {
+      waitUntil: "networkidle0",
+      timeout: fetchTimeout.singleScreenshot,
+    });
+
+    // Wait for page to fully render
+    await new Promise((resolve) =>
+      setTimeout(resolve, fetchTimeout.screenshotDelay)
+    );
+
+    // Generate paths
+    const localPath = path.join(screenshotDir, filename);
+    const prodPath = path.join(productionScreenshotDir, filename);
+
+    // Rename existing screenshots if they exist
+    renameExistingScreenshot(localPath);
+    renameExistingScreenshot(prodPath);
+
+    // Ensure directories exist
+    if (!fs.existsSync(screenshotDir)) {
+      fs.mkdirSync(screenshotDir, { recursive: true });
+    }
+    if (!fs.existsSync(productionScreenshotDir)) {
+      fs.mkdirSync(productionScreenshotDir, { recursive: true });
+    }
+
+    // Take screenshot
+    await page.screenshot({
+      path: localPath,
+      type: "jpeg",
+      quality: 100,
+    });
+
+    // Copy to production location
+    fs.copyFileSync(localPath, prodPath);
+
+    await page.close();
+
+    console.log(chalk.green(`  ✓ Screenshot captured: ${filename}`));
+    return `/screenshots/${filename}`;
+  } catch (error) {
+    console.log(chalk.red(`  ✗ Screenshot failed: ${error.message}`));
+    return null;
+  }
+};
+
+// Transform bundledb entry to showcase format
+const transformToShowcaseFormat = (
+  entry,
+  screenshotpath,
+  leaderboardLink = null
+) => {
+  const showcase = {
+    title: entry.Title || "",
+    description: entry.description || "",
+    link: entry.Link || "",
+    date: entry.Date || "",
+    formattedDate: entry.formattedDate || "",
+    favicon: entry.favicon || "",
+    screenshotpath: screenshotpath || "",
+  };
+
+  // Add leaderboardLink only if it exists
+  if (leaderboardLink) {
+    showcase.leaderboardLink = leaderboardLink;
+  }
+
+  return showcase;
+};
+
+// Load showcase-data.json
+const loadShowcaseData = () => {
+  try {
+    if (fs.existsSync(showcaseDataPath)) {
+      return JSON.parse(fs.readFileSync(showcaseDataPath, "utf-8"));
+    }
+    return [];
+  } catch (error) {
+    console.log(
+      chalk.yellow(`Could not load showcase-data.json: ${error.message}`)
+    );
+    return [];
+  }
+};
+
+// Save showcase-data.json
+const saveShowcaseData = (data) => {
+  try {
+    // Sort by date descending
+    data.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    fs.writeFileSync(showcaseDataPath, JSON.stringify(data, null, 2));
+    console.log(chalk.green("  ✓ showcase-data.json updated"));
+  } catch (error) {
+    console.log(
+      chalk.red(`  ✗ Could not save showcase-data.json: ${error.message}`)
+    );
+  }
+};
+
+// Check if entry exists in showcase-data.json by normalized URL
+const findShowcaseEntry = (showcaseData, url) => {
+  const normalizedUrl = normalizeUrl(url);
+  return showcaseData.findIndex(
+    (entry) => normalizeUrl(entry.link) === normalizedUrl
+  );
 };
 
 // Function to generate a default date for the entry
@@ -299,6 +499,36 @@ const enterSite = async () => {
     console.log(chalk.yellow("Could not fetch favicon:", error.message));
   }
 
+  // Prompt for screenshot capture
+  const captureScreenshotPrompt = await confirm({
+    message: "Capture screenshot?",
+    default: true,
+  });
+
+  let screenshotpath = null;
+  let leaderboardLink = null;
+
+  if (captureScreenshotPrompt) {
+    console.log(chalk.blue("Capturing screenshot..."));
+
+    // Generate filename
+    const { filename } = await genScreenshotFilename(commonInfo.Link);
+
+    // Capture screenshot
+    screenshotpath = await captureScreenshot(commonInfo.Link, filename);
+
+    // Check for leaderboard link if screenshot succeeded
+    if (screenshotpath) {
+      console.log(chalk.blue("Checking for leaderboard link..."));
+      leaderboardLink = await hasLeaderboardLink(commonInfo.Link);
+      if (leaderboardLink) {
+        console.log(
+          chalk.green(`  ✓ Leaderboard link found: ${leaderboardLink}`)
+        );
+      }
+    }
+  }
+
   entryData = {
     Issue: commonInfo.Issue,
     Type: "site",
@@ -309,6 +539,52 @@ const enterSite = async () => {
     formattedDate: formatItemDate(Date),
     favicon: favicon || "",
   };
+
+  // Add to showcase-data.json if screenshot was captured
+  if (screenshotpath) {
+    try {
+      console.log(chalk.blue("Adding entry to showcase-data.json..."));
+
+      // Backup showcase-data.json
+      if (fs.existsSync(showcaseDataPath)) {
+        makeBackupFile(showcaseDataPath);
+      }
+
+      // Load showcase data
+      const showcaseData = loadShowcaseData();
+
+      // Check for duplicate
+      const existingIndex = findShowcaseEntry(showcaseData, commonInfo.Link);
+      if (existingIndex >= 0) {
+        console.log(
+          chalk.yellow(
+            "  Entry already exists in showcase-data.json, updating..."
+          )
+        );
+        showcaseData[existingIndex] = transformToShowcaseFormat(
+          entryData,
+          screenshotpath,
+          leaderboardLink
+        );
+      } else {
+        // Add new entry
+        const showcaseEntry = transformToShowcaseFormat(
+          entryData,
+          screenshotpath,
+          leaderboardLink
+        );
+        showcaseData.push(showcaseEntry);
+      }
+
+      // Save showcase data
+      saveShowcaseData(showcaseData);
+    } catch (error) {
+      console.log(
+        chalk.red(`  ✗ Error updating showcase-data.json: ${error.message}`)
+      );
+    }
+  }
+
   return;
 };
 
@@ -563,6 +839,77 @@ const editSite = async () => {
     default: favicon,
   });
 
+  // Check if entry exists in showcase-data.json
+  const showcaseData = loadShowcaseData();
+  const existingIndex = findShowcaseEntry(showcaseData, commonInfo.Link);
+
+  let screenshotpath = null;
+  let leaderboardLink = null;
+  let shouldUpdateShowcase = false;
+
+  if (existingIndex >= 0) {
+    // Entry exists in showcase - prompt for screenshot regeneration
+    const regeneratePrompt = await confirm({
+      message: "Regenerate screenshot?",
+      default: false,
+    });
+
+    if (regeneratePrompt) {
+      console.log(chalk.blue("Capturing screenshot..."));
+
+      // Generate filename
+      const { filename } = await genScreenshotFilename(commonInfo.Link);
+
+      // Capture screenshot
+      screenshotpath = await captureScreenshot(commonInfo.Link, filename);
+
+      // Check for leaderboard link if screenshot succeeded
+      if (screenshotpath) {
+        console.log(chalk.blue("Checking for leaderboard link..."));
+        leaderboardLink = await hasLeaderboardLink(commonInfo.Link);
+        if (leaderboardLink) {
+          console.log(
+            chalk.green(`  ✓ Leaderboard link found: ${leaderboardLink}`)
+          );
+        }
+        shouldUpdateShowcase = true;
+      }
+    } else {
+      // Keep existing screenshot path
+      screenshotpath = showcaseData[existingIndex].screenshotpath;
+      leaderboardLink = showcaseData[existingIndex].leaderboardLink || null;
+      shouldUpdateShowcase = true;
+    }
+  } else {
+    // Entry doesn't exist - prompt to capture screenshot
+    const captureScreenshotPrompt = await confirm({
+      message: "Capture screenshot and add to showcase?",
+      default: true,
+    });
+
+    if (captureScreenshotPrompt) {
+      console.log(chalk.blue("Capturing screenshot..."));
+
+      // Generate filename
+      const { filename } = await genScreenshotFilename(commonInfo.Link);
+
+      // Capture screenshot
+      screenshotpath = await captureScreenshot(commonInfo.Link, filename);
+
+      // Check for leaderboard link if screenshot succeeded
+      if (screenshotpath) {
+        console.log(chalk.blue("Checking for leaderboard link..."));
+        leaderboardLink = await hasLeaderboardLink(commonInfo.Link);
+        if (leaderboardLink) {
+          console.log(
+            chalk.green(`  ✓ Leaderboard link found: ${leaderboardLink}`)
+          );
+        }
+        shouldUpdateShowcase = true;
+      }
+    }
+  }
+
   entryData = {
     Issue: commonInfo.Issue,
     Type: "site",
@@ -573,6 +920,39 @@ const editSite = async () => {
     formattedDate: formatItemDate(Date),
     favicon: favicon || "",
   };
+
+  // Update showcase-data.json if needed
+  if (shouldUpdateShowcase && screenshotpath) {
+    try {
+      console.log(chalk.blue("Updating showcase-data.json..."));
+
+      // Backup showcase-data.json
+      if (fs.existsSync(showcaseDataPath)) {
+        makeBackupFile(showcaseDataPath);
+      }
+
+      // Transform and update/add entry
+      const showcaseEntry = transformToShowcaseFormat(
+        entryData,
+        screenshotpath,
+        leaderboardLink
+      );
+
+      if (existingIndex >= 0) {
+        showcaseData[existingIndex] = showcaseEntry;
+      } else {
+        showcaseData.push(showcaseEntry);
+      }
+
+      // Save showcase data
+      saveShowcaseData(showcaseData);
+    } catch (error) {
+      console.log(
+        chalk.red(`  ✗ Error updating showcase-data.json: ${error.message}`)
+      );
+    }
+  }
+
   return;
 };
 
@@ -637,6 +1017,7 @@ const afterEntry = async () => {
       { value: "save & add another" },
       { value: "edit entry" },
       { value: "save, push, & exit" },
+      { value: "exit without saving" },
     ],
   });
   switch (whatNext) {
@@ -671,6 +1052,9 @@ const afterEntry = async () => {
       await appendToJsonFile(entryData);
       await genIssueRecords();
       await pushChanges();
+      return (nextAction = "exit");
+    case "exit without saving":
+      console.log(chalk.yellow("Exiting without saving..."));
       return (nextAction = "exit");
     default:
       console.log("Invalid choice");
@@ -794,10 +1178,15 @@ const main = async () => {
   console.log(chalk.green(`Sites: ${itemCounts.siteCount}`));
   console.log(chalk.green(`Releases: ${itemCounts.releaseCount}`));
   console.log(chalk.green(`Starters: ${itemCounts.starterCount}`));
+
+  // Close browser if it was initialized
+  await closeBrowser();
+
   console.log("All done...bye!");
 };
 
 // Run the main function
-main().catch((error) => {
+main().catch(async (error) => {
   console.error(chalk.red("An error occurred:", error));
+  await closeBrowser();
 });
