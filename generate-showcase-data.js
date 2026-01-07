@@ -6,7 +6,6 @@ import { AssetCache } from "@11ty/eleventy-fetch";
 import puppeteer from "puppeteer";
 import "dotenv/config";
 import { cacheDuration, fetchTimeout } from "./cacheconfig.js";
-import { getOrigin } from "./getorigin.js";
 import { getTitle } from "./gettitle.js";
 import { getDescription } from "./getdescription.js";
 import { getFavicon } from "./getfavicon.js";

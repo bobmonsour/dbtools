@@ -1,5 +1,4 @@
 import Fetch from "@11ty/eleventy-fetch";
-import { AssetCache } from "@11ty/eleventy-fetch";
 import path from "path";
 import { fileURLToPath } from "url";
 import { promises as fs } from "fs";
@@ -14,6 +13,10 @@ const defaultFaviconPath = "default - no favicon found";
 const faviconDir = "/img/favicons";
 const fetchSize = 128; // Size to request from Google
 const targetSize = 64; // Target size for all favicons
+const faviconStorageDir = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "favicons"
+);
 // ---
 
 // Helper function to get file extension from content type
@@ -192,50 +195,59 @@ const fetchAndSaveFavicon = async (origin, domain) => {
     // If 30+ days old, we'll retry (continue to fetch below)
   }
 
-  // Check if we have a cached, processed favicon
-  const cacheKey = `processed-favicon-${domain}`;
-  const cache = new AssetCache(cacheKey, ".cache");
+  // Check if favicon already exists in storage directory
+  // Try common extensions
+  const possibleExtensions = [
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".svg",
+    ".ico",
+    ".gif",
+    ".webp",
+  ];
+  let existingFaviconPath = null;
+  let existingExtension = null;
 
-  if (cache.isCacheValid(cacheDuration.faviconImage)) {
-    const cachedData = await cache.getCachedValue();
-    if (cachedData && cachedData.cachedFilePath && cachedData.localPath) {
-      try {
-        // Verify cached file still exists and is valid
-        const cachedFileExists = await fs
-          .access(cachedData.cachedFilePath)
-          .then(() => true)
-          .catch(() => false);
+  for (const ext of possibleExtensions) {
+    const filename = `${slugify(domain, {
+      lower: true,
+      strict: true,
+    })}-favicon${ext}`;
+    const storagePath = path.join(faviconStorageDir, filename);
 
-        if (cachedFileExists) {
-          // Copy cached file to 11tybundle.dev _site directory
-          const __dirname = path.dirname(fileURLToPath(import.meta.url));
-          const outputPath = path.join(
-            __dirname,
-            "../11tybundle.dev/_site",
-            cachedData.localPath
-          );
-          await fs.mkdir(path.dirname(outputPath), { recursive: true });
-          await fs.copyFile(cachedData.cachedFilePath, outputPath);
-
-          // Validate it's still a valid image (skip for SVG)
-          if (cachedData.extension !== ".svg") {
-            try {
-              await sharp(outputPath).metadata();
-              // Valid cached image, use it
-              return cachedData.localPath;
-            } catch (validationError) {
-              // Cached favicon invalid, will re-fetch
-              await fs.unlink(outputPath).catch(() => {});
-            }
-          } else {
-            // SVG, no validation needed
-            return cachedData.localPath;
-          }
-        }
-      } catch (cacheError) {
-        // Silently continue on cache error
-      }
+    try {
+      await fs.access(storagePath);
+      existingFaviconPath = storagePath;
+      existingExtension = ext;
+      break;
+    } catch {
+      // File doesn't exist, try next extension
     }
+  }
+
+  // If favicon exists in storage, conditionally copy to _site and return
+  if (existingFaviconPath) {
+    const filename = path.basename(existingFaviconPath);
+    const localPath = `${faviconDir}/${filename}`;
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const siteOutputPath = path.join(
+      __dirname,
+      "../11tybundle.dev/_site",
+      localPath
+    );
+
+    // Only copy to _site if it doesn't already exist there
+    try {
+      await fs.access(siteOutputPath);
+      // File exists in _site, no need to copy
+    } catch {
+      // File doesn't exist in _site, copy it
+      await fs.mkdir(path.dirname(siteOutputPath), { recursive: true });
+      await fs.copyFile(existingFaviconPath, siteOutputPath);
+    }
+
+    return localPath;
   }
 
   const faviconUrl = `https://www.google.com/s2/favicons?domain=${origin}&sz=${fetchSize}`;
@@ -267,16 +279,17 @@ const fetchAndSaveFavicon = async (origin, domain) => {
     })}-favicon${extension}`;
     const localPath = `${faviconDir}/${filename}`;
 
-    // Write favicon to _site/img/favicons/ directory
+    // Write favicon to storage directory first
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const outputPath = path.join(
+    const storagePath = path.join(faviconStorageDir, filename);
+    const siteOutputPath = path.join(
       __dirname,
       "../11tybundle.dev/_site",
       localPath
     );
 
-    // Ensure directory exists
-    await fs.mkdir(path.dirname(outputPath), { recursive: true });
+    // Ensure storage directory exists
+    await fs.mkdir(faviconStorageDir, { recursive: true });
 
     // Process image with Sharp to ensure consistent dimensions
     let finalBuffer = faviconBuffer;
@@ -323,13 +336,13 @@ const fetchAndSaveFavicon = async (origin, domain) => {
       }
     }
 
-    // Write the processed (or original) favicon data
-    await fs.writeFile(outputPath, finalBuffer);
+    // Write the processed (or original) favicon data to storage
+    await fs.writeFile(storagePath, finalBuffer);
 
     // Verify file exists and is not empty
-    const stats = await fs.stat(outputPath);
+    const stats = await fs.stat(storagePath);
     if (stats.size === 0) {
-      await fs.unlink(outputPath).catch(() => {});
+      await fs.unlink(storagePath).catch(() => {});
 
       // Update failure cache with current date
       failureCache[origin] = getCurrentDate();
@@ -342,10 +355,10 @@ const fetchAndSaveFavicon = async (origin, domain) => {
     // Skip validation for SVG (text-based format)
     if (extension !== ".svg") {
       try {
-        await sharp(outputPath).metadata();
+        await sharp(storagePath).metadata();
       } catch (validationError) {
         // Invalid image file
-        await fs.unlink(outputPath).catch(() => {});
+        await fs.unlink(storagePath).catch(() => {});
         failureCache[origin] = getCurrentDate();
         await saveFailureCache();
         return defaultFaviconPath;
@@ -358,25 +371,15 @@ const fetchAndSaveFavicon = async (origin, domain) => {
       await saveFailureCache();
     }
 
-    // Cache the processed favicon for future builds
-    const cachedFilePath = path.join(
-      path.dirname(fileURLToPath(import.meta.url)),
-      ".cache/favicons",
-      `${slugify(domain, {
-        lower: true,
-        strict: true,
-      })}-favicon${extension}`
-    );
-    await fs.mkdir(path.dirname(cachedFilePath), { recursive: true });
-    await fs.copyFile(outputPath, cachedFilePath);
-    await cache.save(
-      {
-        localPath: localPath,
-        cachedFilePath: cachedFilePath,
-        extension: extension,
-      },
-      "json"
-    );
+    // Copy to _site directory only if it doesn't exist there
+    try {
+      await fs.access(siteOutputPath);
+      // File exists in _site, no need to copy
+    } catch {
+      // File doesn't exist in _site, copy it
+      await fs.mkdir(path.dirname(siteOutputPath), { recursive: true });
+      await fs.copyFile(storagePath, siteOutputPath);
+    }
 
     return localPath;
   } catch (error) {
@@ -415,16 +418,17 @@ const fetchAndSaveFavicon = async (origin, domain) => {
         })}-favicon${extension}`;
         const localPath = `${faviconDir}/${filename}`;
 
-        // Write favicon to _site/img/favicons/ directory
+        // Write favicon to storage directory first
         const __dirname = path.dirname(fileURLToPath(import.meta.url));
-        const outputPath = path.join(
+        const storagePath = path.join(faviconStorageDir, filename);
+        const siteOutputPath = path.join(
           __dirname,
           "../11tybundle.dev/_site",
           localPath
         );
 
-        // Ensure directory exists
-        await fs.mkdir(path.dirname(outputPath), { recursive: true });
+        // Ensure storage directory exists
+        await fs.mkdir(faviconStorageDir, { recursive: true });
 
         // Process image with Sharp
         let finalBuffer = faviconBuffer;
@@ -473,12 +477,12 @@ const fetchAndSaveFavicon = async (origin, domain) => {
           }
         }
 
-        await fs.writeFile(outputPath, finalBuffer);
+        await fs.writeFile(storagePath, finalBuffer);
 
         // Verify file exists and is not empty
-        const stats = await fs.stat(outputPath);
+        const stats = await fs.stat(storagePath);
         if (stats.size === 0) {
-          await fs.unlink(outputPath).catch(() => {});
+          await fs.unlink(storagePath).catch(() => {});
 
           failureCache[origin] = getCurrentDate();
           await saveFailureCache();
@@ -490,10 +494,10 @@ const fetchAndSaveFavicon = async (origin, domain) => {
         // Skip validation for SVG (text-based format)
         if (extension !== ".svg") {
           try {
-            await sharp(outputPath).metadata();
+            await sharp(storagePath).metadata();
           } catch (validationError) {
             // Invalid image file from HTML extraction
-            await fs.unlink(outputPath).catch(() => {});
+            await fs.unlink(storagePath).catch(() => {});
             failureCache[origin] = getCurrentDate();
             await saveFailureCache();
             return defaultFaviconPath;
@@ -506,25 +510,15 @@ const fetchAndSaveFavicon = async (origin, domain) => {
           await saveFailureCache();
         }
 
-        // Cache the processed favicon for future builds
-        const cachedFilePath = path.join(
-          path.dirname(fileURLToPath(import.meta.url)),
-          ".cache/favicons",
-          `${slugify(domain, {
-            lowercase: true,
-            strict: true,
-          })}-favicon${extension}`
-        );
-        await fs.mkdir(path.dirname(cachedFilePath), { recursive: true });
-        await fs.copyFile(outputPath, cachedFilePath);
-        await cache.save(
-          {
-            localPath: localPath,
-            cachedFilePath: cachedFilePath,
-            extension: extension,
-          },
-          "json"
-        );
+        // Copy to _site directory only if it doesn't exist there
+        try {
+          await fs.access(siteOutputPath);
+          // File exists in _site, no need to copy
+        } catch {
+          // File doesn't exist in _site, copy it
+          await fs.mkdir(path.dirname(siteOutputPath), { recursive: true });
+          await fs.copyFile(storagePath, siteOutputPath);
+        }
 
         return localPath;
       }

@@ -10,14 +10,14 @@ const args = process.argv.slice(2);
 // Show help and exit
 if (args.includes("-h") || args.includes("--help")) {
   console.log(`
-Copy Cached Favicons
+Copy Stored Favicons
 ====================
 
-Copies processed favicon files from the cache directory to the project's
+Copies processed favicon files from the storage directory to the project's
 public assets directory.
 
 USAGE:
-  node copy-cached-favicons.js [OPTIONS]
+  node copy-stored-favicons.js [OPTIONS]
 
 OPTIONS:
   -h, --help     Show this help message
@@ -27,12 +27,12 @@ DESCRIPTION:
   By default, this script skips files that already exist in the destination
   directory, making repeated runs fast. Use --force to overwrite all files.
 
-SOURCE:      .cache/favicons/
+SOURCE:      favicons/
 DESTINATION: /Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundle.dev/_site/img/favicons/
 
 EXAMPLES:
-  node copy-cached-favicons.js           # Copy only new files
-  node copy-cached-favicons.js --force   # Overwrite all files
+  node copy-stored-favicons.js           # Copy only new files
+  node copy-stored-favicons.js --force   # Overwrite all files
 `);
   process.exit(0);
 }
@@ -40,7 +40,7 @@ EXAMPLES:
 const forceOverwrite = args.includes("--force") || args.includes("-f");
 
 // Source and destination directories
-const sourceDir = path.join(__dirname, ".cache/favicons");
+const sourceDir = path.join(__dirname, "favicons");
 const destDir =
   "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundle.dev/_site/img/favicons";
 
@@ -61,7 +61,7 @@ async function copyFavicons() {
     const files = await fs.readdir(sourceDir);
 
     if (files.length === 0) {
-      console.log("No favicon files found in cache directory.");
+      console.log("No favicon files found in storage directory.");
       return;
     }
 
