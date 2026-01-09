@@ -251,6 +251,22 @@ const findShowcaseEntry = (showcaseData, url) => {
   );
 };
 
+// Display showcase entry in formatted style
+const displayShowcaseEntry = (showcaseEntry) => {
+  console.log(chalk.blue("\n--- Showcase Entry ---"));
+  console.log(chalk.cyan("Title:"), showcaseEntry.title);
+  console.log(chalk.cyan("Description:"), showcaseEntry.description);
+  console.log(chalk.cyan("Link:"), showcaseEntry.link);
+  console.log(chalk.cyan("Date:"), showcaseEntry.date);
+  console.log(chalk.cyan("Formatted Date:"), showcaseEntry.formattedDate);
+  console.log(chalk.cyan("Favicon:"), showcaseEntry.favicon);
+  console.log(chalk.cyan("Screenshot Path:"), showcaseEntry.screenshotpath);
+  if (showcaseEntry.leaderboardLink) {
+    console.log(chalk.cyan("Leaderboard Link:"), showcaseEntry.leaderboardLink);
+  }
+  console.log(chalk.blue("--- End Showcase Entry ---\n"));
+};
+
 // Function to generate a default date for the entry
 // The date should default to today's date in the format of YYYY-MM-DD
 const getDefaultDate = () => {
@@ -687,11 +703,16 @@ const editPost = async () => {
   // Fetch AuthorSiteDescription if AuthorSite exists
   if (AuthorSite && AuthorSite.trim() !== "") {
     try {
-      authorSiteDescription = (await getDescription(AuthorSite)) || "";
+      authorSiteDescription =
+        (await getDescription(AuthorSite)) ||
+        entryData.AuthorSiteDescription ||
+        "";
     } catch (error) {
       console.log(
         chalk.yellow("Could not fetch author site description:", error.message)
       );
+      // Preserve existing value if fetch fails
+      authorSiteDescription = entryData.AuthorSiteDescription || "";
     }
   }
 
@@ -839,16 +860,44 @@ const editSite = async () => {
     default: favicon,
   });
 
-  // Check if entry exists in showcase-data.json
+  // Load showcase data early to check if entry exists
   const showcaseData = loadShowcaseData();
   const existingIndex = findShowcaseEntry(showcaseData, commonInfo.Link);
 
+  // If showcase entry exists, allow editing showcase-specific properties
+  let showcaseScreenshotPath = null;
+  let showcaseLeaderboardLink = null;
+
+  if (existingIndex >= 0) {
+    console.log(
+      chalk.blue(
+        "\nReview and edit showcase-specific data (press Enter to keep current value):"
+      )
+    );
+
+    showcaseScreenshotPath = await input({
+      message: "Screenshot path:",
+      default: showcaseData[existingIndex].screenshotpath || "",
+    });
+
+    showcaseLeaderboardLink = await input({
+      message: "Leaderboard link (optional):",
+      default: showcaseData[existingIndex].leaderboardLink || "",
+    });
+  }
+
+  // Handle screenshot capture/regeneration
   let screenshotpath = null;
   let leaderboardLink = null;
   let shouldUpdateShowcase = false;
 
   if (existingIndex >= 0) {
-    // Entry exists in showcase - prompt for screenshot regeneration
+    // Entry exists in showcase
+    // Use edited values from showcase-specific prompts
+    screenshotpath = showcaseScreenshotPath;
+    leaderboardLink = showcaseLeaderboardLink || null;
+
+    // Prompt for screenshot regeneration
     const regeneratePrompt = await confirm({
       message: "Regenerate screenshot?",
       default: false,
@@ -861,25 +910,26 @@ const editSite = async () => {
       const { filename } = await genScreenshotFilename(commonInfo.Link);
 
       // Capture screenshot
-      screenshotpath = await captureScreenshot(commonInfo.Link, filename);
+      const newScreenshotPath = await captureScreenshot(
+        commonInfo.Link,
+        filename
+      );
 
-      // Check for leaderboard link if screenshot succeeded
-      if (screenshotpath) {
+      if (newScreenshotPath) {
+        screenshotpath = newScreenshotPath;
+
+        // Check for leaderboard link if screenshot succeeded
         console.log(chalk.blue("Checking for leaderboard link..."));
-        leaderboardLink = await hasLeaderboardLink(commonInfo.Link);
-        if (leaderboardLink) {
+        const newLeaderboardLink = await hasLeaderboardLink(commonInfo.Link);
+        if (newLeaderboardLink) {
+          leaderboardLink = newLeaderboardLink;
           console.log(
             chalk.green(`  ✓ Leaderboard link found: ${leaderboardLink}`)
           );
         }
-        shouldUpdateShowcase = true;
       }
-    } else {
-      // Keep existing screenshot path
-      screenshotpath = showcaseData[existingIndex].screenshotpath;
-      leaderboardLink = showcaseData[existingIndex].leaderboardLink || null;
-      shouldUpdateShowcase = true;
     }
+    shouldUpdateShowcase = true;
   } else {
     // Entry doesn't exist - prompt to capture screenshot
     const captureScreenshotPrompt = await confirm({
@@ -1155,6 +1205,15 @@ const main = async () => {
   // Validate if the entry data is a valid JSON object
   if (validateJsonObject(entryData)) {
     console.log("Entry Data is a valid JSON object:", entryData);
+
+    // Display showcase entry if this is a site and it exists
+    if (entryData.Type === "site") {
+      const showcaseData = loadShowcaseData();
+      const showcaseIndex = findShowcaseEntry(showcaseData, entryData.Link);
+      if (showcaseIndex >= 0) {
+        displayShowcaseEntry(showcaseData[showcaseIndex]);
+      }
+    }
   } else {
     console.error(chalk.red("Entry Data is not a valid JSON object"));
   }
