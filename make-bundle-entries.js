@@ -62,6 +62,83 @@ const getUniqueAuthors = () => {
   }
 };
 
+// Function to get existing author metadata from most recent blog post
+const getExistingAuthorMetadata = (authorName) => {
+  try {
+    const data = fs.readFileSync(dbFilePath, "utf8");
+    const jsonData = JSON.parse(data);
+
+    // Filter blog posts by author
+    const authorPosts = jsonData.filter(
+      (entry) => entry.Type === "blog post" && entry.Author === authorName
+    );
+
+    if (authorPosts.length === 0) {
+      return null;
+    }
+
+    // Sort by date descending and get the most recent
+    const mostRecentPost = authorPosts.sort((a, b) => {
+      const dateA = new Date(a.Date);
+      const dateB = new Date(b.Date);
+      return dateB - dateA; // Most recent first
+    })[0];
+
+    // Extract metadata
+    return {
+      AuthorSite: mostRecentPost.AuthorSite || "",
+      AuthorSiteDescription: mostRecentPost.AuthorSiteDescription || "",
+      socialLinks: mostRecentPost.socialLinks || {
+        mastodon: "",
+        bluesky: "",
+        youtube: "",
+        github: "",
+        linkedin: "",
+      },
+      favicon: mostRecentPost.favicon || "",
+      rssLink: mostRecentPost.rssLink || "",
+      postTitle: mostRecentPost.Title,
+      postDate: mostRecentPost.Date,
+    };
+  } catch (err) {
+    console.error(chalk.red("Error reading author metadata:", err));
+    return null;
+  }
+};
+
+// Function to display existing author metadata
+const displayExistingAuthorMetadata = (metadata) => {
+  console.log(chalk.cyan("\n=== Existing Author Metadata ==="));
+  console.log(
+    chalk.gray(`From: "${metadata.postTitle}" (${metadata.postDate})`)
+  );
+  console.log(chalk.white(`AuthorSite: ${metadata.AuthorSite || "(empty)"}`));
+  console.log(
+    chalk.white(
+      `AuthorSiteDescription: ${metadata.AuthorSiteDescription || "(empty)"}`
+    )
+  );
+  console.log(chalk.white(`RSS Link: ${metadata.rssLink || "(empty)"}`));
+  console.log(chalk.white(`Favicon: ${metadata.favicon || "(empty)"}`));
+  console.log(chalk.white("Social Links:"));
+  console.log(
+    chalk.white(`  Mastodon: ${metadata.socialLinks.mastodon || "(empty)"}`)
+  );
+  console.log(
+    chalk.white(`  Bluesky: ${metadata.socialLinks.bluesky || "(empty)"}`)
+  );
+  console.log(
+    chalk.white(`  YouTube: ${metadata.socialLinks.youtube || "(empty)"}`)
+  );
+  console.log(
+    chalk.white(`  GitHub: ${metadata.socialLinks.github || "(empty)"}`)
+  );
+  console.log(
+    chalk.white(`  LinkedIn: ${metadata.socialLinks.linkedin || "(empty)"}`)
+  );
+  console.log(chalk.cyan("================================\n"));
+};
+
 // Generate a date string that includes date and time in local timezone
 const getCurrentDateTimeString = () => {
   const now = new Date();
@@ -418,7 +495,29 @@ const enterPost = async () => {
     },
     validate: (input) => (input ? true : "Author is required."),
   });
-  const defaultAuthorSite = getOriginFromUrl(commonInfo.Link);
+
+  // Check for existing author metadata
+  const existingMetadata = getExistingAuthorMetadata(Author);
+  let useExistingMetadata = false;
+
+  if (existingMetadata) {
+    console.log(chalk.green(`\nFound existing metadata for author: ${Author}`));
+    displayExistingAuthorMetadata(existingMetadata);
+
+    useExistingMetadata = await confirm({
+      message: "Use existing metadata?",
+      default: true,
+    });
+
+    if (!useExistingMetadata) {
+      console.log(chalk.yellow("Will fetch fresh metadata from website..."));
+    }
+  }
+
+  const defaultAuthorSite =
+    useExistingMetadata && existingMetadata
+      ? existingMetadata.AuthorSite
+      : getOriginFromUrl(commonInfo.Link);
   const AuthorSite = await input({
     message: "Author site (optional):",
     default: defaultAuthorSite,
@@ -433,7 +532,6 @@ const enterPost = async () => {
   });
 
   // Fetch metadata
-  console.log(chalk.blue("Fetching metadata..."));
   let description = "";
   let authorSiteDescription = "";
   let rssLink = "";
@@ -446,6 +544,7 @@ const enterPost = async () => {
   };
   let favicon = "";
 
+  // Always fetch description from the blog post link
   try {
     description = (await getDescription(commonInfo.Link)) || "";
   } catch (error) {
@@ -455,33 +554,47 @@ const enterPost = async () => {
   const siteToFetch =
     AuthorSite && AuthorSite.trim() !== "" ? AuthorSite : commonInfo.Link;
 
-  // Fetch AuthorSiteDescription if AuthorSite exists
-  if (AuthorSite && AuthorSite.trim() !== "") {
-    try {
-      authorSiteDescription = (await getDescription(AuthorSite)) || "";
-    } catch (error) {
-      console.log(
-        chalk.yellow("Could not fetch author site description:", error.message)
-      );
+  // Use existing metadata or fetch fresh
+  if (useExistingMetadata && existingMetadata) {
+    console.log(chalk.blue("Using existing author metadata..."));
+    authorSiteDescription = existingMetadata.AuthorSiteDescription;
+    rssLink = existingMetadata.rssLink;
+    socialLinks = existingMetadata.socialLinks;
+    favicon = existingMetadata.favicon;
+  } else {
+    console.log(chalk.blue("Fetching metadata..."));
+
+    // Fetch AuthorSiteDescription if AuthorSite exists
+    if (AuthorSite && AuthorSite.trim() !== "") {
+      try {
+        authorSiteDescription = (await getDescription(AuthorSite)) || "";
+      } catch (error) {
+        console.log(
+          chalk.yellow(
+            "Could not fetch author site description:",
+            error.message
+          )
+        );
+      }
     }
-  }
 
-  try {
-    rssLink = (await getRSSLink(siteToFetch)) || "";
-  } catch (error) {
-    console.log(chalk.yellow("Could not fetch RSS link:", error.message));
-  }
+    try {
+      rssLink = (await getRSSLink(siteToFetch)) || "";
+    } catch (error) {
+      console.log(chalk.yellow("Could not fetch RSS link:", error.message));
+    }
 
-  try {
-    socialLinks = (await getSocialLinks(siteToFetch)) || socialLinks;
-  } catch (error) {
-    console.log(chalk.yellow("Could not fetch social links:", error.message));
-  }
+    try {
+      socialLinks = (await getSocialLinks(siteToFetch)) || socialLinks;
+    } catch (error) {
+      console.log(chalk.yellow("Could not fetch social links:", error.message));
+    }
 
-  try {
-    favicon = (await getFavicon(siteToFetch, "post")) || "";
-  } catch (error) {
-    console.log(chalk.yellow("Could not fetch favicon:", error.message));
+    try {
+      favicon = (await getFavicon(siteToFetch, "post")) || "";
+    } catch (error) {
+      console.log(chalk.yellow("Could not fetch favicon:", error.message));
+    }
   }
 
   entryData = {
