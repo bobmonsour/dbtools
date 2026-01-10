@@ -1,4 +1,4 @@
-import { input, rawlist, checkbox, confirm } from "@inquirer/prompts";
+import { input, rawlist, checkbox, confirm, search } from "@inquirer/prompts";
 import axios from "axios";
 import fs from "fs";
 import path from "path";
@@ -44,6 +44,23 @@ let entryData = {};
 // Global browser instance for screenshot capture
 let browser = null;
 let { uniqueCategoryChoices, uniqueCategories } = getUniqueCategories();
+let uniqueAuthors = [];
+
+// Function to get unique authors from blog posts in the production database
+const getUniqueAuthors = () => {
+  try {
+    const data = fs.readFileSync(dbFilePath, "utf8");
+    const jsonData = JSON.parse(data);
+    const authors = jsonData
+      .filter((entry) => entry.Type === "blog post")
+      .map((entry) => entry.Author)
+      .filter((author) => author && author.trim() !== "");
+    return [...new Set(authors)].sort();
+  } catch (err) {
+    console.error(chalk.red("Error reading authors from database:", err));
+    return [];
+  }
+};
 
 // Generate a date string that includes date and time in local timezone
 const getCurrentDateTimeString = () => {
@@ -390,8 +407,15 @@ const enterPost = async () => {
     default: getDefaultDate(),
     validate: validateDate,
   });
-  const Author = await input({
+  const Author = await search({
     message: "Author:",
+    source: async (input) => {
+      if (!input) return uniqueAuthors.map((name) => ({ value: name }));
+      const lowerInput = input.toLowerCase();
+      return uniqueAuthors
+        .filter((name) => name.toLowerCase().startsWith(lowerInput))
+        .map((name) => ({ value: name }));
+    },
     validate: (input) => (input ? true : "Author is required."),
   });
   const defaultAuthorSite = getOriginFromUrl(commonInfo.Link);
@@ -652,9 +676,17 @@ const editPost = async () => {
     default: entryData.Date,
     validate: validateDate,
   });
-  const Author = await input({
+  const Author = await search({
     message: "Author:",
     default: entryData.Author,
+    source: async (input) => {
+      const searchInput = input || entryData.Author || "";
+      if (!searchInput) return uniqueAuthors.map((name) => ({ value: name }));
+      const lowerInput = searchInput.toLowerCase();
+      return uniqueAuthors
+        .filter((name) => name.toLowerCase().startsWith(lowerInput))
+        .map((name) => ({ value: name }));
+    },
     validate: (input) => (input ? true : "Author is required."),
   });
   const defaultAuthorSite =
@@ -1160,6 +1192,16 @@ const pushChanges = async () => {
 // Main function to prompt for entry type and
 // call the respective entry function
 const main = async () => {
+  // Load unique authors for autocomplete (once per session)
+  if (uniqueAuthors.length === 0) {
+    uniqueAuthors = getUniqueAuthors();
+    console.log(
+      chalk.cyan(
+        `Loaded ${uniqueAuthors.length} unique authors for autocomplete`
+      )
+    );
+  }
+
   // make a backup of the file before creating new entries
   // make a single backup per entry/editing session
   if (!backedUp) {
