@@ -26,16 +26,17 @@ function extractIssueNumber(filename) {
  */
 function removeTitlePrefix(content) {
   // Match the eleventyComputed title line and remove the prefix
-  const regex = /(eleventyComputed:\s*\n\s+title:\s*["'])Issue\s+\{\{\s*bundleIssue\s*\}\}\s*-\s*/m;
-  
+  const regex =
+    /(eleventyComputed:\s*\n\s+title:\s*["'])Issue\s+\{\{\s*bundleIssue\s*\}\}\s*-\s*/m;
+
   // Check if the prefix exists
   if (!regex.test(content)) {
     return { modified: false, content: content };
   }
-  
+
   // Remove the prefix
   const newContent = content.replace(regex, "$1");
-  
+
   return { modified: true, content: newContent };
 }
 
@@ -56,9 +57,9 @@ function processAllFiles() {
   const results = [];
   let totalModified = 0;
 
-  console.log("=" .repeat(70));
+  console.log("=".repeat(70));
   console.log("REMOVING ISSUE PREFIX FROM BLOG TITLES");
-  console.log("=" .repeat(70));
+  console.log("=".repeat(70));
   console.log(`Starting from Issue ${START_ISSUE}`);
   console.log();
 
@@ -86,7 +87,9 @@ function processAllFiles() {
 
       // Skip issues 1-4
       if (issueNumber < START_ISSUE) {
-        console.log(`  Skipping Issue ${issueNumber} (below Issue ${START_ISSUE})`);
+        console.log(
+          `  Skipping Issue ${issueNumber} (below Issue ${START_ISSUE})`
+        );
         continue;
       }
 
@@ -129,7 +132,9 @@ function processAllFiles() {
           console.log(`  ⚠ Issue ${issueNumber}: No prefix found (skipped)`);
         }
       } catch (error) {
-        console.log(`  ✗ Error processing Issue ${issueNumber}: ${error.message}`);
+        console.log(
+          `  ✗ Error processing Issue ${issueNumber}: ${error.message}`
+        );
         results.push({
           issueNumber,
           filename,
