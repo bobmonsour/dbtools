@@ -43,7 +43,8 @@ export const hasLeaderboardLink = async (link) => {
     const cachedLink = await cache.getCachedValue();
     if (cachedLink) {
       // console.log(`Using cached leaderboardlink for ${normalizedDomain}`);
-      return cachedLink;
+      // Convert Buffer to string if necessary
+      return cachedLink.toString ? cachedLink.toString() : cachedLink;
     }
   }
 
