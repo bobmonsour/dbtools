@@ -20,7 +20,7 @@ export const cacheDuration = {
   socialHtml: "1y",
   socialLinks: "1y",
   starters: "1y",
-  leaderboardLink: "1y",
+  leaderboardLink: "0s",
 };
 
 // Timeout settings for fetch operations, in milliseconds
