@@ -7,6 +7,7 @@
 /temp/
 /log/*
 /docs/*
+/starter-screenshots/*
 /screenshots/*
 /favicons/*
 /log/resized-files.md

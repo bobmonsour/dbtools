@@ -28384,15 +28384,6 @@
   },
   {
     "Issue": "44",
-    "Type": "starter",
-    "Title": "11ty-multisite",
-    "Link": "https://github.com/davidwkeith/11ty-multisite",
-    "Demo": "https://11ty-multisite-site1.netlify.app/",
-    "description": "A starter project that demos configuring 11ty for multi-site support",
-    "screenshotpath": "/screenshots/11ty-multisite-site1-netlify-app-large.jpg"
-  },
-  {
-    "Issue": "44",
     "Type": "site",
     "Title": "A Cuca",
     "description": "",
