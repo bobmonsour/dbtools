@@ -20,6 +20,7 @@ import { getRSSLink } from "./getrsslink.js";
 import { getFavicon } from "./getfavicon.js";
 import { getSocialLinks } from "./getsociallinks.js";
 import { getDescription } from "./getdescription.js";
+import { getGitHubDescription } from "./getgithubdescription.js";
 import { hasLeaderboardLink } from "./hasleaderboardlink.js";
 import { genScreenshotFilename } from "./genscreenshotfilename.js";
 import { exec } from "child_process";
@@ -772,12 +773,86 @@ const enterRelease = async () => {
 // Function to ENTER starter info
 const enterStarter = async () => {
   const commonInfo = await promptCommonInfo("enter");
+
+  // Prompt for Demo URL
+  const Demo = await input({
+    message: "Demo URL (optional):",
+    default: "",
+    validate: async (input) => {
+      if (!input || input.trim() === "") return true;
+      const formatValidation = validateUrlFormat(input);
+      if (formatValidation !== true) return formatValidation;
+      return await validateUrlAccessibility(input);
+    },
+  });
+
+  // Fetch description from GitHub repo
+  console.log(chalk.blue("Fetching metadata..."));
+  let description = "";
+
+  try {
+    description = (await getGitHubDescription(commonInfo.Link)) || "";
+    if (description) {
+      console.log(chalk.green("  ✓ Description fetched from GitHub"));
+    }
+  } catch (error) {
+    console.log(
+      chalk.yellow("Could not fetch GitHub description:", error.message)
+    );
+  }
+
+  // If GitHub fetch failed and Demo URL exists, try fetching from Demo site
+  if (!description && Demo && Demo.trim() !== "") {
+    try {
+      description = (await getDescription(Demo)) || "";
+      if (description) {
+        console.log(chalk.green("  ✓ Description fetched from Demo site"));
+      }
+    } catch (error) {
+      console.log(
+        chalk.yellow("Could not fetch Demo site description:", error.message)
+      );
+    }
+  }
+
+  let screenshotpath = null;
+
+  // Prompt for screenshot capture if Demo URL exists
+  if (Demo && Demo.trim() !== "") {
+    const captureScreenshotPrompt = await confirm({
+      message: "Capture screenshot?",
+      default: true,
+    });
+
+    if (captureScreenshotPrompt) {
+      console.log(chalk.blue("Capturing screenshot..."));
+
+      // Generate filename from Demo URL
+      const { filename } = await genScreenshotFilename(Demo);
+
+      // Capture screenshot
+      screenshotpath = await captureScreenshot(Demo, filename);
+    }
+  }
+
   entryData = {
     Issue: commonInfo.Issue,
     Type: "starter",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
   };
+
+  // Add optional fields if they exist
+  if (Demo && Demo.trim() !== "") {
+    entryData.Demo = Demo;
+  }
+  if (description) {
+    entryData.description = description;
+  }
+  if (screenshotpath) {
+    entryData.screenshotpath = screenshotpath;
+  }
+
   return;
 };
 
@@ -1194,12 +1269,111 @@ const editRelease = async () => {
 // Function to EDIT starter info
 const editStarter = async () => {
   const commonInfo = await promptCommonInfo("edit", entryData);
+
+  // Prompt for Demo URL
+  const Demo = await input({
+    message: "Demo URL (optional):",
+    default: entryData.Demo || "",
+    validate: async (input) => {
+      if (!input || input.trim() === "") return true;
+      const formatValidation = validateUrlFormat(input);
+      if (formatValidation !== true) return formatValidation;
+      return await validateUrlAccessibility(input);
+    },
+  });
+
+  // Fetch metadata
+  console.log(chalk.blue("Fetching metadata..."));
+  let description = "";
+
+  try {
+    description = (await getGitHubDescription(commonInfo.Link)) || "";
+    if (description) {
+      console.log(chalk.green("  ✓ Description fetched from GitHub"));
+    }
+  } catch (error) {
+    console.log(
+      chalk.yellow("Could not fetch GitHub description:", error.message)
+    );
+  }
+
+  // If GitHub fetch failed and Demo URL exists, try fetching from Demo site
+  if (!description && Demo && Demo.trim() !== "") {
+    try {
+      description = (await getDescription(Demo)) || "";
+      if (description) {
+        console.log(chalk.green("  ✓ Description fetched from Demo site"));
+      }
+    } catch (error) {
+      console.log(
+        chalk.yellow("Could not fetch Demo site description:", error.message)
+      );
+    }
+  }
+
+  let screenshotpath = entryData.screenshotpath || null;
+
+  // Prompt for screenshot capture if Demo URL exists
+  if (Demo && Demo.trim() !== "") {
+    // Check if screenshot already exists
+    if (screenshotpath) {
+      const regenerateScreenshot = await confirm({
+        message: `Screenshot already exists (${screenshotpath}). Regenerate?`,
+        default: false,
+      });
+
+      if (regenerateScreenshot) {
+        console.log(chalk.blue("Capturing screenshot..."));
+        const { filename } = await genScreenshotFilename(Demo);
+        const newScreenshotPath = await captureScreenshot(Demo, filename);
+        if (newScreenshotPath) {
+          screenshotpath = newScreenshotPath;
+        }
+      }
+    } else {
+      const captureScreenshotPrompt = await confirm({
+        message: "Capture screenshot?",
+        default: true,
+      });
+
+      if (captureScreenshotPrompt) {
+        console.log(chalk.blue("Capturing screenshot..."));
+        const { filename } = await genScreenshotFilename(Demo);
+        screenshotpath = await captureScreenshot(Demo, filename);
+      }
+    }
+  }
+
+  // Prompt for enrichment data editing
+  console.log(
+    chalk.blue(
+      "\nReview and edit enrichment data (press Enter to keep fetched value):"
+    )
+  );
+
+  description = await input({
+    message: "Starter description:",
+    default: description || entryData.description || "",
+  });
+
   entryData = {
     Issue: commonInfo.Issue,
     Type: "starter",
     Title: commonInfo.Title,
     Link: commonInfo.Link,
   };
+
+  // Add optional fields if they exist
+  if (Demo && Demo.trim() !== "") {
+    entryData.Demo = Demo;
+  }
+  if (description && description.trim() !== "") {
+    entryData.description = description;
+  }
+  if (screenshotpath) {
+    entryData.screenshotpath = screenshotpath;
+  }
+
   return;
 };
 

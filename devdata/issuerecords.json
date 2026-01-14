@@ -487,8 +487,14 @@
   },
   {
     "issue": 82,
-    "blogPosts": 10,
+    "blogPosts": 19,
     "releases": 2,
-    "sites": 8
+    "sites": 12
+  },
+  {
+    "issue": 83,
+    "blogPosts": 5,
+    "releases": 0,
+    "sites": 3
   }
 ]
