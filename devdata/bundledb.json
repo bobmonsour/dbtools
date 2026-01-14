@@ -1053,7 +1053,7 @@
     },
     "favicon": "/img/favicons/www-markllobrera-com-favicon.svg",
     "rssLink": "https://www.markllobrera.com/feed/feed.xml",
-    "Categories": ["Images", "Image Galleries"]
+    "Categories": ["Images", "Image Gallery"]
   },
   {
     "Issue": "3",
@@ -7424,7 +7424,7 @@
     },
     "favicon": "/img/favicons/www-cassey-dev-favicon.png",
     "rssLink": "https://cassey.dev/feed/feed.xml",
-    "Categories": ["How to...", "CMS", "Image Galleries"]
+    "Categories": ["How to...", "CMS", "Image Gallery"]
   },
   {
     "Issue": "",
@@ -14686,7 +14686,7 @@
       "How to...",
       "Plugins",
       "Configuration",
-      "Image Galleries"
+      "Image Gallery"
     ]
   },
   {
@@ -15119,7 +15119,7 @@
     },
     "favicon": "/img/favicons/www-raymondcamden-com-favicon.png",
     "rssLink": "https://www.raymondcamden.com/feed.xml",
-    "Categories": ["Images", "How to...", "Remote Data", "Image Galleries"]
+    "Categories": ["Images", "How to...", "Remote Data", "Image Gallery"]
   },
   {
     "Issue": "",
@@ -18927,118 +18927,135 @@
     "Type": "starter",
     "Title": "eleventeen",
     "Link": "https://github.com/rdela/eleventeen",
-    "Demo": "https://eleventeen.blog/"
+    "Demo": "https://eleventeen.blog/",
+    "description": "🌈📓 Eleventy blog with Rainbow Mode powered by Chromagen 🎨💥 https://chromagen.io",
+    "screenshotpath": "/screenshots/eleventeen-blog-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "Elva",
     "Link": "https://github.com/scottsweb/elva",
-    "Demo": "https://elva.scott.ee/"
+    "Demo": "https://elva.scott.ee/",
+    "description": "✅ A multilingual, clean, green 11ty starter theme.",
+    "screenshotpath": "/screenshots/elva-scott-ee-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "11ty-tailscript",
     "Link": "https://github.com/4lador/11ty-tailscript",
-    "Demo": "https://vocal-licorice-a3b377.netlify.app/"
+    "Demo": "https://vocal-licorice-a3b377.netlify.app/",
+    "description": "(WIP) Eleventy starter that use Typescript, PostCSS, Tailwind, WebC, Fontawesome, Decap CMS, Webpack ready and Typescript",
+    "screenshotpath": "/screenshots/vocal-licorice-a3b377-netlify-app-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "eleventy-base-webc",
     "Link": "https://github.com/11ty/eleventy-base-webc",
-    "Demo": "https://eleventy-base-webc.netlify.app/"
+    "Demo": "https://eleventy-base-webc.netlify.app/",
+    "description": "A minimalist bare-bones starter project using Eleventy and WebC.",
+    "screenshotpath": "/screenshots/eleventy-base-webc-netlify-app-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "eleventy-base-blog",
     "Link": "https://github.com/11ty/eleventy-base-blog",
-    "Demo": "https://eleventy-base-blog.netlify.app/"
+    "Demo": "https://eleventy-base-blog.netlify.app/",
+    "description": "A starter repository for a blog web site using the Eleventy static site generator.",
+    "screenshotpath": "/screenshots/eleventy-base-blog-netlify-app-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "Grease",
     "Link": "https://github.com/adamstddrd/grease",
-    "Demo": "https://web-grease.netlify.app/"
+    "Demo": "https://web-grease.netlify.app/",
+    "description": "A starter for working with the modern web platform",
+    "screenshotpath": "/screenshots/web-grease-netlify-app-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "Nulite",
     "Link": "https://github.com/codingpotions/nulite",
-    "Demo": "https://nulite-starter.netlify.app/"
+    "Demo": "https://nulite-starter.netlify.app/",
+    "description": "💊 Nulite is a simple, elegant, minimalistic stater project for Eleventy to help you create a simple blog with focus on performance and simplicity.",
+    "screenshotpath": "/screenshots/nulite-starter-netlify-app-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "vredeburg",
     "Link": "https://github.com/daflh/vredeburg",
-    "Demo": "https://vredeburg.netlify.app/"
+    "Demo": "https://vredeburg.netlify.app/",
+    "description": "A simple starter project to create a blog using Eleventy and Tailwind CSS",
+    "screenshotpath": "/screenshots/vredeburg-netlify-app-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "reveal-eleventy-template",
     "Link": "https://github.com/Bullrich/reveal-eleventy-template",
-    "Demo": "https://bullrich.dev/reveal-eleventy-template/#/"
+    "Demo": "https://bullrich.dev/reveal-eleventy-template/#/",
+    "description": "Template for using Reveal.js with 11ty. One click deployment with GitHub pages",
+    "screenshotpath": "/screenshots/bullrich-dev-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "eleventy-excellent",
     "Link": "https://github.com/madrilene/eleventy-excellent",
-    "Demo": "https://eleventy-excellent.netlify.app/"
-  },
-  {
-    "Issue": "",
-    "Type": "starter",
-    "Title": "Bliss - Blog Theme For Eleventy",
-    "Link": "https://github.com/lwojcik/eleventy-template-bliss",
-    "Demo": "https://eleventy-bliss.lkmt.us/"
+    "Demo": "https://eleventy-excellent.netlify.app/",
+    "description": "Eleventy starter based on the workflow suggested by Andy Bell's buildexcellentwebsit.es.",
+    "screenshotpath": "/screenshots/eleventy-excellent-netlify-app-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "eleventy-simple",
     "Link": "https://github.com/lkhrs/eleventy-simple",
-    "Demo": "https://eleventy-simple.pages.dev/"
-  },
-  {
-    "Issue": "",
-    "Type": "starter",
-    "Title": "tea-stack",
-    "Link": "https://github.com/mattwaler/tea-stack"
+    "Demo": "https://eleventy-simple.pages.dev/",
+    "description": "A blog starter template with 11ty and Simple.css.",
+    "screenshotpath": "/screenshots/eleventy-simple-pages-dev-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "Eleventy Satisfactory",
     "Link": "https://github.com/mendhak/eleventy-satisfactory",
-    "Demo": "https://code.mendhak.com/eleventy-satisfactory/"
+    "Demo": "https://code.mendhak.com/eleventy-satisfactory/",
+    "description": "Content-first eleventy blog template with basic layout and  various features",
+    "screenshotpath": "/screenshots/code-mendhak-com-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "Pack11ty",
     "Link": "https://github.com/nhoizey/pack11ty",
-    "Demo": "https://pack11ty.dev/"
+    "Demo": "https://pack11ty.dev/",
+    "description": "An heavily opinionated Eleventy template project with Sass",
+    "screenshotpath": "/screenshots/pack11ty-dev-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "11ta-template",
     "Link": "https://github.com/11ta/11ta-template",
-    "Demo": "https://11ta.netlify.app/"
+    "Demo": "https://11ta.netlify.app/",
+    "description": "Deeply customizable, full-featured, ready to publish blog template built with 11ty, TailwindCSS, & Alpine.js",
+    "screenshotpath": "/screenshots/11ta-netlify-app-large.jpg"
   },
   {
     "Issue": "",
     "Type": "starter",
     "Title": "eleventy-photo-gallery",
     "Link": "https://github.com/tannerdolby/eleventy-photo-gallery",
-    "Demo": "https://eleventy-gallery.netlify.app/"
+    "Demo": "https://eleventy-gallery.netlify.app/",
+    "description": "Starter site for creating a responsive image gallery using the Eleventy static site generator",
+    "screenshotpath": "/screenshots/eleventy-gallery-netlify-app-large.jpg"
   },
   {
     "Issue": "20",
@@ -19150,7 +19167,7 @@
     },
     "favicon": "/img/favicons/darekkay-com-favicon.png",
     "rssLink": "https://darekkay.com/atom.xml",
-    "Categories": ["How to...", "Images", "Navigation", "Image Galleries"]
+    "Categories": ["How to...", "Images", "Navigation", "Image Gallery"]
   },
   {
     "Issue": "20",
@@ -20858,7 +20875,9 @@
     "Type": "starter",
     "Title": "eleventy-plus-vite",
     "Link": "https://github.com/matthiasott/eleventy-plus-vite",
-    "Demo": "https://eleventyplusvite.netlify.app/"
+    "Demo": "https://eleventyplusvite.netlify.app/",
+    "description": "A clean and fast Eleventy Starter Project with Vite",
+    "screenshotpath": "/screenshots/eleventyplusvite-netlify-app-large.jpg"
   },
   {
     "Issue": "24",
@@ -20977,7 +20996,9 @@
     "Type": "starter",
     "Title": "Niepce",
     "Link": "https://github.com/GoOz/Niepce",
-    "Demo": "https://gooz.github.io/Niepce/"
+    "Demo": "https://gooz.github.io/Niepce/",
+    "description": "Eleventy Starter kit for a portfolio site",
+    "screenshotpath": "/screenshots/gooz-github-io-large.jpg"
   },
   {
     "Issue": "24",
@@ -22207,7 +22228,7 @@
       "How to...",
       "Images",
       "Layouts",
-      "Image Galleries"
+      "Image Gallery"
     ]
   },
   {
@@ -22307,7 +22328,9 @@
     "Type": "starter",
     "Title": "11ty Resume Template",
     "Link": "https://github.com/learnwithgurpreet/11ty-resume-template",
-    "Demo": "https://www.gurpreetsingh.me/"
+    "Demo": "https://www.gurpreetsingh.me/",
+    "description": "An online resume template",
+    "screenshotpath": "/screenshots/www-gurpreetsingh-me-large.jpg"
   },
   {
     "Issue": "26",
@@ -26995,7 +27018,9 @@
     "Type": "starter",
     "Title": "eleventy-duo",
     "Link": "https://github.com/yinkakun/eleventy-duo",
-    "Demo": "https://eleventyduo.netlify.app/"
+    "Demo": "https://eleventyduo.netlify.app/",
+    "description": "Eleventy Duo is a minimal and beautiful Eleventy theme for personal blogs.",
+    "screenshotpath": "/screenshots/eleventyduo-netlify-app-large.jpg"
   },
   {
     "Issue": "40",
@@ -27011,7 +27036,9 @@
     "Type": "starter",
     "Title": "resume-template",
     "Link": "https://github.com/devon-wolf/resume-template",
-    "Demo": "https://devon-wolf.github.io/resume-template/"
+    "Demo": "https://devon-wolf.github.io/resume-template/",
+    "description": "A basic Eleventy site for displaying a resume",
+    "screenshotpath": "/screenshots/devon-wolf-github-io-large.jpg"
   },
   {
     "Issue": "41",
@@ -27072,7 +27099,9 @@
     "Type": "starter",
     "Title": "Halide",
     "Link": "https://github.com/danurbanowicz/halide",
-    "Demo": "https://halide.netlify.app/"
+    "Demo": "https://halide.netlify.app/",
+    "description": "A customizable, responsive image portfolio website template, built with Eleventy and Tina CMS",
+    "screenshotpath": "/screenshots/halide-netlify-app-large.jpg"
   },
   {
     "Issue": "41",
@@ -28349,14 +28378,18 @@
     "Type": "starter",
     "Title": "Campus Spark",
     "Link": "https://github.com/CloudCannon/campus-spark-bookshop-template",
-    "Demo": "https://endless-iris.cloudvent.net/"
+    "Demo": "https://endless-iris.cloudvent.net/",
+    "description": "Campus Spark is a single page website template built in Eleventy for education institutions.",
+    "screenshotpath": "/screenshots/endless-iris-cloudvent-net-large.jpg"
   },
   {
     "Issue": "44",
     "Type": "starter",
     "Title": "11ty-multisite",
     "Link": "https://github.com/davidwkeith/11ty-multisite",
-    "Demo": "https://11ty-multisite-site1.netlify.app/"
+    "Demo": "https://11ty-multisite-site1.netlify.app/",
+    "description": "A starter project that demos configuring 11ty for multi-site support",
+    "screenshotpath": "/screenshots/11ty-multisite-site1-netlify-app-large.jpg"
   },
   {
     "Issue": "44",
@@ -29580,7 +29613,7 @@
     "Categories": [
       "How to...",
       "Images",
-      "Image Galleries",
+      "Image Gallery",
       "Markdown",
       "RSS",
       "Upgrading"
@@ -29983,7 +30016,9 @@
     "Type": "starter",
     "Title": "Eleventy ESM Minimal",
     "Link": "https://github.com/madrilene/eleventy-esm-minimal",
-    "Demo": "https://eleventy-esm-minimal.netlify.app/"
+    "Demo": "https://eleventy-esm-minimal.netlify.app/",
+    "description": "Very minimal Eleventy 3.0 starter, using ESM",
+    "screenshotpath": "/screenshots/eleventy-esm-minimal-netlify-app-large.jpg"
   },
   {
     "Issue": "50",
@@ -30519,7 +30554,7 @@
     "Categories": [
       "Global Data",
       "How to...",
-      "Image Galleries",
+      "Image Gallery",
       "Images",
       "Pagination",
       "Remote Data"
@@ -32833,7 +32868,9 @@
     "Type": "starter",
     "Title": "11ty-serene",
     "Link": "https://github.com/CLCK0622/11ty-Serene",
-    "Demo": "https://11ty-serene.vercel.app/"
+    "Demo": "https://11ty-serene.vercel.app/",
+    "description": "A minimal theme for a landing page and an integrated blog. Built with 11ty and Sass.",
+    "screenshotpath": "/screenshots/11ty-serene-vercel-app-large.jpg"
   },
   {
     "Issue": "58",
@@ -35003,7 +35040,7 @@
     "Categories": [
       "Collections",
       "Filters",
-      "Image Galleries",
+      "Image Gallery",
       "Layouts",
       "Pagination"
     ]
@@ -36466,12 +36503,7 @@
     },
     "favicon": "/img/favicons/sainthood-xyz-favicon.png",
     "rssLink": "",
-    "Categories": [
-      "Accessibility",
-      "Global Data",
-      "How to...",
-      "Image Galleries"
-    ]
+    "Categories": ["Accessibility", "Global Data", "How to...", "Image Gallery"]
   },
   {
     "Issue": "64",
@@ -42182,7 +42214,7 @@
     "Categories": [
       "Configuration",
       "How to...",
-      "Image Galleries",
+      "Image Gallery",
       "Images",
       "Shortcodes"
     ]
@@ -42212,7 +42244,7 @@
     "Categories": [
       "Configuration",
       "How to...",
-      "Image Galleries",
+      "Image Gallery",
       "Images",
       "Shortcodes"
     ]
@@ -42354,7 +42386,9 @@
     "Type": "starter",
     "Title": "Eleventy LibDoc",
     "Link": "https://github.com/ita-design-system/eleventy-libdoc",
-    "Demo": "https://eleventy-libdoc.netlify.app/"
+    "Demo": "https://eleventy-libdoc.netlify.app/",
+    "description": "An Eleventy starter project to craft slick documentation",
+    "screenshotpath": "/screenshots/eleventy-libdoc-netlify-app-large.jpg"
   },
   {
     "Issue": "74",
@@ -44593,7 +44627,9 @@
     "Type": "starter",
     "Title": "Strawberry Starter",
     "Link": "https://github.com/kate-bagenzo/strawberry-starter",
-    "Demo": "https://strawberrystarter.neocities.org/"
+    "Demo": "https://strawberrystarter.neocities.org/",
+    "description": "A simply sweet blog template for 11ty!",
+    "screenshotpath": "/screenshots/strawberrystarter-neocities-org-large.jpg"
   },
   {
     "Issue": "77",
@@ -44707,7 +44743,9 @@
     "Type": "starter",
     "Title": "ZeroPoint",
     "Link": "https://github.com/MWDelaney/zeropoint",
-    "Demo": "https://getzeropoint.com/"
+    "Demo": "https://getzeropoint.com/",
+    "description": "A modern, opinionated, bare-bones Jamstack starter using Eleventy to get \"up to zero\" on a project quickly and easily. https://getzeropoint.com",
+    "screenshotpath": "/screenshots/getzeropoint-com-large.jpg"
   },
   {
     "Issue": "78",
@@ -46285,7 +46323,7 @@
       "CSS/Sass",
       "Data Cascade",
       "Global Data",
-      "Image Galleries",
+      "Image Gallery",
       "Pagination",
       "Shortcodes"
     ]
@@ -47197,7 +47235,7 @@
     },
     "favicon": "/img/favicons/stefanbohacek-com-favicon.png",
     "rssLink": "https://stefanbohacek.com/feed",
-    "Categories": ["Deployment", "How to...", "Image Galleries"]
+    "Categories": ["Deployment", "How to...", "Image Gallery"]
   },
   {
     "Issue": "80",
@@ -48204,5 +48242,411 @@
     "Date": "2026-01-06T22:02:32.000",
     "formattedDate": "Jan 6, 2026",
     "favicon": "/img/favicons/jrsofty1-stinkbugonline-com-favicon.jpg"
+  },
+  {
+    "Issue": "82",
+    "Type": "blog post",
+    "Title": "Automating Your RSS Feed with 11ty",
+    "slugifiedTitle": "automating-your-rss-feed-with-11ty",
+    "Link": "https://caffeineandlasers.com/blogs/automatingYourRSS.html",
+    "Date": "2025-09-05",
+    "formattedDate": "Sep 5, 2025",
+    "description": "I opted to use 11ty to auto-update the RSS feed every time I added a new blog-post. ",
+    "Author": "Cameron Jones",
+    "slugifiedAuthor": "cameron-jones",
+    "AuthorSite": "https://caffeineandlasers.com",
+    "AuthorSiteDescription": "PhD Candidate, Australian National University",
+    "socialLinks": {
+      "mastodon": "https://aus.social/@AuntyRed/",
+      "bluesky": "",
+      "youtube": "https://www.youtube.com/@CameronJones-dj8mm",
+      "github": "https://github.com/CJones-Optics",
+      "linkedin": "https://www.linkedin.com/in/cameron-jones-sydney/"
+    },
+    "favicon": "/img/favicons/caffeineandlasers-com-favicon.png",
+    "rssLink": "https://caffeineandlasers.com/feed.xml",
+    "Categories": ["Blogging", "How to...", "RSS"]
+  },
+  {
+    "Issue": "82",
+    "Type": "site",
+    "Title": "Calgary Groups",
+    "description": "A centralized, searchable directory to help Calgarians find grassroots organizations, clubs, activist groups, and community initiatives.",
+    "Link": "https://calgarygroups.ca/",
+    "Date": "2026-01-07T13:44:30.000",
+    "formattedDate": "Jan 7, 2026",
+    "favicon": "/img/favicons/calgarygroups-ca-favicon.png"
+  },
+  {
+    "Issue": "82",
+    "Type": "blog post",
+    "Title": "Deploying An Eleventy Site to NeoCities with GitLab CI/CD",
+    "slugifiedTitle": "deploying-an-eleventy-site-to-neo-cities-with-git-lab-ci-cd",
+    "Link": "https://brennan.day/deploying-an-eleventy-site-to-neocities-with-gitlab-ci-cd/",
+    "Date": "2026-01-01",
+    "formattedDate": "Jan 1, 2026",
+    "description": "A guide to automatically deploying your Eleventy static site to NeoCities using GitLab CI/CD, including authentication, error handling, and optimizations.",
+    "Author": "Brennan Kenneth Brown",
+    "slugifiedAuthor": "brennan-kenneth-brown",
+    "AuthorSite": "https://brennan.day",
+    "AuthorSiteDescription": "Journal entries, essays, poetry, and musings on craft, technology, and the human experience. A Queer Métis writer exploring the intersections of Indigenous identity, digital culture, and creativity.",
+    "socialLinks": {
+      "mastodon": "https://en.pronouns.page/@brennanbrown",
+      "bluesky": "https://bsky.app/profile/brennanbrown.ca",
+      "youtube": "",
+      "github": "https://github.com/brennanbrown",
+      "linkedin": "https://www.linkedin.com/in/brennankbrown"
+    },
+    "favicon": "/img/favicons/brennan-day-favicon.png",
+    "rssLink": "https://brennan.day//feed.xml",
+    "Categories": ["Debugging", "Deployment", "How to..."]
+  },
+  {
+    "Issue": "82",
+    "Type": "blog post",
+    "Title": "What’s new in Podcaster version 2",
+    "slugifiedTitle": "whats-new-in-podcaster-version-2",
+    "Link": "https://eleventy-plugin-podcaster.com/2026/01/whats-new-in-version-2/",
+    "Date": "2026-01-08T10:53:49.000",
+    "formattedDate": "Jan 8, 2026",
+    "description": "Documentation website for eleventy-plugin-podcaster.",
+    "Author": "Nathan Bottomley",
+    "slugifiedAuthor": "nathan-bottomley",
+    "AuthorSite": "https://gunsandfrocks.com/",
+    "AuthorSiteDescription": "I’m Nathan Bottomley, and the website Guns and Frocks hosts or links to pretty much everything that I write for the web. ",
+    "socialLinks": {
+      "mastodon": "https://aus.social/@nathanbottomley",
+      "bluesky": "https://bsky.app/profile/nathanbottomley.com",
+      "youtube": "",
+      "github": "https://github.com/nathan-bottomley",
+      "linkedin": ""
+    },
+    "favicon": "#icon-person-circle",
+    "rssLink": "https://gunsandfrocks.com/feed.xml",
+    "Categories": ["How to..."]
+  },
+  {
+    "Issue": "82",
+    "Type": "blog post",
+    "Title": "Building an IndieAuth Comment System for Your Static Site",
+    "slugifiedTitle": "building-an-indie-auth-comment-system-for-your-static-site",
+    "Link": "https://brennan.day/building-an-indieauth-comment-system-for-your-static-site/",
+    "Date": "2026-01-06",
+    "formattedDate": "Jan 6, 2026",
+    "description": "A journey through authentication, CORS issues, and the joy of owning your comments! Learn how to build a comment system for your static site using IndieAuth and Netlify Functions, storing the comments in your git repository.",
+    "Author": "Brennan Kenneth Brown",
+    "slugifiedAuthor": "brennan-kenneth-brown",
+    "AuthorSite": "https://brennan.day",
+    "AuthorSiteDescription": "Journal entries, essays, poetry, and musings on craft, technology, and the human experience. A Queer Métis writer exploring the intersections of Indigenous identity, digital culture, and creativity.",
+    "socialLinks": {
+      "mastodon": "https://en.pronouns.page/@brennanbrown",
+      "bluesky": "https://bsky.app/profile/brennanbrown.ca",
+      "youtube": "",
+      "github": "https://github.com/brennanbrown",
+      "linkedin": "https://www.linkedin.com/in/brennankbrown"
+    },
+    "favicon": "/img/favicons/brennan-day-favicon.png",
+    "rssLink": "https://brennan.day//feed.xml",
+    "Categories": ["Dates", "How to...", "Netlify"]
+  },
+  {
+    "Issue": "82",
+    "Type": "blog post",
+    "Title": "Adding Hardcover.app Data to Eleventy",
+    "slugifiedTitle": "adding-hardcover-app-data-to-eleventy",
+    "Link": "https://www.raymondcamden.com/2026/01/07/adding-hardcoverapp-data-to-eleventy",
+    "Date": "2026-01-07",
+    "formattedDate": "Jan 7, 2026",
+    "description": "Using Hardcover.app books in your Eleventy site",
+    "Author": "Raymond Camden",
+    "slugifiedAuthor": "raymond-camden",
+    "AuthorSite": "https://www.raymondcamden.com",
+    "AuthorSiteDescription": "Father, husband, developer relations and web standards expert, and cat demo builder.",
+    "socialLinks": {
+      "mastodon": "https://medium.com/@cfjedimaster",
+      "bluesky": "",
+      "youtube": "https://youtube.com/user/theraymondcamden",
+      "github": "https://github.com/cfjedimaster",
+      "linkedin": "https://linkedin.com/in/raymondcamden"
+    },
+    "favicon": "/img/favicons/www-raymondcamden-com-favicon.png",
+    "rssLink": "https://www.raymondcamden.com/feed.xml",
+    "Categories": ["Books Pages", "How to...", "Remote Data"]
+  },
+  {
+    "Issue": "82",
+    "Type": "site",
+    "Title": "Nicolai's Blog",
+    "description": "Nicolai&#39;s digital garden: Posts, stories, and whatever else comes to mind.",
+    "Link": "https://blog.nicolai.ink/",
+    "Date": "2026-01-08T21:38:12.000",
+    "formattedDate": "Jan 8, 2026",
+    "favicon": "/img/favicons/blog-nicolai-ink-favicon.svg"
+  },
+  {
+    "Issue": "82",
+    "Type": "site",
+    "Title": "Bruchbühne Tübingen",
+    "description": "Webseite der Bruchbühne Tübingen",
+    "Link": "https://bruchbuehne.de/",
+    "Date": "2026-01-08T22:02:33.000",
+    "formattedDate": "Jan 8, 2026",
+    "favicon": "/img/favicons/bruchbuehne-de-favicon.png"
+  },
+  {
+    "Issue": "82",
+    "Type": "site",
+    "Title": "Guns and Frocks",
+    "description": "",
+    "Link": "https://gunsandfrocks.com/",
+    "Date": "2026-01-08T22:55:35.000",
+    "formattedDate": "Jan 8, 2026",
+    "favicon": "#icon-globe"
+  },
+  {
+    "Issue": "82",
+    "Type": "blog post",
+    "Title": "Quick Start: Eleventy Shortcodes for Responsive Images & Inline SVG",
+    "slugifiedTitle": "quick-start-eleventy-shortcodes-for-responsive-images-and-inline-svg",
+    "Link": "https://quesby.dev/blog/eleventy-responsive-images-and-inline-svg/",
+    "Date": "2025-09-12",
+    "formattedDate": "Sep 12, 2025",
+    "description": "Quick start to production-ready Eleventy shortcodes: responsive images with @11ty/eleventy-img and inline SVG helpers you can copy-paste and use immediately.",
+    "Author": "Emiliano Soravia",
+    "slugifiedAuthor": "emiliano-soravia",
+    "AuthorSite": "https://emilianosoravia.com/",
+    "AuthorSiteDescription": "Emiliano Soravia is a software engineer living in Austria.",
+    "socialLinks": {
+      "mastodon": "https://mastodon.social/@emilianosoravia",
+      "bluesky": "https://bsky.app/profile/emilianosoravia.bsky.social",
+      "youtube": "",
+      "github": "",
+      "linkedin": ""
+    },
+    "favicon": "/img/favicons/emilianosoravia-com-favicon.png",
+    "rssLink": "",
+    "Categories": ["Configuration", "Debugging", "Images", "Shortcodes"]
+  },
+  {
+    "Issue": "82",
+    "Type": "blog post",
+    "Title": "Why Eleventy Still Matters in 2026 (and Why Quesby Builds on It)",
+    "slugifiedTitle": "why-eleventy-still-matters-in-2026-and-why-quesby-builds-on-it",
+    "Link": "https://quesby.dev/blog/why-eleventy-still-matters-in-2026-and-why-quesby-builds-on-it/",
+    "Date": "2025-12-02",
+    "formattedDate": "Dec 2, 2025",
+    "description": "A practical look at Eleventy in 2026 and the reasons Quesby uses it to deliver fast, stable static sites without modern framework overhead.",
+    "Author": "Emiliano Soravia",
+    "slugifiedAuthor": "emiliano-soravia",
+    "AuthorSite": "https://emilianosoravia.com/",
+    "AuthorSiteDescription": "Emiliano Soravia is a software engineer living in Austria.",
+    "socialLinks": {
+      "mastodon": "https://mastodon.social/@emilianosoravia",
+      "bluesky": "https://bsky.app/profile/emilianosoravia.bsky.social",
+      "youtube": "",
+      "github": "",
+      "linkedin": ""
+    },
+    "favicon": "/img/favicons/emilianosoravia-com-favicon.png",
+    "rssLink": "",
+    "Categories": ["Why Eleventy?"]
+  },
+  {
+    "Issue": "82",
+    "Type": "blog post",
+    "Title": "Eleventy, 2025 in Review",
+    "slugifiedTitle": "eleventy-2025-in-review",
+    "Link": "https://www.11ty.dev/blog/review-2025/",
+    "Date": "2026-01-05",
+    "formattedDate": "Jan 5, 2026",
+    "description": "Eleventy, 2025 in Review — Eleventy",
+    "Author": "Zach Leatherman",
+    "slugifiedAuthor": "zach-leatherman",
+    "AuthorSite": "https://www.zachleat.com/",
+    "AuthorSiteDescription": "A post by Zach Leatherman (zachleat)",
+    "socialLinks": {
+      "mastodon": "https://zachleat.com/@zachleat",
+      "bluesky": "https://bsky.app/profile/zachleat.com",
+      "youtube": "https://www.youtube.com/channel/UCMlSs0Ltg57qpYdFwUVLR2A",
+      "github": "https://github.com/zachleat",
+      "linkedin": "https://www.linkedin.com/in/zachleat/"
+    },
+    "favicon": "/img/favicons/www-zachleat-com-favicon.jpg",
+    "rssLink": "https://www.zachleat.com/follow/",
+    "Categories": ["From the Source"]
+  },
+  {
+    "Issue": "82",
+    "Type": "blog post",
+    "Title": "Extending the Post Graph Plugin: Adding Clickable Links and Tooltips",
+    "slugifiedTitle": "extending-the-post-graph-plugin-adding-clickable-links-and-tooltips",
+    "Link": "https://brennan.day/extending-the-post-graph-plugin-adding-clickable-links-and-tooltips/",
+    "Date": "2026-01-09",
+    "formattedDate": "Jan 9, 2026",
+    "description": "A technical walkthrough of how I extended the eleventy-plugin-post-graph to add clickable links and hover tooltips showing article titles.",
+    "Author": "Brennan Kenneth Brown",
+    "slugifiedAuthor": "brennan-kenneth-brown",
+    "AuthorSite": "https://brennan.day",
+    "AuthorSiteDescription": "Journal entries, essays, poetry, and musings on craft, technology, and the human experience. A Queer Métis writer exploring the intersections of Indigenous identity, digital culture, and creativity.",
+    "socialLinks": {
+      "mastodon": "https://en.pronouns.page/@brennanbrown",
+      "bluesky": "https://bsky.app/profile/brennanbrown.ca",
+      "youtube": "",
+      "github": "https://github.com/brennanbrown",
+      "linkedin": "https://www.linkedin.com/in/brennankbrown"
+    },
+    "favicon": "/img/favicons/brennan-day-favicon.png",
+    "rssLink": "https://brennan.day//feed.xml",
+    "Categories": ["Dates", "Plugins", "Shortcodes"]
+  },
+  {
+    "Issue": "83",
+    "Type": "site",
+    "Title": "The No Script Show",
+    "description": "An audio and video where we chat, learn and build websites as simply as we can.",
+    "Link": "https://noscript.show/",
+    "Date": "2026-01-11T10:58:07.000",
+    "formattedDate": "Jan 11, 2026",
+    "favicon": "/img/favicons/noscript-show-favicon.png"
+  },
+  {
+    "Issue": "83",
+    "Type": "blog post",
+    "Title": "Eleventy Adding Page Links to a Post",
+    "slugifiedTitle": "eleventy-adding-page-links-to-a-post",
+    "Link": "https://johnwargo.com/posts/2026/eleventy-adding-page-links-to-a-post/",
+    "Date": "2026-01-10",
+    "formattedDate": "Jan 10, 2026",
+    "description": "I created a plugin called Eleventy Plugin Markdown Post Links that adds a list of links to the top of my posts. The plugin has options for different types of lists and can generate links based on a minimum number specified. I implemented it on my site with a collapsible link list feature. You can fi",
+    "Author": "John M. Wargo",
+    "slugifiedAuthor": "john-m-wargo",
+    "AuthorSite": "https://johnwargo.com",
+    "AuthorSiteDescription": "Internet Home of John M. Wargo",
+    "socialLinks": {
+      "mastodon": "https://mastodon.social/@johnwargo",
+      "bluesky": "",
+      "youtube": "",
+      "github": "https://github.com/johnwargo",
+      "linkedin": ""
+    },
+    "favicon": "/img/favicons/johnwargo-com-favicon.png",
+    "rssLink": "https://johnwargo.com/feed.xml",
+    "Categories": ["Markdown", "Plugins"]
+  },
+  {
+    "Issue": "83",
+    "Type": "blog post",
+    "Title": "From 65 to 83: Attempts at Performance Optimization",
+    "slugifiedTitle": "from-65-to-83-attempts-at-performance-optimization",
+    "Link": "https://brennan.day/from-65-to-83-attempts-at-performance-optimization/",
+    "Date": "2026-01-10",
+    "formattedDate": "Jan 10, 2026",
+    "description": "A humble look into the performance optimizations boosting my Lighthouse score from 65 to 83, including critical CSS, layout shift fixes, and image optimization while maintaining the site&#39;s design and user experience.",
+    "Author": "Brennan Kenneth Brown",
+    "slugifiedAuthor": "brennan-kenneth-brown",
+    "AuthorSite": "https://brennan.day",
+    "AuthorSiteDescription": "Journal entries, essays, poetry, and musings on craft, technology, and the human experience. A Queer Métis writer exploring the intersections of Indigenous identity, digital culture, and creativity.",
+    "socialLinks": {
+      "mastodon": "https://en.pronouns.page/@brennanbrown",
+      "bluesky": "https://bsky.app/profile/brennanbrown.ca",
+      "youtube": "",
+      "github": "https://github.com/brennanbrown",
+      "linkedin": "https://www.linkedin.com/in/brennankbrown"
+    },
+    "favicon": "/img/favicons/brennan-day-favicon.png",
+    "rssLink": "https://brennan.day//feed.xml",
+    "Categories": ["Performance"]
+  },
+  {
+    "Issue": "83",
+    "Type": "blog post",
+    "Title": "Eleventy in 2026",
+    "slugifiedTitle": "eleventy-in-2026",
+    "Link": "https://fudge.org/archive/11ty-in-2026/",
+    "Date": "2026-01-10",
+    "formattedDate": "Jan 10, 2026",
+    "description": "My stack and workflow in 2026",
+    "Author": "Jay Cuthrell",
+    "slugifiedAuthor": "jay-cuthrell",
+    "AuthorSite": "https://fudge.org",
+    "AuthorSiteDescription": "Fudge Factor 🤔💡🤯🤓 is the newsletter and blog of Jay Cuthrell",
+    "socialLinks": {
+      "mastodon": "https://cuthrell.com/@jay",
+      "bluesky": "https://bsky.app/profile/cuthrell.com",
+      "youtube": "",
+      "github": "https://github.com/madrilene",
+      "linkedin": ""
+    },
+    "favicon": "/img/favicons/fudge-org-favicon.png",
+    "rssLink": "https://fudge.org/rss.xml",
+    "Categories": ["Dates", "Markdown"]
+  },
+  {
+    "Issue": "83",
+    "Type": "blog post",
+    "Title": "Migrating from Cloudflare Pages to Workers (and cleaning up the mess)",
+    "slugifiedTitle": "migrating-from-cloudflare-pages-to-workers-and-cleaning-up-the-mess",
+    "Link": "https://alex.zappa.dev/blog/cloudflare-pages-to-workers-migration/",
+    "Date": "2026-01-11T11:26:46.000",
+    "formattedDate": "Jan 11, 2026",
+    "description": "My experience merging an 11ty static site and API into a single Cloudflare Worker, plus a bash script to delete old Pages deployments when the dashboard won&#39;t let you.",
+    "Author": "Alex Zappa",
+    "slugifiedAuthor": "alex-zappa",
+    "AuthorSite": "https://alex.zappa.dev",
+    "AuthorSiteDescription": "I am writing about my experiences as a naval navel-gazer.",
+    "socialLinks": {
+      "mastodon": "",
+      "bluesky": "",
+      "youtube": "",
+      "github": "https://github.com/reatlat",
+      "linkedin": "https://www.linkedin.com/in/reatlat/"
+    },
+    "favicon": "/img/favicons/alex-zappa-dev-favicon.jpg",
+    "rssLink": "https://alex.zappa.dev/feed.xml",
+    "Categories": ["Configuration", "Deployment"]
+  },
+  {
+    "Issue": "83",
+    "Type": "blog post",
+    "Title": "Added Eleventy-Fetch to the Site",
+    "slugifiedTitle": "added-eleventy-fetch-to-the-site",
+    "Link": "https://johnwargo.com/posts/2026/added-eleventy-fetch/",
+    "Date": "2026-01-13T08:01:13.000",
+    "formattedDate": "Jan 13, 2026",
+    "description": "The article discusses how the Eleventy Fetch plugin can be used to cache API requests in al 11ty site. By making a few changes to the code, the plugin handles data processing automatically. This simplifies the code and reduces the need for manual data conversion. Additionally, the plugin supports cu",
+    "Author": "John M. Wargo",
+    "slugifiedAuthor": "john-m-wargo",
+    "AuthorSite": "https://johnwargo.com",
+    "AuthorSiteDescription": "Internet Home of John M. Wargo",
+    "socialLinks": {
+      "mastodon": "https://mastodon.social/@johnwargo",
+      "bluesky": "",
+      "youtube": "",
+      "github": "https://github.com/johnwargo",
+      "linkedin": ""
+    },
+    "favicon": "/img/favicons/johnwargo-com-favicon.png",
+    "rssLink": "https://johnwargo.com/feed.xml",
+    "Categories": ["How to...", "Plugins", "Remote Data"]
+  },
+  {
+    "Issue": "83",
+    "Type": "site",
+    "Title": "Jason Pamental",
+    "description": "I’m an expert web typographer, design strategist, UX leader, technologist, and Invited Expert on the W3C Web Fonts Working Group.",
+    "Link": "https://www.rwt.io/",
+    "Date": "2026-01-13T09:36:21.000",
+    "formattedDate": "Jan 13, 2026",
+    "favicon": "/img/favicons/www-rwt-io-favicon.jpg"
+  },
+  {
+    "Issue": "83",
+    "Type": "site",
+    "Title": "Studio CiTA",
+    "description": "Studio CiTA is an experienced engineering studio that specializes in developing challenging websites and performing online stores.",
+    "Link": "https://www.cita.hr/",
+    "Date": "2026-01-13T16:03:35.000",
+    "formattedDate": "Jan 13, 2026",
+    "favicon": "/img/favicons/www-cita-hr-favicon.png"
   }
 ]
