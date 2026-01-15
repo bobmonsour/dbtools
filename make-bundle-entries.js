@@ -169,6 +169,8 @@ const selectDataset = async () => {
     config.showcaseDataPath = showcaseDataPath;
     config.dbBackupDir = dbBackupDir;
     config.dbFileDir = "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb";
+    config.issueRecordsPath =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/issuerecords.json";
 
     console.log(chalk.green("\n✓ Using Production dataset (11tybundledb)\n"));
   } else {
@@ -185,6 +187,8 @@ const selectDataset = async () => {
     config.dbBackupDir = dbBackupDir;
     config.dbFileDir =
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata";
+    config.issueRecordsPath =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/issuerecords.json";
 
     console.log(chalk.green("\n✓ Using Development dataset (devdata)\n"));
   }
@@ -735,6 +739,10 @@ const enterSite = async () => {
         console.log(
           chalk.green(`  ✓ Leaderboard link found: ${leaderboardLink}`)
         );
+      } else {
+        console.log(
+          chalk.gray("  ℹ Leaderboard link not found (not added to data)")
+        );
       }
     }
   }
@@ -1202,6 +1210,10 @@ const editSite = async () => {
           console.log(
             chalk.green(`  ✓ Leaderboard link found: ${leaderboardLink}`)
           );
+        } else {
+          console.log(
+            chalk.gray("  ℹ Leaderboard link not found (not added to data)")
+          );
         }
       }
     }
@@ -1229,6 +1241,10 @@ const editSite = async () => {
         if (leaderboardLink) {
           console.log(
             chalk.green(`  ✓ Leaderboard link found: ${leaderboardLink}`)
+          );
+        } else {
+          console.log(
+            chalk.gray("  ℹ Leaderboard link not found (not added to data)")
           );
         }
         shouldUpdateShowcase = true;

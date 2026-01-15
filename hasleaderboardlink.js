@@ -84,15 +84,17 @@ export const hasLeaderboardLink = async (link) => {
       }
     }
 
-    // No valid URL found, cache false to avoid repeated checks
-    await cache.save(false, cacheDuration.leaderboardLink);
+    // No valid URL found, cache null to avoid repeated checks
+    try {
+      await cache.save(null, cacheDuration.leaderboardLink);
+    } catch (cacheErr) {
+      // Silently ignore cache save errors when no leaderboard link exists
+    }
     return false;
   } catch (err) {
     const timestamp = new Date().toISOString();
     const errorMessage = `[${timestamp}] ${originalDomain}: ${err.message}\n`;
-    console.log(
-      `Error checking leaderboard link for ${originalDomain}: ${err.message}`
-    );
+    console.log(`Leaderboard link not found for ${originalDomain}`);
     appendFileSync("./log/leaderboard-fetch-errors.txt", errorMessage);
     return false;
   }
