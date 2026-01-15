@@ -28,8 +28,9 @@ import util from "util";
 import slugify from "@sindresorhus/slugify";
 
 // Get the location of the bundle database file
-const dbFilePath = config.dbFilePath;
-const showcaseDataPath = config.showcaseDataPath;
+let dbFilePath = config.dbFilePath;
+let showcaseDataPath = config.showcaseDataPath;
+let dbBackupDir = config.dbBackupDir;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const screenshotDir = path.join(__dirname, "screenshots");
 const productionScreenshotDir = path.join(
@@ -138,6 +139,61 @@ const displayExistingAuthorMetadata = (metadata) => {
     chalk.white(`  LinkedIn: ${metadata.socialLinks.linkedin || "(empty)"}`)
   );
   console.log(chalk.cyan("================================\n"));
+};
+
+// Function to prompt for dataset selection and update runtime configuration
+const selectDataset = async () => {
+  const datasetChoice = await rawlist({
+    message: "Select which dataset to use:",
+    choices: [
+      { name: "Production dataset (11tybundledb)", value: "production" },
+      {
+        name: "Development dataset (devdata in this project)",
+        value: "development",
+      },
+    ],
+    default: "production",
+  });
+
+  // Update runtime configuration based on selection
+  if (datasetChoice === "production") {
+    dbFilePath =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/bundledb.json";
+    showcaseDataPath =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/showcase-data.json";
+    dbBackupDir =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/db_backups";
+
+    // Update config object for utilities that reference it
+    config.dbFilePath = dbFilePath;
+    config.showcaseDataPath = showcaseDataPath;
+    config.dbBackupDir = dbBackupDir;
+    config.dbFileDir = "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb";
+
+    console.log(chalk.green("\n✓ Using Production dataset (11tybundledb)\n"));
+  } else {
+    dbFilePath =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/bundledb.json";
+    showcaseDataPath =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/showcase-data.json";
+    dbBackupDir =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/bundledb-backups";
+
+    // Update config object for utilities that reference it
+    config.dbFilePath = dbFilePath;
+    config.showcaseDataPath = showcaseDataPath;
+    config.dbBackupDir = dbBackupDir;
+    config.dbFileDir =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata";
+
+    console.log(chalk.green("\n✓ Using Development dataset (devdata)\n"));
+  }
+
+  // Refresh category and author lists from the selected database
+  const result = getUniqueCategories();
+  uniqueCategoryChoices = result.uniqueCategoryChoices;
+  uniqueCategories = result.uniqueCategories;
+  uniqueAuthors = getUniqueAuthors();
 };
 
 // Generate a date string that includes date and time in local timezone
@@ -1489,15 +1545,6 @@ const main = async () => {
     );
   }
 
-  // make a backup of the file before creating new entries
-  // make a single backup per entry/editing session
-  if (!backedUp) {
-    makeBackupFile(dbFilePath);
-    const inputFilePath = dbFilePath;
-    makeBackupFile(inputFilePath);
-    backedUp = true;
-  }
-
   const entryType = await rawlist({
     message: "Type of entry:",
     choices: [
@@ -1508,6 +1555,20 @@ const main = async () => {
       { value: "Generate issue records" },
     ],
   });
+
+  // Prompt for dataset selection (unless generating issue records)
+  if (entryType !== "Generate issue records") {
+    await selectDataset();
+  }
+
+  // make a backup of the file before creating new entries
+  // make a single backup per entry/editing session
+  if (!backedUp) {
+    makeBackupFile(dbFilePath);
+    const inputFilePath = dbFilePath;
+    makeBackupFile(inputFilePath);
+    backedUp = true;
+  }
 
   switch (entryType) {
     case "post":
