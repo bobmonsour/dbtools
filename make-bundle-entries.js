@@ -48,6 +48,42 @@ let browser = null;
 let { uniqueCategoryChoices, uniqueCategories } = getUniqueCategories();
 let uniqueAuthors = [];
 
+// ============================================================================
+// FORMATTING HELPERS
+// ============================================================================
+
+// Indentation constant
+const INDENT = "    "; // 4 spaces
+
+// Styled output helpers
+const separator = () => console.log(chalk.dim("---"));
+const blankLine = () => console.log();
+const sectionHeader = (text) => {
+  blankLine();
+  console.log(chalk.yellow(text));
+};
+const promptLabel = (text) => console.log(chalk.cyan(text));
+const dataField = (label, value) =>
+  console.log(chalk.white(`${INDENT}${label}: ${value}`));
+const successMessage = (text) => {
+  blankLine();
+  console.log(chalk.green(`${INDENT}${text}`));
+  blankLine();
+};
+const errorMessage = (text) => {
+  blankLine();
+  console.log(chalk.red(`${INDENT}${text}`));
+  blankLine();
+};
+const infoMessage = (text) => {
+  blankLine();
+  console.log(chalk.white(`${INDENT}${text}`));
+  blankLine();
+};
+const statusMessage = (text) => console.log(chalk.cyan(`${INDENT}${text}`));
+
+// ============================================================================
+
 // Function to get unique authors from blog posts in the production database
 const getUniqueAuthors = () => {
   try {
@@ -59,7 +95,9 @@ const getUniqueAuthors = () => {
       .filter((author) => author && author.trim() !== "");
     return [...new Set(authors)].sort();
   } catch (err) {
-    console.error(chalk.red("Error reading authors from database:", err));
+    console.error(
+      chalk.red(`${INDENT}Error reading authors from database: ${err.message}`)
+    );
     return [];
   }
 };
@@ -103,42 +141,38 @@ const getExistingAuthorMetadata = (authorName) => {
       postDate: mostRecentPost.Date,
     };
   } catch (err) {
-    console.error(chalk.red("Error reading author metadata:", err));
+    console.error(
+      chalk.red(`${INDENT}Error reading author metadata: ${err.message}`)
+    );
     return null;
   }
 };
 
 // Function to display existing author metadata
 const displayExistingAuthorMetadata = (metadata) => {
-  console.log(chalk.cyan("\n=== Existing Author Metadata ==="));
+  blankLine();
+  separator();
+  sectionHeader("Existing Author Metadata");
   console.log(
-    chalk.gray(`From: "${metadata.postTitle}" (${metadata.postDate})`)
+    chalk.dim(`${INDENT}From: "${metadata.postTitle}" (${metadata.postDate})`)
   );
-  console.log(chalk.white(`AuthorSite: ${metadata.AuthorSite || "(empty)"}`));
-  console.log(
-    chalk.white(
-      `AuthorSiteDescription: ${metadata.AuthorSiteDescription || "(empty)"}`
-    )
+  blankLine();
+  dataField("AuthorSite", metadata.AuthorSite || "(empty)");
+  dataField(
+    "AuthorSiteDescription",
+    metadata.AuthorSiteDescription || "(empty)"
   );
-  console.log(chalk.white(`RSS Link: ${metadata.rssLink || "(empty)"}`));
-  console.log(chalk.white(`Favicon: ${metadata.favicon || "(empty)"}`));
-  console.log(chalk.white("Social Links:"));
-  console.log(
-    chalk.white(`  Mastodon: ${metadata.socialLinks.mastodon || "(empty)"}`)
-  );
-  console.log(
-    chalk.white(`  Bluesky: ${metadata.socialLinks.bluesky || "(empty)"}`)
-  );
-  console.log(
-    chalk.white(`  YouTube: ${metadata.socialLinks.youtube || "(empty)"}`)
-  );
-  console.log(
-    chalk.white(`  GitHub: ${metadata.socialLinks.github || "(empty)"}`)
-  );
-  console.log(
-    chalk.white(`  LinkedIn: ${metadata.socialLinks.linkedin || "(empty)"}`)
-  );
-  console.log(chalk.cyan("================================\n"));
+  dataField("RSS Link", metadata.rssLink || "(empty)");
+  dataField("Favicon", metadata.favicon || "(empty)");
+  blankLine();
+  console.log(chalk.white(`${INDENT}Social Links:`));
+  dataField("  Mastodon", metadata.socialLinks.mastodon || "(empty)");
+  dataField("  Bluesky", metadata.socialLinks.bluesky || "(empty)");
+  dataField("  YouTube", metadata.socialLinks.youtube || "(empty)");
+  dataField("  GitHub", metadata.socialLinks.github || "(empty)");
+  dataField("  LinkedIn", metadata.socialLinks.linkedin || "(empty)");
+  separator();
+  blankLine();
 };
 
 // Function to prompt for dataset selection and update runtime configuration
@@ -172,7 +206,7 @@ const selectDataset = async () => {
     config.issueRecordsPath =
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/issuerecords.json";
 
-    console.log(chalk.green("\n✓ Using Production dataset (11tybundledb)\n"));
+    successMessage("✓ Using Production dataset (11tybundledb)");
   } else {
     dbFilePath =
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/bundledb.json";
@@ -190,7 +224,7 @@ const selectDataset = async () => {
     config.issueRecordsPath =
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/issuerecords.json";
 
-    console.log(chalk.green("\n✓ Using Development dataset (devdata)\n"));
+    successMessage("✓ Using Development dataset (devdata)");
   }
 
   // Refresh category and author lists from the selected database
@@ -247,7 +281,8 @@ const normalizeUrl = (url) => {
 // Initialize browser for screenshot capture (lazy loading)
 const initBrowser = async () => {
   if (!browser) {
-    console.log(chalk.cyan("Launching browser for screenshots..."));
+    blankLine();
+    statusMessage("Launching browser for screenshots...");
     browser = await puppeteer.launch();
   }
   return browser;
@@ -280,7 +315,7 @@ const renameExistingScreenshot = (screenshotPath) => {
 
   try {
     fs.renameSync(screenshotPath, newPath);
-    console.log(chalk.gray(`  Renamed old screenshot to: ${newName}`));
+    console.log(chalk.dim(`${INDENT}Renamed old screenshot to: ${newName}`));
   } catch (error) {
     console.log(
       chalk.yellow(`  Could not rename old screenshot: ${error.message}`)
@@ -336,10 +371,10 @@ const captureScreenshot = async (url, filename) => {
 
     await page.close();
 
-    console.log(chalk.green(`  ✓ Screenshot captured: ${filename}`));
+    console.log(chalk.green(`${INDENT}✓ Screenshot captured: ${filename}`));
     return `/screenshots/${filename}`;
   } catch (error) {
-    console.log(chalk.red(`  ✗ Screenshot failed: ${error.message}`));
+    console.log(chalk.red(`${INDENT}✗ Screenshot failed: ${error.message}`));
     return null;
   }
 };
@@ -377,7 +412,7 @@ const loadShowcaseData = () => {
     return [];
   } catch (error) {
     console.log(
-      chalk.yellow(`Could not load showcase-data.json: ${error.message}`)
+      chalk.red(`${INDENT}Could not load showcase-data.json: ${error.message}`)
     );
     return [];
   }
@@ -390,10 +425,12 @@ const saveShowcaseData = (data) => {
     data.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     fs.writeFileSync(showcaseDataPath, JSON.stringify(data, null, 2));
-    console.log(chalk.green("  ✓ showcase-data.json updated"));
+    console.log(chalk.green(`${INDENT}✓ showcase-data.json updated`));
   } catch (error) {
     console.log(
-      chalk.red(`  ✗ Could not save showcase-data.json: ${error.message}`)
+      chalk.red(
+        `${INDENT}✗ Could not save showcase-data.json: ${error.message}`
+      )
     );
   }
 };
@@ -408,18 +445,22 @@ const findShowcaseEntry = (showcaseData, url) => {
 
 // Display showcase entry in formatted style
 const displayShowcaseEntry = (showcaseEntry) => {
-  console.log(chalk.blue("\n--- Showcase Entry ---"));
-  console.log(chalk.cyan("Title:"), showcaseEntry.title);
-  console.log(chalk.cyan("Description:"), showcaseEntry.description);
-  console.log(chalk.cyan("Link:"), showcaseEntry.link);
-  console.log(chalk.cyan("Date:"), showcaseEntry.date);
-  console.log(chalk.cyan("Formatted Date:"), showcaseEntry.formattedDate);
-  console.log(chalk.cyan("Favicon:"), showcaseEntry.favicon);
-  console.log(chalk.cyan("Screenshot Path:"), showcaseEntry.screenshotpath);
+  blankLine();
+  separator();
+  sectionHeader("Showcase Entry");
+  blankLine();
+  dataField("Title", showcaseEntry.title);
+  dataField("Description", showcaseEntry.description);
+  dataField("Link", showcaseEntry.link);
+  dataField("Date", showcaseEntry.date);
+  dataField("Formatted Date", showcaseEntry.formattedDate);
+  dataField("Favicon", showcaseEntry.favicon);
+  dataField("Screenshot Path", showcaseEntry.screenshotpath);
   if (showcaseEntry.leaderboardLink) {
-    console.log(chalk.cyan("Leaderboard Link:"), showcaseEntry.leaderboardLink);
+    dataField("Leaderboard Link", showcaseEntry.leaderboardLink);
   }
-  console.log(chalk.blue("--- End Showcase Entry ---\n"));
+  separator();
+  blankLine();
 };
 
 // Function to generate a default date for the entry
@@ -562,7 +603,10 @@ const enterPost = async () => {
   let useExistingMetadata = false;
 
   if (existingMetadata) {
-    console.log(chalk.green(`\nFound existing metadata for author: ${Author}`));
+    blankLine();
+    console.log(
+      chalk.green(`${INDENT}Found existing metadata for author: ${Author}`)
+    );
     displayExistingAuthorMetadata(existingMetadata);
 
     useExistingMetadata = await confirm({
@@ -571,7 +615,8 @@ const enterPost = async () => {
     });
 
     if (!useExistingMetadata) {
-      console.log(chalk.yellow("Will fetch fresh metadata from website..."));
+      blankLine();
+      statusMessage("Will fetch fresh metadata from website...");
     }
   }
 
@@ -609,7 +654,9 @@ const enterPost = async () => {
   try {
     description = (await getDescription(commonInfo.Link)) || "";
   } catch (error) {
-    console.log(chalk.yellow("Could not fetch description:", error.message));
+    console.log(
+      chalk.red(`${INDENT}Could not fetch description: ${error.message}`)
+    );
   }
 
   const siteToFetch =
@@ -617,13 +664,15 @@ const enterPost = async () => {
 
   // Use existing metadata or fetch fresh
   if (useExistingMetadata && existingMetadata) {
-    console.log(chalk.blue("Using existing author metadata..."));
+    blankLine();
+    statusMessage("Using existing author metadata...");
     authorSiteDescription = existingMetadata.AuthorSiteDescription;
     rssLink = existingMetadata.rssLink;
     socialLinks = existingMetadata.socialLinks;
     favicon = existingMetadata.favicon;
   } else {
-    console.log(chalk.blue("Fetching metadata..."));
+    blankLine();
+    statusMessage("Fetching metadata...");
 
     // Fetch AuthorSiteDescription if AuthorSite exists
     if (AuthorSite && AuthorSite.trim() !== "") {
@@ -631,9 +680,8 @@ const enterPost = async () => {
         authorSiteDescription = (await getDescription(AuthorSite)) || "";
       } catch (error) {
         console.log(
-          chalk.yellow(
-            "Could not fetch author site description:",
-            error.message
+          chalk.red(
+            `${INDENT}Could not fetch author site description: ${error.message}`
           )
         );
       }
@@ -642,19 +690,25 @@ const enterPost = async () => {
     try {
       rssLink = (await getRSSLink(siteToFetch)) || "";
     } catch (error) {
-      console.log(chalk.yellow("Could not fetch RSS link:", error.message));
+      console.log(
+        chalk.red(`${INDENT}Could not fetch RSS link: ${error.message}`)
+      );
     }
 
     try {
       socialLinks = (await getSocialLinks(siteToFetch)) || socialLinks;
     } catch (error) {
-      console.log(chalk.yellow("Could not fetch social links:", error.message));
+      console.log(
+        chalk.red(`${INDENT}Could not fetch social links: ${error.message}`)
+      );
     }
 
     try {
       favicon = (await getFavicon(siteToFetch, "post")) || "";
     } catch (error) {
-      console.log(chalk.yellow("Could not fetch favicon:", error.message));
+      console.log(
+        chalk.red(`${INDENT}Could not fetch favicon: ${error.message}`)
+      );
     }
   }
 
@@ -697,20 +751,25 @@ const enterSite = async () => {
   });
 
   // Fetch metadata
-  console.log(chalk.blue("Fetching metadata..."));
+  blankLine();
+  statusMessage("Fetching metadata...");
   let description = "";
   let favicon = "";
 
   try {
     description = (await getDescription(commonInfo.Link)) || "";
   } catch (error) {
-    console.log(chalk.yellow("Could not fetch description:", error.message));
+    console.log(
+      chalk.red(`${INDENT}Could not fetch description: ${error.message}`)
+    );
   }
 
   try {
     favicon = (await getFavicon(commonInfo.Link, "site")) || "";
   } catch (error) {
-    console.log(chalk.yellow("Could not fetch favicon:", error.message));
+    console.log(
+      chalk.red(`${INDENT}Could not fetch favicon: ${error.message}`)
+    );
   }
 
   // Prompt for screenshot capture
@@ -723,7 +782,8 @@ const enterSite = async () => {
   let leaderboardLink = null;
 
   if (captureScreenshotPrompt) {
-    console.log(chalk.blue("Capturing screenshot..."));
+    blankLine();
+    statusMessage("Capturing screenshot...");
 
     // Generate filename
     const { filename } = await genScreenshotFilename(commonInfo.Link);
@@ -733,15 +793,16 @@ const enterSite = async () => {
 
     // Check for leaderboard link if screenshot succeeded
     if (screenshotpath) {
-      console.log(chalk.blue("Checking for leaderboard link..."));
+      blankLine();
+      statusMessage("Checking for leaderboard link...");
       leaderboardLink = await hasLeaderboardLink(commonInfo.Link);
       if (leaderboardLink) {
         console.log(
-          chalk.green(`  ✓ Leaderboard link found: ${leaderboardLink}`)
+          chalk.green(`${INDENT}✓ Leaderboard link found: ${leaderboardLink}`)
         );
       } else {
         console.log(
-          chalk.gray("  ℹ Leaderboard link not found (not added to data)")
+          chalk.dim(`${INDENT}ℹ Leaderboard link not found (not added to data)`)
         );
       }
     }
@@ -761,7 +822,8 @@ const enterSite = async () => {
   // Add to showcase-data.json if screenshot was captured
   if (screenshotpath) {
     try {
-      console.log(chalk.blue("Adding entry to showcase-data.json..."));
+      blankLine();
+      statusMessage("Adding entry to showcase-data.json...");
 
       // Backup showcase-data.json
       if (fs.existsSync(showcaseDataPath)) {
@@ -776,7 +838,7 @@ const enterSite = async () => {
       if (existingIndex >= 0) {
         console.log(
           chalk.yellow(
-            "  Entry already exists in showcase-data.json, updating..."
+            `${INDENT}Entry already exists in showcase-data.json, updating...`
           )
         );
         showcaseData[existingIndex] = transformToShowcaseFormat(
@@ -798,7 +860,9 @@ const enterSite = async () => {
       saveShowcaseData(showcaseData);
     } catch (error) {
       console.log(
-        chalk.red(`  ✗ Error updating showcase-data.json: ${error.message}`)
+        chalk.red(
+          `${INDENT}✗ Error updating showcase-data.json: ${error.message}`
+        )
       );
     }
   }
@@ -819,7 +883,9 @@ const enterRelease = async () => {
   try {
     description = (await getDescription(commonInfo.Link)) || "";
   } catch (error) {
-    console.log(chalk.yellow("Could not fetch description:", error.message));
+    console.log(
+      chalk.red(`${INDENT}Could not fetch description: ${error.message}`)
+    );
   }
 
   entryData = {
@@ -851,17 +917,18 @@ const enterStarter = async () => {
   });
 
   // Fetch description from GitHub repo
-  console.log(chalk.blue("Fetching metadata..."));
+  blankLine();
+  statusMessage("Fetching metadata...");
   let description = "";
 
   try {
     description = (await getGitHubDescription(commonInfo.Link)) || "";
     if (description) {
-      console.log(chalk.green("  ✓ Description fetched from GitHub"));
+      console.log(chalk.green(`${INDENT}✓ Description fetched from GitHub`));
     }
   } catch (error) {
     console.log(
-      chalk.yellow("Could not fetch GitHub description:", error.message)
+      chalk.red(`${INDENT}Could not fetch GitHub description: ${error.message}`)
     );
   }
 
@@ -870,11 +937,15 @@ const enterStarter = async () => {
     try {
       description = (await getDescription(Demo)) || "";
       if (description) {
-        console.log(chalk.green("  ✓ Description fetched from Demo site"));
+        console.log(
+          chalk.green(`${INDENT}✓ Description fetched from Demo site`)
+        );
       }
     } catch (error) {
       console.log(
-        chalk.yellow("Could not fetch Demo site description:", error.message)
+        chalk.red(
+          `${INDENT}Could not fetch Demo site description: ${error.message}`
+        )
       );
     }
   }
@@ -889,7 +960,8 @@ const enterStarter = async () => {
     });
 
     if (captureScreenshotPrompt) {
-      console.log(chalk.blue("Capturing screenshot..."));
+      blankLine();
+      statusMessage("Capturing screenshot...");
 
       // Generate filename from Demo URL
       const { filename } = await genScreenshotFilename(Demo);
@@ -962,7 +1034,8 @@ const editPost = async () => {
   });
 
   // Fetch metadata
-  console.log(chalk.blue("Fetching metadata..."));
+  blankLine();
+  statusMessage("Fetching metadata...");
   let description = "";
   let authorSiteDescription = "";
   let rssLink = "";
@@ -978,7 +1051,9 @@ const editPost = async () => {
   try {
     description = (await getDescription(commonInfo.Link)) || "";
   } catch (error) {
-    console.log(chalk.yellow("Could not fetch description:", error.message));
+    console.log(
+      chalk.red(`${INDENT}Could not fetch description: ${error.message}`)
+    );
   }
 
   const siteToFetch =
@@ -993,7 +1068,9 @@ const editPost = async () => {
         "";
     } catch (error) {
       console.log(
-        chalk.yellow("Could not fetch author site description:", error.message)
+        chalk.red(
+          `${INDENT}Could not fetch author site description: ${error.message}`
+        )
       );
       // Preserve existing value if fetch fails
       authorSiteDescription = entryData.AuthorSiteDescription || "";
@@ -1003,27 +1080,33 @@ const editPost = async () => {
   try {
     rssLink = (await getRSSLink(siteToFetch)) || "";
   } catch (error) {
-    console.log(chalk.yellow("Could not fetch RSS link:", error.message));
+    console.log(
+      chalk.red(`${INDENT}Could not fetch RSS link: ${error.message}`)
+    );
   }
 
   try {
     socialLinks = (await getSocialLinks(siteToFetch)) || socialLinks;
   } catch (error) {
-    console.log(chalk.yellow("Could not fetch social links:", error.message));
+    console.log(
+      chalk.red(`${INDENT}Could not fetch social links: ${error.message}`)
+    );
   }
 
   try {
     favicon = (await getFavicon(siteToFetch, "post")) || "";
   } catch (error) {
-    console.log(chalk.yellow("Could not fetch favicon:", error.message));
+    console.log(
+      chalk.red(`${INDENT}Could not fetch favicon: ${error.message}`)
+    );
   }
 
   // Prompt for enrichment data editing
-  console.log(
-    chalk.blue(
-      "\nReview and edit enrichment data (press Enter to keep fetched value):"
-    )
-  );
+  blankLine();
+  separator();
+  sectionHeader("Review and Edit Enrichment Data");
+  console.log(chalk.white(`${INDENT}Press Enter to keep fetched value`));
+  blankLine();
 
   description = await input({
     message: "Post description:",
@@ -1111,28 +1194,33 @@ const editSite = async () => {
   });
 
   // Fetch metadata
-  console.log(chalk.blue("Fetching metadata..."));
+  blankLine();
+  statusMessage("Fetching metadata...");
   let description = "";
   let favicon = "";
 
   try {
     description = (await getDescription(commonInfo.Link)) || "";
   } catch (error) {
-    console.log(chalk.yellow("Could not fetch description:", error.message));
+    console.log(
+      chalk.red(`${INDENT}Could not fetch description: ${error.message}`)
+    );
   }
 
   try {
     favicon = (await getFavicon(commonInfo.Link, "site")) || "";
   } catch (error) {
-    console.log(chalk.yellow("Could not fetch favicon:", error.message));
+    console.log(
+      chalk.red(`${INDENT}Could not fetch favicon: ${error.message}`)
+    );
   }
 
   // Prompt for enrichment data editing
-  console.log(
-    chalk.blue(
-      "\nReview and edit enrichment data (press Enter to keep fetched value):"
-    )
-  );
+  blankLine();
+  separator();
+  sectionHeader("Review and Edit Enrichment Data");
+  console.log(chalk.white(`${INDENT}Press Enter to keep fetched value`));
+  blankLine();
 
   description = await input({
     message: "Description:",
@@ -1153,11 +1241,11 @@ const editSite = async () => {
   let showcaseLeaderboardLink = null;
 
   if (existingIndex >= 0) {
-    console.log(
-      chalk.blue(
-        "\nReview and edit showcase-specific data (press Enter to keep current value):"
-      )
-    );
+    blankLine();
+    separator();
+    sectionHeader("Review and Edit Showcase-Specific Data");
+    console.log(chalk.white(`${INDENT}Press Enter to keep current value`));
+    blankLine();
 
     showcaseScreenshotPath = await input({
       message: "Screenshot path:",
@@ -1188,7 +1276,8 @@ const editSite = async () => {
     });
 
     if (regeneratePrompt) {
-      console.log(chalk.blue("Capturing screenshot..."));
+      blankLine();
+      statusMessage("Capturing screenshot...");
 
       // Generate filename
       const { filename } = await genScreenshotFilename(commonInfo.Link);
@@ -1203,16 +1292,19 @@ const editSite = async () => {
         screenshotpath = newScreenshotPath;
 
         // Check for leaderboard link if screenshot succeeded
-        console.log(chalk.blue("Checking for leaderboard link..."));
+        blankLine();
+        statusMessage("Checking for leaderboard link...");
         const newLeaderboardLink = await hasLeaderboardLink(commonInfo.Link);
         if (newLeaderboardLink) {
           leaderboardLink = newLeaderboardLink;
           console.log(
-            chalk.green(`  ✓ Leaderboard link found: ${leaderboardLink}`)
+            chalk.green(`${INDENT}✓ Leaderboard link found: ${leaderboardLink}`)
           );
         } else {
           console.log(
-            chalk.gray("  ℹ Leaderboard link not found (not added to data)")
+            chalk.dim(
+              `${INDENT}ℹ Leaderboard link not found (not added to data)`
+            )
           );
         }
       }
@@ -1226,7 +1318,8 @@ const editSite = async () => {
     });
 
     if (captureScreenshotPrompt) {
-      console.log(chalk.blue("Capturing screenshot..."));
+      blankLine();
+      statusMessage("Capturing screenshot...");
 
       // Generate filename
       const { filename } = await genScreenshotFilename(commonInfo.Link);
@@ -1236,15 +1329,18 @@ const editSite = async () => {
 
       // Check for leaderboard link if screenshot succeeded
       if (screenshotpath) {
-        console.log(chalk.blue("Checking for leaderboard link..."));
+        blankLine();
+        statusMessage("Checking for leaderboard link...");
         leaderboardLink = await hasLeaderboardLink(commonInfo.Link);
         if (leaderboardLink) {
           console.log(
-            chalk.green(`  ✓ Leaderboard link found: ${leaderboardLink}`)
+            chalk.green(`${INDENT}✓ Leaderboard link found: ${leaderboardLink}`)
           );
         } else {
           console.log(
-            chalk.gray("  ℹ Leaderboard link not found (not added to data)")
+            chalk.dim(
+              `${INDENT}ℹ Leaderboard link not found (not added to data)`
+            )
           );
         }
         shouldUpdateShowcase = true;
@@ -1266,7 +1362,8 @@ const editSite = async () => {
   // Update showcase-data.json if needed
   if (shouldUpdateShowcase && screenshotpath) {
     try {
-      console.log(chalk.blue("Updating showcase-data.json..."));
+      blankLine();
+      statusMessage("Updating showcase-data.json...");
 
       // Backup showcase-data.json
       if (fs.existsSync(showcaseDataPath)) {
@@ -1290,7 +1387,9 @@ const editSite = async () => {
       saveShowcaseData(showcaseData);
     } catch (error) {
       console.log(
-        chalk.red(`  ✗ Error updating showcase-data.json: ${error.message}`)
+        chalk.red(
+          `${INDENT}✗ Error updating showcase-data.json: ${error.message}`
+        )
       );
     }
   }
@@ -1311,15 +1410,17 @@ const editRelease = async () => {
   try {
     description = (await getDescription(commonInfo.Link)) || "";
   } catch (error) {
-    console.log(chalk.yellow("Could not fetch description:", error.message));
+    console.log(
+      chalk.red(`${INDENT}Could not fetch description: ${error.message}`)
+    );
   }
 
   // Prompt for enrichment data editing
-  console.log(
-    chalk.blue(
-      "\nReview and edit enrichment data (press Enter to keep fetched value):"
-    )
-  );
+  blankLine();
+  separator();
+  sectionHeader("Review and Edit Enrichment Data");
+  console.log(chalk.white(`${INDENT}Press Enter to keep fetched value`));
+  blankLine();
 
   description = await input({
     message: "Description:",
@@ -1355,17 +1456,18 @@ const editStarter = async () => {
   });
 
   // Fetch metadata
-  console.log(chalk.blue("Fetching metadata..."));
+  blankLine();
+  statusMessage("Fetching metadata...");
   let description = "";
 
   try {
     description = (await getGitHubDescription(commonInfo.Link)) || "";
     if (description) {
-      console.log(chalk.green("  ✓ Description fetched from GitHub"));
+      console.log(chalk.green(`${INDENT}✓ Description fetched from GitHub`));
     }
   } catch (error) {
     console.log(
-      chalk.yellow("Could not fetch GitHub description:", error.message)
+      chalk.red(`${INDENT}Could not fetch GitHub description: ${error.message}`)
     );
   }
 
@@ -1374,11 +1476,15 @@ const editStarter = async () => {
     try {
       description = (await getDescription(Demo)) || "";
       if (description) {
-        console.log(chalk.green("  ✓ Description fetched from Demo site"));
+        console.log(
+          chalk.green(`${INDENT}✓ Description fetched from Demo site`)
+        );
       }
     } catch (error) {
       console.log(
-        chalk.yellow("Could not fetch Demo site description:", error.message)
+        chalk.red(
+          `${INDENT}Could not fetch Demo site description: ${error.message}`
+        )
       );
     }
   }
@@ -1395,7 +1501,8 @@ const editStarter = async () => {
       });
 
       if (regenerateScreenshot) {
-        console.log(chalk.blue("Capturing screenshot..."));
+        blankLine();
+        statusMessage("Capturing screenshot...");
         const { filename } = await genScreenshotFilename(Demo);
         const newScreenshotPath = await captureScreenshot(Demo, filename);
         if (newScreenshotPath) {
@@ -1409,7 +1516,8 @@ const editStarter = async () => {
       });
 
       if (captureScreenshotPrompt) {
-        console.log(chalk.blue("Capturing screenshot..."));
+        blankLine();
+        statusMessage("Capturing screenshot...");
         const { filename } = await genScreenshotFilename(Demo);
         screenshotpath = await captureScreenshot(Demo, filename);
       }
@@ -1417,11 +1525,11 @@ const editStarter = async () => {
   }
 
   // Prompt for enrichment data editing
-  console.log(
-    chalk.blue(
-      "\nReview and edit enrichment data (press Enter to keep fetched value):"
-    )
-  );
+  blankLine();
+  separator();
+  sectionHeader("Review and Edit Enrichment Data");
+  console.log(chalk.white(`${INDENT}Press Enter to keep fetched value`));
+  blankLine();
 
   description = await input({
     message: "Starter description:",
@@ -1486,7 +1594,7 @@ const afterEntry = async () => {
           await editStarter();
           return;
         default:
-          console.log("Invalid EDIT type");
+          errorMessage("Invalid EDIT type");
           return;
       }
     case "save, push, & exit": // New case added here
@@ -1495,10 +1603,12 @@ const afterEntry = async () => {
       await pushChanges();
       return (nextAction = "exit");
     case "exit without saving":
-      console.log(chalk.yellow("Exiting without saving..."));
+      blankLine();
+      console.log(chalk.yellow(`${INDENT}Exiting without saving...`));
+      blankLine();
       return (nextAction = "exit");
     default:
-      console.log("Invalid choice");
+      errorMessage("Invalid choice");
       return;
   }
 };
@@ -1510,7 +1620,7 @@ const validateJsonObject = (data) => {
     JSON.parse(jsonString);
     return true;
   } catch (error) {
-    console.log("Error parsing JSON:", error.message);
+    errorMessage(`Error parsing JSON: ${error.message}`);
     return false;
   }
 };
@@ -1518,14 +1628,22 @@ const validateJsonObject = (data) => {
 // Function to append the validated entry data to the JSON file
 const appendToJsonFile = async (data) => {
   try {
-    console.log("Appending to JSON file...", data);
+    blankLine();
+    statusMessage("Appending to JSON file...");
+    console.log(
+      chalk.dim(
+        `${INDENT}${JSON.stringify(data, null, 2)
+          .split("\n")
+          .join("\n" + INDENT)}`
+      )
+    );
     const fileData = fs.readFileSync(dbFilePath, "utf8");
     const jsonData = JSON.parse(fileData);
     jsonData.push(data);
     fs.writeFileSync(dbFilePath, JSON.stringify(jsonData, null, 2), "utf8");
-    console.log(chalk.green("Entry successfully saved!"));
+    successMessage("Entry successfully saved!");
   } catch (error) {
-    console.error(chalk.red("Error writing to the file:", error));
+    errorMessage(`Error writing to the file: ${error.message}`);
   }
 };
 
@@ -1542,9 +1660,9 @@ const pushChanges = async () => {
     await execPromise(`git commit -m "Added to bundledb.json"`);
     await execPromise(`git push origin main`);
 
-    console.log(chalk.green("Changes pushed to the repository successfully!"));
+    successMessage("Changes pushed to the repository successfully!");
   } catch (error) {
-    console.error(chalk.red("Error pushing changes to the repository:", error));
+    errorMessage(`Error pushing changes to the repository: ${error.message}`);
   }
 };
 
@@ -1554,11 +1672,13 @@ const main = async () => {
   // Load unique authors for autocomplete (once per session)
   if (uniqueAuthors.length === 0) {
     uniqueAuthors = getUniqueAuthors();
+    blankLine();
     console.log(
       chalk.cyan(
-        `Loaded ${uniqueAuthors.length} unique authors for autocomplete`
+        `${INDENT}Loaded ${uniqueAuthors.length} unique authors for autocomplete`
       )
     );
+    blankLine();
   }
 
   const entryType = await rawlist({
@@ -1601,16 +1721,27 @@ const main = async () => {
       break;
     case "Generate issue records":
       await genIssueRecords();
-      console.log(chalk.green("Issue records generated successfully!"));
+      successMessage("Issue records generated successfully!");
       return;
     default:
-      console.log("Invalid ENTRY type");
+      errorMessage("Invalid ENTRY type");
       return;
   }
 
   // Validate if the entry data is a valid JSON object
   if (validateJsonObject(entryData)) {
-    console.log("Entry Data is a valid JSON object:", entryData);
+    blankLine();
+    separator();
+    sectionHeader("Entry Data");
+    console.log(
+      chalk.white(
+        `${INDENT}${JSON.stringify(entryData, null, 2)
+          .split("\n")
+          .join("\n" + INDENT)}`
+      )
+    );
+    separator();
+    blankLine();
 
     // Display showcase entry if this is a site and it exists
     if (entryData.Type === "site") {
@@ -1621,7 +1752,7 @@ const main = async () => {
       }
     }
   } else {
-    console.error(chalk.red("Entry Data is not a valid JSON object"));
+    errorMessage("Entry Data is not a valid JSON object");
   }
 
   while (nextAction !== "exit") {
@@ -1637,21 +1768,28 @@ const main = async () => {
   }
   const latestIssueNumber = getLatestIssueNumber();
   const itemCounts = countEntriesByIssue(latestIssueNumber);
+
   // Output the results
-  console.log(chalk.blue(`Issue Number: ${itemCounts.issueNumber}`));
-  console.log(chalk.green(`Blog Posts: ${itemCounts.blogPostCount}`));
-  console.log(chalk.green(`Sites: ${itemCounts.siteCount}`));
-  console.log(chalk.green(`Releases: ${itemCounts.releaseCount}`));
-  console.log(chalk.green(`Starters: ${itemCounts.starterCount}`));
+  blankLine();
+  separator();
+  sectionHeader(`Issue ${itemCounts.issueNumber} Summary`);
+  blankLine();
+  dataField("Blog Posts", itemCounts.blogPostCount);
+  dataField("Sites", itemCounts.siteCount);
+  dataField("Releases", itemCounts.releaseCount);
+  dataField("Starters", itemCounts.starterCount);
+  separator();
+  blankLine();
 
   // Close browser if it was initialized
   await closeBrowser();
 
-  console.log("All done...bye!");
+  console.log(chalk.cyan("All done...bye!"));
+  blankLine();
 };
 
 // Run the main function
 main().catch(async (error) => {
-  console.error(chalk.red("An error occurred:", error));
+  errorMessage(`An error occurred: ${error.message}`);
   await closeBrowser();
 });
