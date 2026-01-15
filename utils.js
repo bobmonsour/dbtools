@@ -50,9 +50,9 @@ function createDirIfNotExists(dir) {
 }
 
 // Function to create a backup of the file
-export async function makeBackupFile(inputFilePath) {
+export async function makeBackupFile(inputFilePath, customBackupDir = null) {
   // Get the backup directory location
-  const backupDir = config.dbBackupDir;
+  const backupDir = customBackupDir || config.dbBackupDir;
   try {
     // Ensure the backup directory exists
     await createDirIfNotExists(backupDir);

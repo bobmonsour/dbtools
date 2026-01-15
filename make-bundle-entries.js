@@ -827,7 +827,7 @@ const enterSite = async () => {
 
       // Backup showcase-data.json
       if (fs.existsSync(showcaseDataPath)) {
-        makeBackupFile(showcaseDataPath);
+        makeBackupFile(showcaseDataPath, config.showcaseBackupDir);
       }
 
       // Load showcase data
@@ -1367,7 +1367,7 @@ const editSite = async () => {
 
       // Backup showcase-data.json
       if (fs.existsSync(showcaseDataPath)) {
-        makeBackupFile(showcaseDataPath);
+        makeBackupFile(showcaseDataPath, config.showcaseBackupDir);
       }
 
       // Transform and update/add entry

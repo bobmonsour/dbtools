@@ -11,6 +11,8 @@ if (useTestData) {
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/bundledb.json",
     dbBackupDir:
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/bundledb-backups",
+    showcaseBackupDir:
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/showcase-data-backups",
     badLinksDir:
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/badlinks",
     issueRecordsPath:
@@ -27,7 +29,9 @@ if (useTestData) {
     dbFilePath:
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/bundledb.json",
     dbBackupDir:
-      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/db_backups",
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/bundledb-backups",
+    showcaseBackupDir:
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/showcase-data-backups",
     badLinksDir:
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/badlinks",
     issueRecordsPath:
