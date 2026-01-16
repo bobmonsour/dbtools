@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import fs from "fs";
-import readline from "readline";
+import { rawlist, input, confirm as confirmPrompt } from "@inquirer/prompts";
+import chalk from "chalk";
 import { config } from "./config.js";
 import { getDescription } from "./getdescription.js";
 import { getRSSLink } from "./getrsslink.js";
@@ -46,25 +47,56 @@ EXAMPLES:
   process.exit(0);
 }
 
-// Create readline interface for user input
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
-// Utility function to prompt user
-function question(query) {
-  return new Promise((resolve) => rl.question(query, resolve));
-}
-
 // Delay function to avoid overwhelming servers
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Function to prompt for dataset selection and update runtime configuration
+const selectDataset = async () => {
+  const datasetChoice = await rawlist({
+    message: "Select which dataset to use:",
+    choices: [
+      { name: "Production dataset (11tybundledb)", value: "production" },
+      {
+        name: "Development dataset (devdata in this project)",
+        value: "development",
+      },
+    ],
+    default: "production",
+  });
+
+  // Update runtime configuration based on selection
+  if (datasetChoice === "production") {
+    config.dbFilePath =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/bundledb.json";
+    config.dbBackupDir =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/bundledb-backups";
+    config.dbFileDir = "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb";
+
+    console.log(chalk.green("✓ Using Production dataset (11tybundledb)"));
+  } else {
+    config.dbFilePath =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/bundledb.json";
+    config.dbBackupDir =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/bundledb-backups";
+    config.dbFileDir =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata";
+
+    console.log(
+      chalk.green("✓ Using Development dataset (devdata in this project)")
+    );
+  }
+
+  console.log();
+};
 
 // Main function
 async function main() {
   try {
+    // Prompt for dataset selection
+    await selectDataset();
+
     // Read the bundledb file
-    console.log(`\nReading bundledb from: ${config.dbFilePath}\n`);
+    console.log(`Reading bundledb from: ${config.dbFilePath}\n`);
     const data = fs.readFileSync(config.dbFilePath, "utf8");
     const bundledb = JSON.parse(data);
 
@@ -72,12 +104,9 @@ async function main() {
 
     // Start the processing loop
     await processLoop(bundledb);
-
-    rl.close();
   } catch (error) {
     console.error("Error:", error.message);
     console.error(error.stack);
-    rl.close();
     process.exit(1);
   }
 }
@@ -86,28 +115,29 @@ async function main() {
 async function processLoop(bundledb) {
   while (true) {
     // Prompt user for processing option
-    const choice = await question(
-      "Do you want to process:\n" +
-        "  1. Entire file\n" +
-        "  2. Only a particular domain\n" +
-        "  3. Exit\n" +
-        "Enter choice (1, 2, or 3): "
-    );
+    const choice = await rawlist({
+      message: "Do you want to process:",
+      choices: [
+        { name: "Entire file", value: "1" },
+        { name: "Only a particular domain", value: "2" },
+        { name: "Exit", value: "3" },
+      ],
+    });
 
     let entriesToProcess = [];
     let manualRssLink = null;
     let fullDataset = [];
 
-    if (choice.trim() === "1") {
+    if (choice === "1") {
       // Process entire file
       fullDataset = bundledb;
       entriesToProcess = getEntriesWithEmptyFields(bundledb);
       console.log("\n=== Processing Entire File ===\n");
-    } else if (choice.trim() === "2") {
+    } else if (choice === "2") {
       // Process specific domain
-      const domain = await question(
-        "\nEnter the domain to filter (e.g., benmyers.dev): "
-      );
+      const domain = await input({
+        message: "Enter the domain to filter (e.g., benmyers.dev):",
+      });
       const domainEntries = filterByDomain(bundledb, domain.trim());
       fullDataset = domainEntries;
 
@@ -127,20 +157,23 @@ async function processLoop(bundledb) {
       }
 
       // Ask user how they want to process the domain
-      const domainChoice = await question(
-        "Do you want to:\n" +
-          "  1. Process all empty fields\n" +
-          "  2. Enter an RSS link\n" +
-          "Enter choice (1 or 2): "
-      );
+      const domainChoice = await rawlist({
+        message: "Do you want to:",
+        choices: [
+          { name: "Process all empty fields", value: "1" },
+          { name: "Enter an RSS link", value: "2" },
+        ],
+      });
 
-      if (domainChoice.trim() === "1") {
+      if (domainChoice === "1") {
         // Process all empty fields as normal
         entriesToProcess = domainEntriesWithEmpty;
         console.log(`\n=== Processing All Empty Fields ===\n`);
-      } else if (domainChoice.trim() === "2") {
+      } else if (domainChoice === "2") {
         // Get RSS link from user and apply to all empty rssLink fields
-        manualRssLink = await question("\nEnter the RSS link to use: ");
+        manualRssLink = await input({
+          message: "Enter the RSS link to use:",
+        });
         manualRssLink = manualRssLink.trim();
 
         // Filter for entries with empty rssLink only
@@ -166,7 +199,7 @@ async function processLoop(bundledb) {
         console.log("\nInvalid choice. Exiting.");
         return;
       }
-    } else if (choice.trim() === "3") {
+    } else if (choice === "3") {
       // Exit option
       console.log("\nExiting...\n");
       return;
@@ -181,7 +214,7 @@ async function processLoop(bundledb) {
     }
 
     // Display what will be processed for entire file
-    if (choice.trim() === "1") {
+    if (choice === "1") {
       if (manualRssLink) {
         console.log(
           `Found ${entriesToProcess.length} entries with empty rssLink field.\n`
@@ -193,14 +226,12 @@ async function processLoop(bundledb) {
     }
 
     // Confirm processing
-    const confirm = await question(
-      `\nProceed with filling in ${entriesToProcess.length} entries? (yes/no): `
-    );
+    const shouldProceed = await confirmPrompt({
+      message: `Proceed with filling in ${entriesToProcess.length} entries?`,
+      default: false,
+    });
 
-    if (
-      confirm.trim().toLowerCase() !== "yes" &&
-      confirm.trim().toLowerCase() !== "y"
-    ) {
+    if (!shouldProceed) {
       console.log("\nCancelled. No changes made.\n");
       continue; // Go back to the start
     }

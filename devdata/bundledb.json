@@ -3181,7 +3181,7 @@
       "linkedin": ""
     },
     "favicon": "/img/favicons/lea-codes-favicon.png",
-    "rssLink": "",
+    "rssLink": "https://lea.codes/rss.xml",
     "Categories": [
       "How to..."
     ]
@@ -12362,7 +12362,7 @@
       "linkedin": ""
     },
     "favicon": "/img/favicons/lea-codes-favicon.png",
-    "rssLink": "",
+    "rssLink": "https://lea.codes/rss.xml",
     "Categories": [
       "How to..."
     ]
@@ -23880,7 +23880,7 @@
       "linkedin": ""
     },
     "favicon": "/img/favicons/lea-codes-favicon.png",
-    "rssLink": "",
+    "rssLink": "https://lea.codes/rss.xml",
     "Categories": [
       "Configuration",
       "How to..."
