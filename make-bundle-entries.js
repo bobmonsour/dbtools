@@ -35,7 +35,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const screenshotDir = path.join(__dirname, "screenshots");
 const productionScreenshotDir = path.join(
   __dirname,
-  "../11tybundle.dev/content/screenshots"
+  "../11tybundle.dev/content/screenshots",
 );
 // Set db file backup state
 let backedUp = false;
@@ -96,7 +96,7 @@ const getUniqueAuthors = () => {
     return [...new Set(authors)].sort();
   } catch (err) {
     console.error(
-      chalk.red(`${INDENT}Error reading authors from database: ${err.message}`)
+      chalk.red(`${INDENT}Error reading authors from database: ${err.message}`),
     );
     return [];
   }
@@ -110,7 +110,7 @@ const getExistingAuthorMetadata = (authorName) => {
 
     // Filter blog posts by author
     const authorPosts = jsonData.filter(
-      (entry) => entry.Type === "blog post" && entry.Author === authorName
+      (entry) => entry.Type === "blog post" && entry.Author === authorName,
     );
 
     if (authorPosts.length === 0) {
@@ -142,7 +142,7 @@ const getExistingAuthorMetadata = (authorName) => {
     };
   } catch (err) {
     console.error(
-      chalk.red(`${INDENT}Error reading author metadata: ${err.message}`)
+      chalk.red(`${INDENT}Error reading author metadata: ${err.message}`),
     );
     return null;
   }
@@ -154,13 +154,13 @@ const displayExistingAuthorMetadata = (metadata) => {
   separator();
   sectionHeader("Existing Author Metadata");
   console.log(
-    chalk.dim(`${INDENT}From: "${metadata.postTitle}" (${metadata.postDate})`)
+    chalk.dim(`${INDENT}From: "${metadata.postTitle}" (${metadata.postDate})`),
   );
   blankLine();
   dataField("AuthorSite", metadata.AuthorSite || "(empty)");
   dataField(
     "AuthorSiteDescription",
-    metadata.AuthorSiteDescription || "(empty)"
+    metadata.AuthorSiteDescription || "(empty)",
   );
   dataField("RSS Link", metadata.rssLink || "(empty)");
   dataField("Favicon", metadata.favicon || "(empty)");
@@ -185,9 +185,16 @@ const selectDataset = async () => {
         name: "Development dataset (devdata in this project)",
         value: "development",
       },
+      { name: chalk.dim("Exit"), value: "exit" },
     ],
     default: "production",
   });
+
+  // Handle exit
+  if (datasetChoice === "exit") {
+    console.log(chalk.yellow("\n👋 Exiting...\n"));
+    process.exit(0);
+  }
 
   // Update runtime configuration based on selection
   if (datasetChoice === "production") {
@@ -196,7 +203,7 @@ const selectDataset = async () => {
     showcaseDataPath =
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/showcase-data.json";
     dbBackupDir =
-      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/db_backups";
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/bundledb-backups";
 
     // Update config object for utilities that reference it
     config.dbFilePath = dbFilePath;
@@ -318,7 +325,7 @@ const renameExistingScreenshot = (screenshotPath) => {
     console.log(chalk.dim(`${INDENT}Renamed old screenshot to: ${newName}`));
   } catch (error) {
     console.log(
-      chalk.yellow(`  Could not rename old screenshot: ${error.message}`)
+      chalk.yellow(`  Could not rename old screenshot: ${error.message}`),
     );
   }
 };
@@ -340,7 +347,7 @@ const captureScreenshot = async (url, filename) => {
 
     // Wait for page to fully render
     await new Promise((resolve) =>
-      setTimeout(resolve, fetchTimeout.screenshotDelay)
+      setTimeout(resolve, fetchTimeout.screenshotDelay),
     );
 
     // Generate paths
@@ -383,7 +390,7 @@ const captureScreenshot = async (url, filename) => {
 const transformToShowcaseFormat = (
   entry,
   screenshotpath,
-  leaderboardLink = null
+  leaderboardLink = null,
 ) => {
   const showcase = {
     title: entry.Title || "",
@@ -412,7 +419,7 @@ const loadShowcaseData = () => {
     return [];
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not load showcase-data.json: ${error.message}`)
+      chalk.red(`${INDENT}Could not load showcase-data.json: ${error.message}`),
     );
     return [];
   }
@@ -429,8 +436,8 @@ const saveShowcaseData = (data) => {
   } catch (error) {
     console.log(
       chalk.red(
-        `${INDENT}✗ Could not save showcase-data.json: ${error.message}`
-      )
+        `${INDENT}✗ Could not save showcase-data.json: ${error.message}`,
+      ),
     );
   }
 };
@@ -439,7 +446,7 @@ const saveShowcaseData = (data) => {
 const findShowcaseEntry = (showcaseData, url) => {
   const normalizedUrl = normalizeUrl(url);
   return showcaseData.findIndex(
-    (entry) => normalizeUrl(entry.link) === normalizedUrl
+    (entry) => normalizeUrl(entry.link) === normalizedUrl,
   );
 };
 
@@ -605,7 +612,7 @@ const enterPost = async () => {
   if (existingMetadata) {
     blankLine();
     console.log(
-      chalk.green(`${INDENT}Found existing metadata for author: ${Author}`)
+      chalk.green(`${INDENT}Found existing metadata for author: ${Author}`),
     );
     displayExistingAuthorMetadata(existingMetadata);
 
@@ -655,7 +662,7 @@ const enterPost = async () => {
     description = (await getDescription(commonInfo.Link)) || "";
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not fetch description: ${error.message}`)
+      chalk.red(`${INDENT}Could not fetch description: ${error.message}`),
     );
   }
 
@@ -681,8 +688,8 @@ const enterPost = async () => {
       } catch (error) {
         console.log(
           chalk.red(
-            `${INDENT}Could not fetch author site description: ${error.message}`
-          )
+            `${INDENT}Could not fetch author site description: ${error.message}`,
+          ),
         );
       }
     }
@@ -691,7 +698,7 @@ const enterPost = async () => {
       rssLink = (await getRSSLink(siteToFetch)) || "";
     } catch (error) {
       console.log(
-        chalk.red(`${INDENT}Could not fetch RSS link: ${error.message}`)
+        chalk.red(`${INDENT}Could not fetch RSS link: ${error.message}`),
       );
     }
 
@@ -699,7 +706,7 @@ const enterPost = async () => {
       socialLinks = (await getSocialLinks(siteToFetch)) || socialLinks;
     } catch (error) {
       console.log(
-        chalk.red(`${INDENT}Could not fetch social links: ${error.message}`)
+        chalk.red(`${INDENT}Could not fetch social links: ${error.message}`),
       );
     }
 
@@ -707,7 +714,7 @@ const enterPost = async () => {
       favicon = (await getFavicon(siteToFetch, "post")) || "";
     } catch (error) {
       console.log(
-        chalk.red(`${INDENT}Could not fetch favicon: ${error.message}`)
+        chalk.red(`${INDENT}Could not fetch favicon: ${error.message}`),
       );
     }
   }
@@ -760,7 +767,7 @@ const enterSite = async () => {
     description = (await getDescription(commonInfo.Link)) || "";
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not fetch description: ${error.message}`)
+      chalk.red(`${INDENT}Could not fetch description: ${error.message}`),
     );
   }
 
@@ -768,7 +775,7 @@ const enterSite = async () => {
     favicon = (await getFavicon(commonInfo.Link, "site")) || "";
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not fetch favicon: ${error.message}`)
+      chalk.red(`${INDENT}Could not fetch favicon: ${error.message}`),
     );
   }
 
@@ -798,11 +805,13 @@ const enterSite = async () => {
       leaderboardLink = await hasLeaderboardLink(commonInfo.Link);
       if (leaderboardLink) {
         console.log(
-          chalk.green(`${INDENT}✓ Leaderboard link found: ${leaderboardLink}`)
+          chalk.green(`${INDENT}✓ Leaderboard link found: ${leaderboardLink}`),
         );
       } else {
         console.log(
-          chalk.dim(`${INDENT}ℹ Leaderboard link not found (not added to data)`)
+          chalk.dim(
+            `${INDENT}ℹ Leaderboard link not found (not added to data)`,
+          ),
         );
       }
     }
@@ -838,20 +847,20 @@ const enterSite = async () => {
       if (existingIndex >= 0) {
         console.log(
           chalk.yellow(
-            `${INDENT}Entry already exists in showcase-data.json, updating...`
-          )
+            `${INDENT}Entry already exists in showcase-data.json, updating...`,
+          ),
         );
         showcaseData[existingIndex] = transformToShowcaseFormat(
           entryData,
           screenshotpath,
-          leaderboardLink
+          leaderboardLink,
         );
       } else {
         // Add new entry
         const showcaseEntry = transformToShowcaseFormat(
           entryData,
           screenshotpath,
-          leaderboardLink
+          leaderboardLink,
         );
         showcaseData.push(showcaseEntry);
       }
@@ -861,8 +870,8 @@ const enterSite = async () => {
     } catch (error) {
       console.log(
         chalk.red(
-          `${INDENT}✗ Error updating showcase-data.json: ${error.message}`
-        )
+          `${INDENT}✗ Error updating showcase-data.json: ${error.message}`,
+        ),
       );
     }
   }
@@ -884,7 +893,7 @@ const enterRelease = async () => {
     description = (await getDescription(commonInfo.Link)) || "";
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not fetch description: ${error.message}`)
+      chalk.red(`${INDENT}Could not fetch description: ${error.message}`),
     );
   }
 
@@ -928,7 +937,9 @@ const enterStarter = async () => {
     }
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not fetch GitHub description: ${error.message}`)
+      chalk.red(
+        `${INDENT}Could not fetch GitHub description: ${error.message}`,
+      ),
     );
   }
 
@@ -938,14 +949,14 @@ const enterStarter = async () => {
       description = (await getDescription(Demo)) || "";
       if (description) {
         console.log(
-          chalk.green(`${INDENT}✓ Description fetched from Demo site`)
+          chalk.green(`${INDENT}✓ Description fetched from Demo site`),
         );
       }
     } catch (error) {
       console.log(
         chalk.red(
-          `${INDENT}Could not fetch Demo site description: ${error.message}`
-        )
+          `${INDENT}Could not fetch Demo site description: ${error.message}`,
+        ),
       );
     }
   }
@@ -1052,7 +1063,7 @@ const editPost = async () => {
     description = (await getDescription(commonInfo.Link)) || "";
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not fetch description: ${error.message}`)
+      chalk.red(`${INDENT}Could not fetch description: ${error.message}`),
     );
   }
 
@@ -1069,8 +1080,8 @@ const editPost = async () => {
     } catch (error) {
       console.log(
         chalk.red(
-          `${INDENT}Could not fetch author site description: ${error.message}`
-        )
+          `${INDENT}Could not fetch author site description: ${error.message}`,
+        ),
       );
       // Preserve existing value if fetch fails
       authorSiteDescription = entryData.AuthorSiteDescription || "";
@@ -1081,7 +1092,7 @@ const editPost = async () => {
     rssLink = (await getRSSLink(siteToFetch)) || "";
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not fetch RSS link: ${error.message}`)
+      chalk.red(`${INDENT}Could not fetch RSS link: ${error.message}`),
     );
   }
 
@@ -1089,7 +1100,7 @@ const editPost = async () => {
     socialLinks = (await getSocialLinks(siteToFetch)) || socialLinks;
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not fetch social links: ${error.message}`)
+      chalk.red(`${INDENT}Could not fetch social links: ${error.message}`),
     );
   }
 
@@ -1097,7 +1108,7 @@ const editPost = async () => {
     favicon = (await getFavicon(siteToFetch, "post")) || "";
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not fetch favicon: ${error.message}`)
+      chalk.red(`${INDENT}Could not fetch favicon: ${error.message}`),
     );
   }
 
@@ -1203,7 +1214,7 @@ const editSite = async () => {
     description = (await getDescription(commonInfo.Link)) || "";
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not fetch description: ${error.message}`)
+      chalk.red(`${INDENT}Could not fetch description: ${error.message}`),
     );
   }
 
@@ -1211,7 +1222,7 @@ const editSite = async () => {
     favicon = (await getFavicon(commonInfo.Link, "site")) || "";
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not fetch favicon: ${error.message}`)
+      chalk.red(`${INDENT}Could not fetch favicon: ${error.message}`),
     );
   }
 
@@ -1285,7 +1296,7 @@ const editSite = async () => {
       // Capture screenshot
       const newScreenshotPath = await captureScreenshot(
         commonInfo.Link,
-        filename
+        filename,
       );
 
       if (newScreenshotPath) {
@@ -1298,13 +1309,15 @@ const editSite = async () => {
         if (newLeaderboardLink) {
           leaderboardLink = newLeaderboardLink;
           console.log(
-            chalk.green(`${INDENT}✓ Leaderboard link found: ${leaderboardLink}`)
+            chalk.green(
+              `${INDENT}✓ Leaderboard link found: ${leaderboardLink}`,
+            ),
           );
         } else {
           console.log(
             chalk.dim(
-              `${INDENT}ℹ Leaderboard link not found (not added to data)`
-            )
+              `${INDENT}ℹ Leaderboard link not found (not added to data)`,
+            ),
           );
         }
       }
@@ -1334,13 +1347,15 @@ const editSite = async () => {
         leaderboardLink = await hasLeaderboardLink(commonInfo.Link);
         if (leaderboardLink) {
           console.log(
-            chalk.green(`${INDENT}✓ Leaderboard link found: ${leaderboardLink}`)
+            chalk.green(
+              `${INDENT}✓ Leaderboard link found: ${leaderboardLink}`,
+            ),
           );
         } else {
           console.log(
             chalk.dim(
-              `${INDENT}ℹ Leaderboard link not found (not added to data)`
-            )
+              `${INDENT}ℹ Leaderboard link not found (not added to data)`,
+            ),
           );
         }
         shouldUpdateShowcase = true;
@@ -1374,7 +1389,7 @@ const editSite = async () => {
       const showcaseEntry = transformToShowcaseFormat(
         entryData,
         screenshotpath,
-        leaderboardLink
+        leaderboardLink,
       );
 
       if (existingIndex >= 0) {
@@ -1388,8 +1403,8 @@ const editSite = async () => {
     } catch (error) {
       console.log(
         chalk.red(
-          `${INDENT}✗ Error updating showcase-data.json: ${error.message}`
-        )
+          `${INDENT}✗ Error updating showcase-data.json: ${error.message}`,
+        ),
       );
     }
   }
@@ -1411,7 +1426,7 @@ const editRelease = async () => {
     description = (await getDescription(commonInfo.Link)) || "";
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not fetch description: ${error.message}`)
+      chalk.red(`${INDENT}Could not fetch description: ${error.message}`),
     );
   }
 
@@ -1467,7 +1482,9 @@ const editStarter = async () => {
     }
   } catch (error) {
     console.log(
-      chalk.red(`${INDENT}Could not fetch GitHub description: ${error.message}`)
+      chalk.red(
+        `${INDENT}Could not fetch GitHub description: ${error.message}`,
+      ),
     );
   }
 
@@ -1477,14 +1494,14 @@ const editStarter = async () => {
       description = (await getDescription(Demo)) || "";
       if (description) {
         console.log(
-          chalk.green(`${INDENT}✓ Description fetched from Demo site`)
+          chalk.green(`${INDENT}✓ Description fetched from Demo site`),
         );
       }
     } catch (error) {
       console.log(
         chalk.red(
-          `${INDENT}Could not fetch Demo site description: ${error.message}`
-        )
+          `${INDENT}Could not fetch Demo site description: ${error.message}`,
+        ),
       );
     }
   }
@@ -1634,8 +1651,8 @@ const appendToJsonFile = async (data) => {
       chalk.dim(
         `${INDENT}${JSON.stringify(data, null, 2)
           .split("\n")
-          .join("\n" + INDENT)}`
-      )
+          .join("\n" + INDENT)}`,
+      ),
     );
     const fileData = fs.readFileSync(dbFilePath, "utf8");
     const jsonData = JSON.parse(fileData);
@@ -1669,14 +1686,17 @@ const pushChanges = async () => {
 // Main function to prompt for entry type and
 // call the respective entry function
 const main = async () => {
+  // Prompt for dataset selection first
+  await selectDataset();
+
   // Load unique authors for autocomplete (once per session)
   if (uniqueAuthors.length === 0) {
     uniqueAuthors = getUniqueAuthors();
     blankLine();
     console.log(
       chalk.cyan(
-        `${INDENT}Loaded ${uniqueAuthors.length} unique authors for autocomplete`
-      )
+        `${INDENT}Loaded ${uniqueAuthors.length} unique authors for autocomplete`,
+      ),
     );
     blankLine();
   }
@@ -1692,17 +1712,10 @@ const main = async () => {
     ],
   });
 
-  // Prompt for dataset selection (unless generating issue records)
-  if (entryType !== "Generate issue records") {
-    await selectDataset();
-  }
-
   // make a backup of the file before creating new entries
   // make a single backup per entry/editing session
   if (!backedUp) {
-    makeBackupFile(dbFilePath);
-    const inputFilePath = dbFilePath;
-    makeBackupFile(inputFilePath);
+    makeBackupFile(dbFilePath, config.dbBackupDir);
     backedUp = true;
   }
 
@@ -1737,8 +1750,8 @@ const main = async () => {
       chalk.white(
         `${INDENT}${JSON.stringify(entryData, null, 2)
           .split("\n")
-          .join("\n" + INDENT)}`
-      )
+          .join("\n" + INDENT)}`,
+      ),
     );
     separator();
     blankLine();

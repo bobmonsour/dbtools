@@ -60,9 +60,16 @@ const selectDataset = async () => {
         name: "Development dataset (devdata in this project)",
         value: "development",
       },
+      { name: chalk.dim("Exit"), value: "exit" },
     ],
     default: "production",
   });
+
+  // Handle exit
+  if (datasetChoice === "exit") {
+    console.log(chalk.yellow("\n👋 Exiting...\n"));
+    process.exit(0);
+  }
 
   // Update runtime configuration based on selection
   if (datasetChoice === "production") {
@@ -82,7 +89,7 @@ const selectDataset = async () => {
       "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata";
 
     console.log(
-      chalk.green("✓ Using Development dataset (devdata in this project)")
+      chalk.green("✓ Using Development dataset (devdata in this project)"),
     );
   }
 
@@ -178,21 +185,21 @@ async function processLoop(bundledb) {
 
         // Filter for entries with empty rssLink only
         entriesToProcess = domainEntries.filter(
-          (entry) => entry.rssLink === ""
+          (entry) => entry.rssLink === "",
         );
         console.log(
-          `\n=== Processing Domain: ${domain.trim()} (Manual RSS Link) ===\n`
+          `\n=== Processing Domain: ${domain.trim()} (Manual RSS Link) ===\n`,
         );
 
         if (entriesToProcess.length === 0) {
           console.log(
-            "✓ No entries found with empty rssLink field for this domain.\n"
+            "✓ No entries found with empty rssLink field for this domain.\n",
           );
           continue; // Go back to the start
         }
 
         console.log(
-          `Found ${entriesToProcess.length} entries with empty rssLink field.\n`
+          `Found ${entriesToProcess.length} entries with empty rssLink field.\n`,
         );
         console.log(`RSS link to be applied: ${manualRssLink}\n`);
       } else {
@@ -217,7 +224,7 @@ async function processLoop(bundledb) {
     if (choice === "1") {
       if (manualRssLink) {
         console.log(
-          `Found ${entriesToProcess.length} entries with empty rssLink field.\n`
+          `Found ${entriesToProcess.length} entries with empty rssLink field.\n`,
         );
         console.log(`RSS link to be applied: ${manualRssLink}\n`);
       } else {
@@ -259,7 +266,7 @@ function filterByDomain(bundledb, domain) {
   return bundledb.filter(
     (entry) =>
       (entry.Link && entry.Link.includes(domain)) ||
-      (entry.AuthorSite && entry.AuthorSite.includes(domain))
+      (entry.AuthorSite && entry.AuthorSite.includes(domain)),
   );
 }
 
@@ -288,15 +295,15 @@ function displayEmptyFieldsSummary(fullDataset, entriesToProcess) {
   });
 
   console.log(
-    `Empty field counts from dataset of ${fullDataset.length} entries:\n`
+    `Empty field counts from dataset of ${fullDataset.length} entries:\n`,
   );
   console.log(`  Entries with empty description: ${emptyDescCount}`);
   console.log(`  Entries with empty rssLink: ${emptyRssCount}`);
   console.log(
-    `  Entries with empty AuthorSiteDescription: ${emptyAuthorDescCount}`
+    `  Entries with empty AuthorSiteDescription: ${emptyAuthorDescCount}`,
   );
   console.log(
-    `\n  Total entries to process: ${entriesToProcess.length} (entries with at least one empty field)`
+    `\n  Total entries to process: ${entriesToProcess.length} (entries with at least one empty field)`,
   );
 }
 
@@ -304,7 +311,7 @@ function displayEmptyFieldsSummary(fullDataset, entriesToProcess) {
 async function processEntries(
   bundledb,
   entriesToProcess,
-  manualRssLink = null
+  manualRssLink = null,
 ) {
   console.log("\nProcessing entries...\n");
   console.log("─".repeat(80));
@@ -321,7 +328,7 @@ async function processEntries(
       if (index === -1) continue;
 
       console.log(
-        `\n[${i + 1}/${entriesToProcess.length}] Processing: ${entry.Title}`
+        `\n[${i + 1}/${entriesToProcess.length}] Processing: ${entry.Title}`,
       );
       console.log(`Link: ${entry.Link}`);
 
@@ -344,7 +351,7 @@ async function processEntries(
     if (index === -1) continue;
 
     console.log(
-      `\n[${i + 1}/${entriesToProcess.length}] Processing: ${entry.Title}`
+      `\n[${i + 1}/${entriesToProcess.length}] Processing: ${entry.Title}`,
     );
     console.log(`Link: ${entry.Link}`);
 
@@ -358,7 +365,7 @@ async function processEntries(
         if (description && description !== "") {
           bundledb[index].description = description;
           console.log(
-            `  ✓ Description added: ${description.substring(0, 60)}...`
+            `  ✓ Description added: ${description.substring(0, 60)}...`,
           );
           updated = true;
         } else {
@@ -399,8 +406,8 @@ async function processEntries(
             console.log(
               `  ✓ Author site description added: ${authorDesc.substring(
                 0,
-                60
-              )}...`
+                60,
+              )}...`,
             );
             updated = true;
           } else {
