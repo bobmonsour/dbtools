@@ -140,6 +140,25 @@ const checkLinks = async () => {
   // Prompt for dataset selection
   await selectDataset();
 
+  // Prompt for entry type selection
+  const typeChoice = await rawlist({
+    message: "Which type of entries to check?",
+    choices: [
+      { name: "Blog posts", value: "blog post" },
+      { name: "Sites", value: "site" },
+      { name: "Starters", value: "starter" },
+      { name: "ALL", value: "all" },
+      { name: chalk.dim("Exit"), value: "exit" },
+    ],
+    default: "all",
+  });
+
+  // Handle exit
+  if (typeChoice === "exit") {
+    console.log(chalk.yellow("\n👋 Exiting...\n"));
+    process.exit(0);
+  }
+
   // Read the bundledb file
   statusMessage(`Reading database from: ${dbFilePath}`);
   blankLine();
@@ -148,12 +167,35 @@ const checkLinks = async () => {
 
   infoMessage(`Total entries in database: ${bundledb.length}`);
 
-  // Filter out entries with Skip property
-  const entriesToCheck = bundledb.filter(
+  // Filter out entries with Skip property and by selected type
+  let entriesToCheck = bundledb.filter(
     (entry) => !entry.hasOwnProperty("Skip") && entry.Link,
   );
 
-  infoMessage(`Entries to check (excluding Skip): ${entriesToCheck.length}`);
+  // Apply type filter
+  if (typeChoice !== "all") {
+    entriesToCheck = entriesToCheck.filter(
+      (entry) => entry.Type === typeChoice,
+    );
+    const typeLabel =
+      typeChoice === "blog post"
+        ? "Blog posts"
+        : typeChoice === "site"
+          ? "Sites"
+          : "Starters";
+    infoMessage(`Filtering for: ${typeLabel}`);
+  } else {
+    // Filter for only the three types when ALL is selected
+    entriesToCheck = entriesToCheck.filter(
+      (entry) =>
+        entry.Type === "blog post" ||
+        entry.Type === "site" ||
+        entry.Type === "starter",
+    );
+    infoMessage(`Filtering for: Blog posts, Sites, and Starters`);
+  }
+
+  infoMessage(`Entries to check: ${entriesToCheck.length}`);
 
   const permanentErrors = []; // 404, 410, DNS failures
   const accessRestrictedErrors = []; // 403, 429
