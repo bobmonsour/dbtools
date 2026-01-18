@@ -598,9 +598,14 @@ const enterPost = async () => {
     source: async (input) => {
       if (!input) return uniqueAuthors.map((name) => ({ value: name }));
       const lowerInput = input.toLowerCase();
-      return uniqueAuthors
+      const matches = uniqueAuthors
         .filter((name) => name.toLowerCase().startsWith(lowerInput))
         .map((name) => ({ value: name }));
+      // If no matches found, return the input as an option to allow new authors
+      if (matches.length === 0) {
+        return [{ value: input, name: `${input} (new author)` }];
+      }
+      return matches;
     },
     validate: (input) => (input ? true : "Author is required."),
   });
@@ -1018,9 +1023,14 @@ const editPost = async () => {
       const searchInput = input || entryData.Author || "";
       if (!searchInput) return uniqueAuthors.map((name) => ({ value: name }));
       const lowerInput = searchInput.toLowerCase();
-      return uniqueAuthors
+      const matches = uniqueAuthors
         .filter((name) => name.toLowerCase().startsWith(lowerInput))
         .map((name) => ({ value: name }));
+      // If no matches found, return the input as an option to allow new authors
+      if (matches.length === 0) {
+        return [{ value: searchInput, name: `${searchInput} (new author)` }];
+      }
+      return matches;
     },
     validate: (input) => (input ? true : "Author is required."),
   });
