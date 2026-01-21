@@ -1,6 +1,81 @@
 import { input, confirm } from "@inquirer/prompts";
 import chalk from "chalk";
-import { getLatestIssueNumber, countEntriesByIssue } from "./utils.js";
+import fs from "fs";
+import path from "path";
+
+// Hardcoded path to production database
+const BUNDLEDB_PATH =
+  "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/bundledb.json";
+
+// Function to get the latest issue number from production database
+const getLatestIssueNumber = () => {
+  try {
+    const data = fs.readFileSync(BUNDLEDB_PATH, "utf8");
+    const jsonData = JSON.parse(data);
+    const issueNumbers = jsonData
+      .map((entry) => parseInt(entry.Issue, 10))
+      .filter((num) => !isNaN(num));
+    return issueNumbers.length > 0 ? Math.max(...issueNumbers).toString() : "0";
+  } catch (err) {
+    console.error(chalk.red("Error reading the JSON file:", err));
+    return "0";
+  }
+};
+
+// Function to count entries by issue number from production database
+const countEntriesByIssue = (issueNumber) => {
+  try {
+    const data = fs.readFileSync(BUNDLEDB_PATH, "utf8");
+    const jsonData = JSON.parse(data);
+
+    let blogPostCount = 0;
+    let siteCount = 0;
+    let releaseCount = 0;
+    let starterCount = 0;
+
+    jsonData.forEach((item) => {
+      if (item?.Skip) return;
+
+      if (item.Issue == issueNumber) {
+        switch (item.Type) {
+          case "blog post":
+            blogPostCount++;
+            break;
+          case "site":
+            siteCount++;
+            break;
+          case "release":
+            releaseCount++;
+            break;
+          case "starter":
+            starterCount++;
+            break;
+          default:
+            break;
+        }
+      }
+    });
+
+    return {
+      issueNumber,
+      blogPostCount,
+      siteCount,
+      releaseCount,
+      starterCount,
+    };
+  } catch (error) {
+    console.error(
+      chalk.red("Error reading or processing the JSON file:", error),
+    );
+    return {
+      issueNumber,
+      blogPostCount: 0,
+      siteCount: 0,
+      releaseCount: 0,
+      starterCount: 0,
+    };
+  }
+};
 
 // Function to prompt the user for the issue number
 const promptIssueNumber = async () => {
