@@ -29,7 +29,11 @@ const scripts = [
     value: "check-link-errors.js",
   },
   {
-    name: chalk.dim("5. Exit"),
+    name: "5. Generate Latest Data - Export latest issue data",
+    value: "generate-latest-data.js",
+  },
+  {
+    name: chalk.dim("6. Exit"),
     value: "exit",
   },
 ];
