@@ -33,7 +33,11 @@ const scripts = [
     value: "generate-latest-data.js",
   },
   {
-    name: chalk.dim("6. Exit"),
+    name: "6. Create Blog Post - Create new issue announcement post",
+    value: "create-blog-post.js",
+  },
+  {
+    name: chalk.dim("7. Exit"),
     value: "exit",
   },
 ];
