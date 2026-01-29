@@ -1,0 +1,119 @@
+--- /Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/bundledb.json	2026-01-28 21:50:21
++++ /Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/bundledb-with-updated-mastodon.json	2026-01-28 21:52:53
+@@ -41038,7 +41038,7 @@
+     "AuthorSite": "https://jessieheald.com/",
+     "AuthorSiteDescription": "I&#39;m a full stack React and Node developer, based in Birmingham, UK. I&#39;m a results and impact driven developer with over 15 years of experience and a love for FOSS. I write scalable, maintainable web apps, with a focus on clean and agile code to support product growth and stability.",
+     "socialLinks": {
+-      "mastodon": "",
++      "mastodon": "https://defcon.social/@JessieHealdUK",
+       "bluesky": "",
+       "youtube": "",
+       "github": "",
+@@ -41186,7 +41186,7 @@
+     "AuthorSite": "https://jessieheald.com/",
+     "AuthorSiteDescription": "I&#39;m a full stack React and Node developer, based in Birmingham, UK. I&#39;m a results and impact driven developer with over 15 years of experience and a love for FOSS. I write scalable, maintainable web apps, with a focus on clean and agile code to support product growth and stability.",
+     "socialLinks": {
+-      "mastodon": "",
++      "mastodon": "https://defcon.social/@JessieHealdUK",
+       "bluesky": "",
+       "youtube": "",
+       "github": "",
+@@ -41511,7 +41511,7 @@
+     "AuthorSite": "https://jessieheald.com/",
+     "AuthorSiteDescription": "I&#39;m a full stack React and Node developer, based in Birmingham, UK. I&#39;m a results and impact driven developer with over 15 years of experience and a love for FOSS. I write scalable, maintainable web apps, with a focus on clean and agile code to support product growth and stability.",
+     "socialLinks": {
+-      "mastodon": "",
++      "mastodon": "https://defcon.social/@JessieHealdUK",
+       "bluesky": "",
+       "youtube": "",
+       "github": "",
+@@ -42822,7 +42822,7 @@
+     "AuthorSite": "https://jessieheald.com/",
+     "AuthorSiteDescription": "I&#39;m a full stack React and Node developer, based in Birmingham, UK. I&#39;m a results and impact driven developer with over 15 years of experience and a love for FOSS. I write scalable, maintainable web apps, with a focus on clean and agile code to support product growth and stability.",
+     "socialLinks": {
+-      "mastodon": "",
++      "mastodon": "https://defcon.social/@JessieHealdUK",
+       "bluesky": "",
+       "youtube": "",
+       "github": "",
+@@ -42957,7 +42957,7 @@
+     "AuthorSite": "https://jessieheald.com/",
+     "AuthorSiteDescription": "I&#39;m a full stack React and Node developer, based in Birmingham, UK. I&#39;m a results and impact driven developer with over 15 years of experience and a love for FOSS. I write scalable, maintainable web apps, with a focus on clean and agile code to support product growth and stability.",
+     "socialLinks": {
+-      "mastodon": "",
++      "mastodon": "https://defcon.social/@JessieHealdUK",
+       "bluesky": "",
+       "youtube": "",
+       "github": "",
+@@ -43481,7 +43481,7 @@
+     "AuthorSite": "https://jessieheald.com/",
+     "AuthorSiteDescription": "I&#39;m a full stack React and Node developer, based in Birmingham, UK. I&#39;m a results and impact driven developer with over 15 years of experience and a love for FOSS. I write scalable, maintainable web apps, with a focus on clean and agile code to support product growth and stability.",
+     "socialLinks": {
+-      "mastodon": "",
++      "mastodon": "https://defcon.social/@JessieHealdUK",
+       "bluesky": "",
+       "youtube": "",
+       "github": "",
+@@ -43699,7 +43699,7 @@
+     "AuthorSite": "https://jessieheald.com/",
+     "AuthorSiteDescription": "I&#39;m a full stack React and Node developer, based in Birmingham, UK. I&#39;m a results and impact driven developer with over 15 years of experience and a love for FOSS. I write scalable, maintainable web apps, with a focus on clean and agile code to support product growth and stability.",
+     "socialLinks": {
+-      "mastodon": "",
++      "mastodon": "https://defcon.social/@JessieHealdUK",
+       "bluesky": "",
+       "youtube": "",
+       "github": "",
+@@ -45033,7 +45033,7 @@
+     "AuthorSite": "https://jessieheald.com/",
+     "AuthorSiteDescription": "I&#39;m a full stack React and Node developer, based in Birmingham, UK. I&#39;m a results and impact driven developer with over 15 years of experience and a love for FOSS. I write scalable, maintainable web apps, with a focus on clean and agile code to support product growth and stability.",
+     "socialLinks": {
+-      "mastodon": "",
++      "mastodon": "https://defcon.social/@JessieHealdUK",
+       "bluesky": "",
+       "youtube": "",
+       "github": "",
+@@ -46841,7 +46841,7 @@
+     "AuthorSite": "https://jessieheald.com/",
+     "AuthorSiteDescription": "I&#39;m a full stack React and Node developer, based in Birmingham, UK. I&#39;m a results and impact driven developer with over 15 years of experience and a love for FOSS. I write scalable, maintainable web apps, with a focus on clean and agile code to support product growth and stability.",
+     "socialLinks": {
+-      "mastodon": "",
++      "mastodon": "https://defcon.social/@JessieHealdUK",
+       "bluesky": "",
+       "youtube": "",
+       "github": "",
+@@ -47077,7 +47077,7 @@
+     "AuthorSite": "https://jessieheald.com/",
+     "AuthorSiteDescription": "I&#39;m a full stack React and Node developer, based in Birmingham, UK. I&#39;m a results and impact driven developer with over 15 years of experience and a love for FOSS. I write scalable, maintainable web apps, with a focus on clean and agile code to support product growth and stability.",
+     "socialLinks": {
+-      "mastodon": "",
++      "mastodon": "https://defcon.social/@JessieHealdUK",
+       "bluesky": "",
+       "youtube": "",
+       "github": "",
+@@ -47538,7 +47538,7 @@
+     "AuthorSite": "https://jessieheald.com/",
+     "AuthorSiteDescription": "I&#39;m a full stack React and Node developer, based in Birmingham, UK. I&#39;m a results and impact driven developer with over 15 years of experience and a love for FOSS. I write scalable, maintainable web apps, with a focus on clean and agile code to support product growth and stability.",
+     "socialLinks": {
+-      "mastodon": "",
++      "mastodon": "https://defcon.social/@JessieHealdUK",
+       "bluesky": "",
+       "youtube": "",
+       "github": "",
+@@ -47930,7 +47930,7 @@
+     "AuthorSite": "https://jessieheald.com",
+     "AuthorSiteDescription": "I&#39;m a full stack React and Node developer, based in Birmingham, UK. I&#39;m a results and impact driven developer with over 15 years of experience and a love for FOSS. I write scalable, maintainable web apps, with a focus on clean and agile code to support product growth and stability.",
+     "socialLinks": {
+-      "mastodon": "",
++      "mastodon": "https://defcon.social/@JessieHealdUK",
+       "bluesky": "",
+       "youtube": "",
+       "github": "",
+@@ -49281,7 +49281,7 @@
+     "AuthorSite": "https://jessieheald.com/",
+     "AuthorSiteDescription": "I&#39;m a full stack React and Node developer, based in Birmingham, UK. I&#39;m a results and impact driven developer with over 15 years of experience and a love for FOSS. I write scalable, maintainable web apps, with a focus on clean and agile code to support product growth and stability.",
+     "socialLinks": {
+-      "mastodon": "",
++      "mastodon": "https://defcon.social/@JessieHealdUK",
+       "bluesky": "",
+       "youtube": "",
+       "github": "",

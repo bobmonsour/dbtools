@@ -33,6 +33,8 @@ export const formatTimestamp = () => {
  * @param {string} options.outputFilename - Name for output file (e.g., "bundledb-with-descriptions.json")
  * @param {boolean} [options.skipExisting=true] - Skip items that already have the property
  * @param {string} [options.scriptName] - Name for logging (e.g., "Description Fetcher")
+ * @param {string|Function} [options.authorFilter] - Filter by author name, slug, or custom function (item) => boolean
+ * @param {string} [options.subProperty] - For nested objects, target a specific sub-property (e.g., "github" in socialLinks.github)
  */
 export async function processDbEntries(options) {
   const {
@@ -43,6 +45,8 @@ export async function processDbEntries(options) {
     outputFilename,
     skipExisting = true,
     scriptName = "Database Processor",
+    authorFilter,
+    subProperty,
   } = options;
 
   const dbPath = path.join(__dirname, "devdata/bundledb.json");
@@ -70,7 +74,28 @@ export async function processDbEntries(options) {
     const itemsToProcess = db.filter((item) => {
       if (item.Skip) return false;
       if (item.Type !== typeFilter) return false;
-      if (skipExisting && item[propertyToAdd]) return false;
+
+      // Author filtering
+      if (authorFilter) {
+        if (typeof authorFilter === "function") {
+          if (!authorFilter(item)) return false;
+        } else {
+          // Check both Author and AuthorSlug fields
+          const matches =
+            item.Author === authorFilter || item.AuthorSlug === authorFilter;
+          if (!matches) return false;
+        }
+      }
+
+      // Check if property/sub-property already exists
+      if (skipExisting) {
+        if (subProperty) {
+          // Check nested property
+          if (item[propertyToAdd]?.[subProperty]) return false;
+        } else {
+          if (item[propertyToAdd]) return false;
+        }
+      }
 
       // Get input value using either property name or function
       const inputValue =
@@ -83,12 +108,12 @@ export async function processDbEntries(options) {
     });
 
     console.log(
-      `${typeFilter} entries without "${propertyToAdd}": ${itemsToProcess.length}`
+      `${typeFilter} entries without "${propertyToAdd}": ${itemsToProcess.length}`,
     );
 
     if (itemsToProcess.length === 0) {
       console.log(
-        `\nNo items to process. All ${typeFilter} entries already have "${propertyToAdd}".\n`
+        `\nNo items to process. All ${typeFilter} entries already have "${propertyToAdd}".\n`,
       );
       return { processed: 0, success: 0, skipped: 0 };
     }
@@ -117,7 +142,17 @@ export async function processDbEntries(options) {
           : await fetchFunction(inputValue);
 
         if (result) {
-          item[propertyToAdd] = result;
+          // Handle sub-property assignment
+          if (subProperty) {
+            // Ensure parent property exists
+            if (!item[propertyToAdd]) {
+              item[propertyToAdd] = {};
+            }
+            item[propertyToAdd][subProperty] = result;
+          } else {
+            item[propertyToAdd] = result;
+          }
+
           successCount++;
           const preview =
             typeof result === "string"
@@ -125,7 +160,10 @@ export async function processDbEntries(options) {
                 ? result.substring(0, 50) + "..."
                 : result
               : JSON.stringify(result).substring(0, 50);
-          console.log(`${progress} ✓ Added ${propertyToAdd}: ${preview}\n`);
+          const propName = subProperty
+            ? `${propertyToAdd}.${subProperty}`
+            : propertyToAdd;
+          console.log(`${progress} ✓ Added ${propName}: ${preview}\n`);
         } else {
           skippedCount++;
           console.log(`${progress} ○ No ${propertyToAdd} found\n`);
