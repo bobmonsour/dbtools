@@ -168,10 +168,10 @@ function computeEntryTypeMetrics(entries) {
   return { counts, cumulative, months: allMonths };
 }
 
-function computeSiteJump(siteCount, showcaseCount) {
-  // Calculate the difference between showcase entries and site entries in bundledb
-  const siteJumpAmount = showcaseCount - siteCount;
-  return siteJumpAmount > 0 ? siteJumpAmount : 0;
+function computeSiteJump(entries, showcaseData) {
+  // Count showcase entries whose link is not found in any bundledb entry
+  const bundleLinks = new Set(entries.filter((e) => !e.Skip).map((e) => e.Link));
+  return showcaseData.filter((s) => !s.Skip && !bundleLinks.has(s.link)).length;
 }
 
 function computeAuthorContributions(entries) {
@@ -1280,10 +1280,7 @@ async function main() {
 
   console.log("📊 Computing metrics...");
   const entryTypes = computeEntryTypeMetrics(entries);
-  const siteJumpAmount = computeSiteJump(
-    entryTypes.counts["site"],
-    showcaseData.length,
-  );
+  const siteJumpAmount = computeSiteJump(entries, showcaseData);
   console.log(
     `   Site jump: ${siteJumpAmount} (showcase: ${showcaseData.length} - sites: ${entryTypes.counts["site"]})`,
   );
