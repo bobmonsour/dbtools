@@ -11,3 +11,4 @@
 /screenshots/*
 /favicons/*
 /log/resized-files.md
+.env
