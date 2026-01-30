@@ -16,6 +16,7 @@ node <script-name>.js   # Run any script directly
 ```
 
 The main menu (`bundle.js`) launches these workflows via `@inquirer/prompts`:
+
 1. **Make Bundle Entries** — create new database entries with auto-fetched metadata
 2. **Check Empty Fields** — find and fill missing descriptions/RSS links
 3. **Single Screenshot** — regenerate a site screenshot via Puppeteer
@@ -33,17 +34,20 @@ The main menu (`bundle.js`) launches these workflows via `@inquirer/prompts`:
 
 ### Core modules
 
-| File | Purpose |
-|---|---|
-| `config.js` | Path configuration with dev/prod toggle |
-| `cacheconfig.js` | Cache durations (eleventy-fetch) and fetch timeouts |
-| `utils.js` | Shared utilities: duplicate checking, backups, issue counting, date formatting |
+| File              | Purpose                                                                        |
+| ----------------- | ------------------------------------------------------------------------------ |
+| `config.js`       | Path configuration with dev/prod toggle                                        |
+| `cacheconfig.js`  | Cache durations (eleventy-fetch) and fetch timeouts                            |
+| `utils.js`        | Shared utilities: duplicate checking, backups, issue counting, date formatting |
 | `db-processor.js` | Generic batch processor for database entries with filtering and error handling |
-| `bundledata.js` | Data loading/validation for the 11tybundle.dev site build |
+| `bundledata.js`   | Data loading/validation for the 11tybundle.dev site build                      |
+
+Note that bundledata.js is only present here for reference. The live version of the file is in the sibling repo for 11tybundle.dev.
 
 ### Data fetching modules
 
 Each module fetches one type of metadata from URLs:
+
 - `fetchhtml.js` — base HTML fetcher with eleventy-fetch caching and 30-day failure cache
 - `getdescription.js` — meta descriptions (cheerio)
 - `getfavicon.js` — favicons via Google Favicon API, resized to 64x64 (sharp)
@@ -66,6 +70,7 @@ Before any database write, scripts call `makeBackupFile()` from `utils.js`, crea
 ## Database Schema
 
 Each entry in `bundledb.json` has:
+
 - `Issue` (string), `Type` ("blog post" | "site" | "release" | "starter"), `Title`, `Link`, `Date` (ISO 8601), `formattedDate`
 - Blog posts add: `Author`, `slugifiedAuthor`, `AuthorSite`, `AuthorSiteDescription`, `socialLinks` (object), `favicon`, `rssLink`, `Categories` (array), `description`
 - Sites/starters add: `description`, `favicon`
@@ -83,3 +88,9 @@ Requires a `GITHUB_TOKEN` in `.env` for GitHub API access (octokit) — used for
 - `favicons/` — cached favicon images
 - `screenshots/` — generated site screenshots
 - `log/` — error logs and failure caches
+
+## Notes on the generate-insights.js Script
+
+Among the recent additions to this repo is the `generate-insights.js` script, which analyzes the database to produce insights about trends in the bundledb.json file. It generates an HTML and CSS file that visualizes these insights using charts and graphs.
+
+This will be the focus of near term development in this repo, with plans to expand the types of insights generated and improve the visualizations. Future enhancements may include: making the resulting html more closely align with the visual style of the 11tybundle.dev website, ensuring that the resulting html page that is generated is "accessible" to those useing screen readers, ensuring that when used on smaller screens (mobile devices) the resulting html page is still easy to read and navigate, and further improving data quality with more effective data extraction methods.
