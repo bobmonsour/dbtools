@@ -171,7 +171,7 @@ function computeEntryTypeMetrics(entries) {
 function computeSiteJump(entries, showcaseData) {
   // Count showcase entries whose link is not found in any bundledb entry
   const bundleLinks = new Set(entries.filter((e) => !e.Skip).map((e) => e.Link));
-  return showcaseData.filter((s) => !s.Skip && !bundleLinks.has(s.link)).length;
+  return showcaseData.filter((s) => !s.skip && !bundleLinks.has(s.link)).length;
 }
 
 function computeAuthorContributions(entries) {
