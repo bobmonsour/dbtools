@@ -2,25 +2,79 @@
  * Generate Bundle Insights Page
  *
  * Creates a static HTML page with SVG charts visualizing metrics
- * from the production bundledb.json database.
+ * from the bundledb.json database.
  *
  * Run: node generate-insights.js
  */
 
 import fs from "fs";
 import path from "path";
+import { rawlist } from "@inquirer/prompts";
+import chalk from "chalk";
 
-// Production database path (hardcoded for read-only access)
-const PRODUCTION_DB_PATH =
+// Database paths (updated at runtime based on dataset selection)
+let dbFilePath =
   "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/bundledb.json";
+let showcaseDataPath =
+  "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/showcase-data.json";
 const OUTPUT_DIR = "./insights";
+
+// Month when site jump should appear (11tybundle.dev redesign)
+const SITE_JUMP_MONTH = "2026-01";
+
+// ============================================================================
+// Dataset Selection
+// ============================================================================
+
+const selectDataset = async () => {
+  const datasetChoice = await rawlist({
+    message: "Select which dataset to use:",
+    choices: [
+      { name: "Production dataset (11tybundledb)", value: "production" },
+      {
+        name: "Development dataset (devdata in this project)",
+        value: "development",
+      },
+      { name: chalk.dim("Exit"), value: "exit" },
+    ],
+    default: "production",
+  });
+
+  // Handle exit
+  if (datasetChoice === "exit") {
+    console.log(chalk.yellow("\n👋 Exiting...\n"));
+    process.exit(0);
+  }
+
+  // Update runtime configuration based on selection
+  if (datasetChoice === "production") {
+    dbFilePath =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/bundledb.json";
+    showcaseDataPath =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb/showcase-data.json";
+    console.log(
+      chalk.green("\n    ✓ Using Production dataset (11tybundledb)\n"),
+    );
+  } else {
+    dbFilePath =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/bundledb.json";
+    showcaseDataPath =
+      "/Users/Bob/Dropbox/Docs/Sites/11tybundle/dbtools/devdata/showcase-data.json";
+    console.log(chalk.green("\n    ✓ Using Development dataset (devdata)\n"));
+  }
+};
 
 // ============================================================================
 // Data Loading
 // ============================================================================
 
 function loadDatabase() {
-  const data = fs.readFileSync(PRODUCTION_DB_PATH, "utf8");
+  const data = fs.readFileSync(dbFilePath, "utf8");
+  return JSON.parse(data);
+}
+
+function loadShowcaseData() {
+  const data = fs.readFileSync(showcaseDataPath, "utf8");
   return JSON.parse(data);
 }
 
@@ -114,17 +168,33 @@ function computeEntryTypeMetrics(entries) {
   return { counts, cumulative, months: allMonths };
 }
 
+function computeSiteJump(siteCount, showcaseCount) {
+  // Calculate the difference between showcase entries and site entries in bundledb
+  const siteJumpAmount = showcaseCount - siteCount;
+  return siteJumpAmount > 0 ? siteJumpAmount : 0;
+}
+
 function computeAuthorContributions(entries) {
   const filtered = entries.filter((e) => !e.Skip && e.Author);
-  const authorCounts = {};
+  const authorData = {};
 
   filtered.forEach((e) => {
-    authorCounts[e.Author] = (authorCounts[e.Author] || 0) + 1;
+    if (!authorData[e.Author]) {
+      authorData[e.Author] = {
+        count: 0,
+        site: e.AuthorSite || "",
+      };
+    }
+    authorData[e.Author].count++;
+    // Update site if we find one
+    if (e.AuthorSite && !authorData[e.Author].site) {
+      authorData[e.Author].site = e.AuthorSite;
+    }
   });
 
   // Bucket into ranges
   const ranges = { "1-2": 0, "3-5": 0, "6-10": 0, "11-20": 0, "21+": 0 };
-  Object.values(authorCounts).forEach((count) => {
+  Object.values(authorData).forEach(({ count }) => {
     if (count >= 21) ranges["21+"]++;
     else if (count >= 11) ranges["11-20"]++;
     else if (count >= 6) ranges["6-10"]++;
@@ -132,7 +202,13 @@ function computeAuthorContributions(entries) {
     else if (count >= 1) ranges["1-2"]++;
   });
 
-  return ranges;
+  // Create sorted list of authors with 6+ contributions
+  const prolificAuthors = Object.entries(authorData)
+    .filter(([, data]) => data.count >= 6)
+    .map(([name, data]) => ({ name, site: data.site, count: data.count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+  return { ranges, prolificAuthors };
 }
 
 function computeCategoryMetrics(entries) {
@@ -373,6 +449,7 @@ function generateLineChart(data, months, options = {}) {
     title = "",
     showLegend = true,
     marker = null,
+    siteJump = null, // { month: "2026-01", amount: 796 }
   } = options;
 
   const padding = {
@@ -384,15 +461,32 @@ function generateLineChart(data, months, options = {}) {
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
 
+  // Apply site jump to data if specified (modifies the cumulative values from jump month onward)
+  let processedData = data;
+  if (siteJump && siteJump.amount > 0 && data["site"]) {
+    processedData = { ...data };
+    processedData["site"] = { ...data["site"] };
+    const jumpMonthIndex = months.indexOf(siteJump.month);
+    if (jumpMonthIndex >= 0) {
+      // Add jump amount to all months from jump month onward
+      months.forEach((month, i) => {
+        if (i >= jumpMonthIndex) {
+          processedData["site"][month] =
+            (data["site"][month] || 0) + siteJump.amount;
+        }
+      });
+    }
+  }
+
   // Find max value across all series
   let maxValue = 0;
-  Object.values(data).forEach((series) => {
+  Object.values(processedData).forEach((series) => {
     Object.values(series).forEach((val) => {
       if (val > maxValue) maxValue = val;
     });
   });
 
-  const seriesNames = Object.keys(data);
+  const seriesNames = Object.keys(processedData);
   const xStep = chartWidth / (months.length - 1 || 1);
 
   // Generate axis labels (show every 6th month for readability)
@@ -410,7 +504,7 @@ function generateLineChart(data, months, options = {}) {
   for (let i = 0; i <= ySteps; i++) {
     const y = padding.top + chartHeight - (i / ySteps) * chartHeight;
     const val = Math.round((i / ySteps) * maxValue);
-    yLabels += `<text x="${padding.left - 10}" y="${y + 4}" text-anchor="end" class="chart-label">${val}</text>`;
+    yLabels += `<text x="${padding.left - 10}" y="${y + 4}" text-anchor="end" class="chart-label">${formatNumber(val)}</text>`;
     yLabels += `<line x1="${padding.left}" y1="${y}" x2="${padding.left + chartWidth}" y2="${y}" stroke="#ddd" stroke-dasharray="2,2"/>`;
   }
 
@@ -419,7 +513,7 @@ function generateLineChart(data, months, options = {}) {
   let legend = "";
 
   seriesNames.forEach((name, seriesIndex) => {
-    const series = data[name];
+    const series = processedData[name];
     const color =
       seriesNames.length <= 3
         ? {
@@ -444,7 +538,14 @@ function generateLineChart(data, months, options = {}) {
     if (showLegend) {
       const legendY = padding.top + seriesIndex * 20;
       legend += `<rect x="${width - padding.right + 10}" y="${legendY - 8}" width="12" height="12" fill="${color}" rx="2"/>`;
-      legend += `<text x="${width - padding.right + 28}" y="${legendY + 3}" class="chart-legend-label">${name}</text>`;
+      // Add superscripts for "site" (if siteJump is active) and "release"
+      let legendLabel = name;
+      if (name === "site" && siteJump && siteJump.amount > 0) {
+        legendLabel = `${name}<tspan baseline-shift="super" font-size="8">1</tspan>`;
+      } else if (name === "release") {
+        legendLabel = `${name}<tspan baseline-shift="super" font-size="8">2</tspan>`;
+      }
+      legend += `<text x="${width - padding.right + 28}" y="${legendY + 3}" class="chart-legend-label">${legendLabel}</text>`;
     }
   });
 
@@ -469,14 +570,24 @@ function generateLineChart(data, months, options = {}) {
         markerSvg += `
           <line x1="${markerX}" y1="${padding.top}" x2="${markerX}" y2="${padding.top + chartHeight}" stroke="${COLORS.textMuted}" stroke-width="1" stroke-dasharray="4,4"/>
           <circle cx="${markerX}" cy="${padding.top - 5}" r="4" fill="${COLORS.textMuted}"/>
-          <text x="${markerX}" y="${padding.top - 12}" text-anchor="middle" class="chart-marker-label-minor">${m.label}</text>
+          <text x="${markerX}" y="${padding.top - 28}" text-anchor="middle" class="chart-marker-label-minor">11ty</text>
+          <text x="${markerX}" y="${padding.top - 16}" text-anchor="middle" class="chart-marker-label-minor">${m.label}</text>
         `;
       } else {
         // Major marker: prominent styling
+        // Split label into two lines if it contains a space
+        const labelParts = m.label.split(" ");
+        const line1 = labelParts.slice(0, -1).join(" ");
+        const line2 = labelParts[labelParts.length - 1];
+        // Position label above chart, center "launch" under "11tybundle.dev"
+        const line1X = markerX + 10;
+        const line1Width = 90; // approximate width of "11tybundle.dev"
+        const line2CenterX = line1X + line1Width / 2;
         markerSvg += `
           <line x1="${markerX}" y1="${padding.top}" x2="${markerX}" y2="${padding.top + chartHeight}" stroke="${COLORS.primary}" stroke-width="2" stroke-dasharray="6,3"/>
           <circle cx="${markerX}" cy="${padding.top - 8}" r="6" fill="${COLORS.primary}"/>
-          <text x="${markerX + 10}" y="${padding.top + 15}" class="chart-marker-label">${m.label}</text>
+          <text x="${line1X}" y="${padding.top - 28}" class="chart-marker-label">${line1}</text>
+          <text x="${line2CenterX}" y="${padding.top - 15}" class="chart-marker-label chart-marker-label-centered">${line2}</text>
         `;
       }
     }
@@ -512,7 +623,8 @@ function generateStatCard(label, value, subtext = "") {
 // ============================================================================
 
 function generateHTML(metrics) {
-  const { entryTypes, authorContributions, categories, missingData } = metrics;
+  const { entryTypes, authorContributions, categories, missingData, siteJump } =
+    metrics;
 
   const currentDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
@@ -525,15 +637,15 @@ function generateHTML(metrics) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bundle Insights | 11ty Bundle</title>
+  <title>11ty Bundle Insights | 11ty Bundle</title>
   <link rel="stylesheet" href="insights.css">
 </head>
 <body>
   <header class="site-header">
     <div class="container">
       <a href="https://11tybundle.dev" class="back-link">← Back to 11ty Bundle</a>
-      <h1>Bundle Insights</h1>
-      <p class="generated-date">Generated on ${currentDate}</p>
+      <h1>11ty Bundle Insights</h1>
+      <p class="generated-date">Generated on ${currentDate} &middot; Accuracy not guaranteed.</p>
     </div>
   </header>
 
@@ -542,20 +654,21 @@ function generateHTML(metrics) {
     <section class="section">
       <div class="container">
         <h2>Entry Types</h2>
-        <p class="section-intro">Breakdown of content in the bundle database by type.</p>
+        <p class="section-intro">Breakdown of content in the bundle databases by type.</p>
 
         <div class="stats-row">
           ${generateStatCard("Blog Posts", entryTypes.counts["blog post"])}
-          ${generateStatCard("Sites", entryTypes.counts["site"])}
+          ${generateStatCard("Sites", entryTypes.counts["site"] + (siteJump?.amount || 0))}
           ${generateStatCard("Releases", entryTypes.counts["release"])}
           ${generateStatCard(
             "Total",
-            Object.values(entryTypes.counts).reduce((a, b) => a + b, 0),
+            Object.values(entryTypes.counts).reduce((a, b) => a + b, 0) +
+              (siteJump?.amount || 0),
           )}
         </div>
 
         <div class="chart-container">
-          <h3>Cumulative Growth Over Time</h3>
+          <h3>Cumulative entry growth over time</h3>
           ${generateLineChart(entryTypes.cumulative, entryTypes.months, {
             title: "",
             width: 900,
@@ -566,49 +679,14 @@ function generateHTML(metrics) {
               { month: "2023-05", label: "11tybundle.dev launch" },
               { month: "2024-10", label: "v3.0.0", type: "minor" },
             ],
+            siteJump: siteJump,
           })}
-        </div>
-      </div>
-    </section>
-
-    <!-- Author Contributions -->
-    <section class="section">
-      <div class="container">
-        <h2>Author Contributions</h2>
-        <p class="section-intro">Distribution of authors by number of contributions.</p>
-
-        <div class="chart-container">
-          ${generateBarChart(authorContributions, {
-            title: "Authors by Contribution Range",
-            width: 600,
-            height: 300,
-            barColor: COLORS.tertiary,
-          })}
-        </div>
-      </div>
-    </section>
-
-    <!-- Category Metrics -->
-    <section class="section">
-      <div class="container">
-        <h2>Top 20 Categories</h2>
-        <p class="section-intro">Most frequently used categories across all entries.</p>
-
-        <div class="chart-container">
-          ${generateBarChart(
-            Object.fromEntries(categories.top20.map((c) => [c.name, c.count])),
-            {
-              title: "",
-              width: 800,
-              height: 500,
-              horizontal: true,
-              barColor: COLORS.secondary,
-            },
-          )}
+          ${siteJump && siteJump.amount > 0 ? `<p class="chart-footnote"><sup>1</sup> This jump represents the addition of sites from the <a href="https://www.11ty.dev/speedlify/">11ty Leaderboard</a> that were added at the time of the 11tybundle.dev redesign in January 2026.</p>` : ""}
+          <p class="chart-footnote"><sup>2</sup> Release count includes selected releases starting in January 2023.</p>
         </div>
 
         <div class="chart-container chart-container--wide">
-          <h3>Category Growth Over Time (Top 10)</h3>
+          <h3>Blog post category growth over time (top 10)</h3>
           ${generateLineChart(
             Object.fromEntries(
               categories.top20
@@ -627,32 +705,81 @@ function generateHTML(metrics) {
       </div>
     </section>
 
+    <!-- Author Contributions -->
+    <section class="section">
+      <div class="container">
+        <h2>Author Contributions</h2>
+        <p class="section-intro">Distribution of authors by number of contributions.</p>
+
+        <div class="chart-container">
+          ${generateBarChart(authorContributions.ranges, {
+            title: "Authors by contribution range",
+            width: 600,
+            height: 300,
+            barColor: COLORS.tertiary,
+          })}
+        </div>
+
+        <p  class="section-intro">Authors with 6+ contributions (names are links to their sites)</p>
+        <ul class="author-list">
+          ${authorContributions.prolificAuthors
+            .map((a) =>
+              a.site
+                ? `<li><a href="${a.site}" target="_blank" rel="noopener">${a.name}</a></li>`
+                : `<li>${a.name}</li>`,
+            )
+            .join("\n          ")}
+        </ul>
+      </div>
+    </section>
+
+    <!-- Category Metrics -->
+    <section class="section">
+      <div class="container">
+        <h2>Top 20 categories</h2>
+        <p class="section-intro">Most frequently used categories across all entries (excludes "How to...").</p>
+
+        <div class="chart-container">
+          ${generateBarChart(
+            Object.fromEntries(categories.top20.map((c) => [c.name, c.count])),
+            {
+              title: "",
+              width: 800,
+              height: 500,
+              horizontal: true,
+              barColor: COLORS.secondary,
+            },
+          )}
+        </div>
+      </div>
+    </section>
+
     <!-- Missing Data Metrics -->
     <section class="section">
       <div class="container">
-        <h2>Data Completeness</h2>
-        <p class="section-intro">Tracking missing metadata across the database (data accuracy not guaranteed).</p>
+        <h2>Data completeness</h2>
+        <p class="section-intro">Tracking missing metadata across the database (accuracy not guaranteed).</p>
 
         <div class="stats-row stats-row--missing">
           ${generateStatCard(
-            "Author Sites Missing RSS Link",
-            missingData.missingRssLink,
+            "Author sites missing RSS link",
+            `${missingData.missingRssLink} <span class="stat-percent">(${((missingData.missingRssLink / missingData.totalAuthors) * 100).toFixed(1)}%)</span>`,
             `of ${missingData.totalAuthors} authors`,
           )}
           ${generateStatCard(
-            "Author Sites Missing Favicon",
-            missingData.missingFavicon,
+            "Author sites missing favicon",
+            `${missingData.missingFavicon} <span class="stat-percent">(${((missingData.missingFavicon / missingData.totalAuthors) * 100).toFixed(1)}%)</span>`,
             `of ${missingData.totalAuthors} authors`,
           )}
           ${generateStatCard(
-            "Author Sites Missing Description",
-            missingData.missingAuthorSiteDescription,
+            "Author sites missing description",
+            `${missingData.missingAuthorSiteDescription} <span class="stat-percent">(${((missingData.missingAuthorSiteDescription / missingData.totalAuthors) * 100).toFixed(1)}%)</span>`,
             `of ${missingData.totalAuthors} authors`,
           )}
           ${generateStatCard(
-            "Blog Posts Missing Description",
-            missingData.missingBlogDescription,
-            `of ${missingData.totalBlogPosts} posts`,
+            "Blog posts missing description",
+            `${missingData.missingBlogDescription} <span class="stat-percent">(${((missingData.missingBlogDescription / missingData.totalBlogPosts) * 100).toFixed(1)}%)</span>`,
+            `of ${formatNumber(missingData.totalBlogPosts)} posts`,
           )}
         </div>
 
@@ -660,6 +787,7 @@ function generateHTML(metrics) {
         <div class="missing-details">
           <details class="disclosure" name="missing-data-accordion">
             <summary>View ${formatNumber(missingData.missingRssLink)} author sites missing RSS link</summary>
+            <p class="disclosure-intro">I attempt to examine your site to find an RSS link, but sometimes I can't find it automatically. If you know your site has an RSS feed, perhaps you're not using one of the well-known techniques for exposing it. Here are two blog posts that describe how to do this: <a href="https://chriscoyier.net/2024/01/13/exposed-rss/" target="_blank" rel="noopener">Exposed RSS</a> by Chris Coyier, and <a href="https://rknight.me/blog/please-expose-your-rss/" target="_blank" rel="noopener">Please, Expose your RSS</a> by Robb Knight.</p>
             <ul class="missing-list">
               ${missingData.authorsWithMissingRssLink
                 .map(
@@ -672,6 +800,7 @@ function generateHTML(metrics) {
 
           <details class="disclosure" name="missing-data-accordion">
             <summary>View ${formatNumber(missingData.missingFavicon)} author sites missing favicon</summary>
+            <p class="disclosure-intro">I attempt to examine your site to find a favicon for your site, but sometimes I can't find it automatically. If you want to know how to add one, here are two blog posts that describe how to do this: <a href="https://equk.co.uk/2023/07/14/favicon-generation-in-eleventy/" target="_blank" rel="noopener">Favicon Generation In Eleventy</a> by equilibriumuk, and <a href="https://bnijenhuis.nl/notes/adding-a-favicon-in-eleventy/" target="_blank" rel="noopener">Adding a favicon in Eleventy</a> by Bernard Nijenhuis.</p>
             <ul class="missing-list">
               ${missingData.authorsWithMissingFavicon
                 .map(
@@ -684,6 +813,7 @@ function generateHTML(metrics) {
 
           <details class="disclosure" name="missing-data-accordion">
             <summary>View ${formatNumber(missingData.missingAuthorSiteDescription)} author sites missing description</summary>
+            <p class="disclosure-intro">I attempt to examine your site to find a description for your blog post or site, but sometimes I can't find it automatically. If you want to know how to add one, here are two resources that describe how to do this: <a href="https://learn-eleventy.pages.dev/lesson/17/" target="_blank" rel="noopener">Lesson 17: Meta info, RSS feeds and module recap</a> and <a href="https://johnwargo.com/posts/2023/meta-keywords-in-eleventy/" target="_blank" rel="noopener">Meta Description and Keywords in Eleventy</a> by John M. Wargo.</p>
             <ul class="missing-list">
               ${missingData.authorsWithMissingDescription
                 .map(
@@ -696,6 +826,7 @@ function generateHTML(metrics) {
 
           <details class="disclosure" name="missing-data-accordion">
             <summary>View ${formatNumber(missingData.missingBlogDescription)} blog posts missing description</summary>
+            <p class="disclosure-intro">I attempt to examine your site to find a description for your blog post or site, but sometimes I can't find it automatically. If you want to know how to add one, here are two resources that describe how to do this: <a href="https://learn-eleventy.pages.dev/lesson/17/" target="_blank" rel="noopener">Lesson 17: Meta info, RSS feeds and module recap</a> and <a href="https://johnwargo.com/posts/2023/meta-keywords-in-eleventy/" target="_blank" rel="noopener">Meta Description and Keywords in Eleventy</a> by John M. Wargo.</p>
             <ul class="missing-list">
               ${missingData.postsWithMissingDescription
                 .map(
@@ -913,6 +1044,12 @@ a:hover {
   opacity: 0.8;
 }
 
+.stat-percent {
+  font-size: 0.5em;
+  color: var(--text-colour-2);
+  font-weight: normal;
+}
+
 /* Charts */
 .chart-container {
   margin-bottom: var(--space-l);
@@ -951,14 +1088,35 @@ a:hover {
 }
 
 .chart-marker-label {
-  font-size: 11px;
-  font-weight: bold;
+  font-size: 12px;
+  font-weight: normal;
   fill: var(--heading-colour-1);
+}
+
+.chart-marker-label-centered {
+  text-anchor: middle;
 }
 
 .chart-marker-label-minor {
   font-size: 9px;
   fill: var(--text-colour-2);
+}
+
+/* Chart Footnote */
+.chart-footnote {
+  font-size: var(--step--1);
+  color: var(--text-colour-2);
+  margin-top: 0;
+  font-style: italic;
+}
+
+.chart-footnote sup {
+  font-size: 0.75em;
+  margin-right: 0.2em;
+}
+
+.chart-footnote a {
+  color: var(--primary-5);
 }
 
 /* Missing Data Details */
@@ -1002,6 +1160,20 @@ a:hover {
   background: var(--surface-fore);
 }
 
+.disclosure-intro {
+  margin: 0 var(--space-s) var(--space-s);
+  padding: var(--space-s);
+  font-size: var(--step--1);
+  color: var(--text-colour-2);
+  background: var(--surface-fore);
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+.disclosure-intro a {
+  color: var(--link-colour);
+}
+
 .missing-list {
   margin: 0;
   padding: var(--space-s);
@@ -1033,6 +1205,43 @@ a:hover {
   text-decoration-color: var(--primary-5);
 }
 
+.author-list-title {
+  font-size: var(--step-0);
+  color: var(--heading-colour-1);
+  margin-top: var(--space-l);
+  margin-bottom: var(--space-s);
+}
+
+.author-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  columns: 2;
+  column-gap: var(--space-l);
+}
+
+@media (min-width: 768px) {
+  .author-list {
+    columns: 4;
+  }
+}
+
+.author-list li {
+  padding: var(--space-3xs) 0;
+  font-size: var(--step--1);
+  break-inside: avoid;
+}
+
+.author-list a {
+  color: var(--text-colour-1);
+  text-decoration: underline;
+  text-decoration-color: var(--surface-fore);
+}
+
+.author-list a:hover {
+  text-decoration-color: var(--primary-5);
+}
+
 /* Footer */
 .site-footer {
   padding-block: var(--grid-gutter);
@@ -1060,21 +1269,41 @@ a:hover {
 // Main Execution
 // ============================================================================
 
-function main() {
-  console.log("🔍 Loading production database...");
+async function main() {
+  // Prompt for dataset selection
+  await selectDataset();
+
+  console.log("🔍 Loading database...");
   const entries = loadDatabase();
   console.log(`   Loaded ${entries.length} entries`);
 
+  console.log("� Loading showcase data...");
+  const showcaseData = loadShowcaseData();
+  console.log(`   Loaded ${showcaseData.length} showcase entries`);
+
   console.log("📊 Computing metrics...");
+  const entryTypes = computeEntryTypeMetrics(entries);
+  const siteJumpAmount = computeSiteJump(
+    entryTypes.counts["site"],
+    showcaseData.length,
+  );
+  console.log(
+    `   Site jump: ${siteJumpAmount} (showcase: ${showcaseData.length} - sites: ${entryTypes.counts["site"]})`,
+  );
+
   const metrics = {
-    entryTypes: computeEntryTypeMetrics(entries),
+    entryTypes,
     authorContributions: computeAuthorContributions(entries),
     categories: computeCategoryMetrics(entries),
     missingData: computeMissingDataMetrics(entries),
+    siteJump: { month: SITE_JUMP_MONTH, amount: siteJumpAmount },
   };
 
   console.log("   Entry type counts:", metrics.entryTypes.counts);
-  console.log("   Author contribution ranges:", metrics.authorContributions);
+  console.log(
+    "   Author contribution ranges:",
+    metrics.authorContributions.ranges,
+  );
   console.log(
     "   Top categories:",
     metrics.categories.top20
@@ -1106,4 +1335,4 @@ function main() {
   console.log(`\nOpen insights/index.html in a browser to view.`);
 }
 
-main();
+main().catch(console.error);

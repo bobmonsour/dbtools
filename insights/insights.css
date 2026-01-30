@@ -191,6 +191,12 @@ a:hover {
   opacity: 0.8;
 }
 
+.stat-percent {
+  font-size: 0.5em;
+  color: var(--text-colour-2);
+  font-weight: normal;
+}
+
 /* Charts */
 .chart-container {
   margin-bottom: var(--space-l);
@@ -229,14 +235,35 @@ a:hover {
 }
 
 .chart-marker-label {
-  font-size: 11px;
-  font-weight: bold;
+  font-size: 12px;
+  font-weight: normal;
   fill: var(--heading-colour-1);
+}
+
+.chart-marker-label-centered {
+  text-anchor: middle;
 }
 
 .chart-marker-label-minor {
   font-size: 9px;
   fill: var(--text-colour-2);
+}
+
+/* Chart Footnote */
+.chart-footnote {
+  font-size: var(--step--1);
+  color: var(--text-colour-2);
+  margin-top: 0;
+  font-style: italic;
+}
+
+.chart-footnote sup {
+  font-size: 0.75em;
+  margin-right: 0.2em;
+}
+
+.chart-footnote a {
+  color: var(--primary-5);
 }
 
 /* Missing Data Details */
@@ -280,6 +307,20 @@ a:hover {
   background: var(--surface-fore);
 }
 
+.disclosure-intro {
+  margin: 0 var(--space-s) var(--space-s);
+  padding: var(--space-s);
+  font-size: var(--step--1);
+  color: var(--text-colour-2);
+  background: var(--surface-fore);
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+.disclosure-intro a {
+  color: var(--link-colour);
+}
+
 .missing-list {
   margin: 0;
   padding: var(--space-s);
@@ -308,6 +349,43 @@ a:hover {
 }
 
 .missing-list a:hover {
+  text-decoration-color: var(--primary-5);
+}
+
+.author-list-title {
+  font-size: var(--step-0);
+  color: var(--heading-colour-1);
+  margin-top: var(--space-l);
+  margin-bottom: var(--space-s);
+}
+
+.author-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  columns: 2;
+  column-gap: var(--space-l);
+}
+
+@media (min-width: 768px) {
+  .author-list {
+    columns: 4;
+  }
+}
+
+.author-list li {
+  padding: var(--space-3xs) 0;
+  font-size: var(--step--1);
+  break-inside: avoid;
+}
+
+.author-list a {
+  color: var(--text-colour-1);
+  text-decoration: underline;
+  text-decoration-color: var(--surface-fore);
+}
+
+.author-list a:hover {
   text-decoration-color: var(--primary-5);
 }
 

@@ -10,7 +10,7 @@ import { cacheDuration } from "./cacheconfig.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const failureCachePath = path.join(
   __dirname,
-  "./log/description-fetch-failures.json"
+  "./log/description-fetch-failures.json",
 );
 let failureCache = {};
 
@@ -85,7 +85,63 @@ export const getDescription = async (link) => {
   try {
     let htmlcontent = await fetchHtml(link, "descHtml");
     const $ = cheerio.load(htmlcontent);
-    let description = $("meta[name=description]").attr("content");
+
+    // Helper to find meta tag with case-insensitive name attribute
+    const getMetaContent = (attrName, attrValue) => {
+      let content;
+      $("meta").each((_, el) => {
+        if (content) return;
+        const val = $(el).attr(attrName);
+        if (val && val.toLowerCase() === attrValue.toLowerCase()) {
+          content = $(el).attr("content");
+        }
+      });
+      return content;
+    };
+
+    // Try multiple sources for description, in order of preference
+    let description =
+      // 1. Standard meta description (case-insensitive)
+      getMetaContent("name", "description") ||
+      // 2. Open Graph description
+      $('meta[property="og:description"]').attr("content") ||
+      // 3. Twitter Card description (case-insensitive)
+      getMetaContent("name", "twitter:description") ||
+      // 4. Dublin Core description (case-insensitive)
+      getMetaContent("name", "DC.description") ||
+      // 5. Schema.org microdata
+      $('meta[itemprop="description"]').attr("content") ||
+      undefined;
+
+    // 6. Try JSON-LD schema.org if still not found
+    if (!description) {
+      $('script[type="application/ld+json"]').each((_, el) => {
+        if (description) return; // Already found
+        try {
+          const jsonLd = JSON.parse($(el).html());
+          // Handle single object or array of objects
+          const items = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
+          for (const item of items) {
+            if (item.description) {
+              description = item.description;
+              break;
+            }
+            // Check @graph array if present
+            if (item["@graph"] && Array.isArray(item["@graph"])) {
+              for (const graphItem of item["@graph"]) {
+                if (graphItem.description) {
+                  description = graphItem.description;
+                  break;
+                }
+              }
+            }
+          }
+        } catch {
+          // Invalid JSON, skip
+        }
+      });
+    }
+
     if (description == undefined) {
       // Don't cache empty results - AssetCache doesn't accept empty strings
       return "";
@@ -116,7 +172,7 @@ export const getDescription = async (link) => {
         // Regex: [link text](url) → <a href="url">link text</a>
         description = text.replace(
           /\[([^\]]+)\]\(([^)]+)\)/g,
-          '<a href="$2">$1</a>'
+          '<a href="$2">$1</a>',
         );
       }
     }
