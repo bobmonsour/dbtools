@@ -686,11 +686,11 @@ function generateHTML(metrics) {
         </div>
 
         <div class="chart-container chart-container--wide">
-          <h3>Blog post category growth over time (top 10)</h3>
+          <h3>Blog post category growth over time (top 15, excludes "How to...")</h3>
           ${generateLineChart(
             Object.fromEntries(
               categories.top20
-                .slice(0, 10)
+                .slice(0, 15)
                 .map((c) => [c.name, categories.cumulative[c.name]]),
             ),
             categories.months,
@@ -699,6 +699,24 @@ function generateHTML(metrics) {
               width: 1000,
               height: 450,
               showLegend: true,
+            },
+          )}
+        </div>
+
+        <h3>Top 15 categories</h3>
+        <p class="section-intro">Most frequently used categories across all entries (excludes "How to...").</p>
+
+        <div class="chart-container">
+          ${generateBarChart(
+            Object.fromEntries(
+              categories.top20.slice(0, 15).map((c) => [c.name, c.count]),
+            ),
+            {
+              title: "",
+              width: 800,
+              height: 500,
+              horizontal: true,
+              barColor: COLORS.secondary,
             },
           )}
         </div>
@@ -730,27 +748,6 @@ function generateHTML(metrics) {
             )
             .join("\n          ")}
         </ul>
-      </div>
-    </section>
-
-    <!-- Category Metrics -->
-    <section class="section">
-      <div class="container">
-        <h2>Top 20 categories</h2>
-        <p class="section-intro">Most frequently used categories across all entries (excludes "How to...").</p>
-
-        <div class="chart-container">
-          ${generateBarChart(
-            Object.fromEntries(categories.top20.map((c) => [c.name, c.count])),
-            {
-              title: "",
-              width: 800,
-              height: 500,
-              horizontal: true,
-              barColor: COLORS.secondary,
-            },
-          )}
-        </div>
       </div>
     </section>
 

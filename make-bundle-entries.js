@@ -253,6 +253,20 @@ const getCurrentDateTimeString = () => {
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000`;
 };
 
+// Standardize date to YYYY-MM-DDTHH:mm:ss.000 format
+// Converts YYYY-MM-DD to YYYY-MM-DDTHH:mm:ss.000 with midnight time
+const standardizeDate = (dateStr) => {
+  // If already in standardized format, return as-is
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}$/.test(dateStr)) {
+    return dateStr;
+  }
+  // If date-only format, add midnight time
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return `${dateStr}T00:00:00.000`;
+  }
+  return dateStr;
+};
+
 // Helper to extract origin from URL
 const getOriginFromUrl = (url) => {
   try {
@@ -588,11 +602,12 @@ const promptCommonInfo = async (enterOrEdit, entryData) => {
 // Function to ENTER post info
 const enterPost = async () => {
   const commonInfo = await promptCommonInfo("enter");
-  const Date = await input({
+  const dateInput = await input({
     message: "Date (YYYY-MM-DD):",
     default: getDefaultDate(),
     validate: validateDate,
   });
+  const Date = standardizeDate(dateInput);
   const Author = await search({
     message: "Author:",
     source: async (input) => {
@@ -756,11 +771,12 @@ const enterPost = async () => {
 // Function to ENTER site info
 const enterSite = async () => {
   const commonInfo = await promptCommonInfo("enter");
-  const Date = await input({
+  const dateInput = await input({
     message: "Date (YYYY-MM-DD):",
     default: getDefaultDate(),
     validate: validateDate,
   });
+  const Date = standardizeDate(dateInput);
 
   // Fetch metadata
   blankLine();
@@ -1011,11 +1027,12 @@ const enterStarter = async () => {
 // Function to EDIT post info
 const editPost = async () => {
   const commonInfo = await promptCommonInfo("edit", entryData);
-  const Date = await input({
+  const dateInput = await input({
     message: "Date:",
     default: entryData.Date,
     validate: validateDate,
   });
+  const Date = standardizeDate(dateInput);
   const Author = await search({
     message: "Author:",
     default: entryData.Author,
