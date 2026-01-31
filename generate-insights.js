@@ -1270,20 +1270,10 @@ async function main() {
   // Prompt for dataset selection
   await selectDataset();
 
-  console.log("🔍 Loading database...");
   const entries = loadDatabase();
-  console.log(`   Loaded ${entries.length} entries`);
-
-  console.log("� Loading showcase data...");
   const showcaseData = loadShowcaseData();
-  console.log(`   Loaded ${showcaseData.length} showcase entries`);
-
-  console.log("📊 Computing metrics...");
   const entryTypes = computeEntryTypeMetrics(entries);
   const siteJumpAmount = computeSiteJump(entries, showcaseData);
-  console.log(
-    `   Site jump: ${siteJumpAmount} (showcase: ${showcaseData.length} - sites: ${entryTypes.counts["site"]})`,
-  );
 
   const metrics = {
     entryTypes,
@@ -1293,27 +1283,8 @@ async function main() {
     siteJump: { month: SITE_JUMP_MONTH, amount: siteJumpAmount },
   };
 
-  console.log("   Entry type counts:", metrics.entryTypes.counts);
-  console.log(
-    "   Author contribution ranges:",
-    metrics.authorContributions.ranges,
-  );
-  console.log(
-    "   Top categories:",
-    metrics.categories.top20
-      .slice(0, 5)
-      .map((c) => c.name)
-      .join(", "),
-  );
-  console.log("   Missing data:", metrics.missingData);
-
-  console.log("📝 Generating HTML...");
   const html = generateHTML(metrics);
-
-  console.log("🎨 Generating CSS...");
   const css = generateCSS();
-
-  console.log("💾 Writing files...");
 
   // Ensure output directory exists
   if (!fs.existsSync(OUTPUT_DIR)) {
@@ -1323,10 +1294,40 @@ async function main() {
   fs.writeFileSync(path.join(OUTPUT_DIR, "index.html"), html);
   fs.writeFileSync(path.join(OUTPUT_DIR, "insights.css"), css);
 
-  console.log(`\n✅ Done! Files written to ${OUTPUT_DIR}/`);
-  console.log(`   - index.html`);
-  console.log(`   - insights.css`);
-  console.log(`\nOpen insights/index.html in a browser to view.`);
+  // Summary
+  const totalEntries =
+    Object.values(entryTypes.counts).reduce((a, b) => a + b, 0) +
+    siteJumpAmount;
+  const md = metrics.missingData;
+  const topCats = metrics.categories.top20
+    .slice(0, 5)
+    .map((c) => c.name)
+    .join(", ");
+
+  console.log(chalk.bold.yellow("\n  11ty Bundle Insights Summary\n"));
+  console.log(
+    chalk.cyan(
+      `  Database: ${formatNumber(entries.length)} entries, ${formatNumber(showcaseData.length)} showcase sites`,
+    ),
+  );
+  console.log(
+    chalk.cyan(
+      `  Blog posts: ${formatNumber(entryTypes.counts["blog post"])}  |  Sites: ${formatNumber(entryTypes.counts["site"] + siteJumpAmount)}  |  Releases: ${formatNumber(entryTypes.counts["release"])}  |  Total: ${formatNumber(totalEntries)}`,
+    ),
+  );
+  console.log(
+    chalk.cyan(
+      `  Unique authors: ${formatNumber(md.totalAuthors)}  |  Authors with 6+ posts: ${formatNumber(metrics.authorContributions.prolificAuthors.length)}`,
+    ),
+  );
+  console.log(chalk.cyan(`  Top categories: ${topCats}`));
+  console.log(
+    chalk.cyan(
+      `  Missing: ${md.missingRssLink} RSS links, ${md.missingFavicon} favicons, ${md.missingAuthorSiteDescription} author descriptions, ${md.missingBlogDescription} post descriptions`,
+    ),
+  );
+  console.log(chalk.green(`\n  Files written to ${OUTPUT_DIR}/\n`));
 }
 
 main().catch(console.error);
+
