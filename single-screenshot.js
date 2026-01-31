@@ -11,11 +11,16 @@ import fsSync from "fs";
 import { rawlist, input } from "@inquirer/prompts";
 import chalk from "chalk";
 import { makeBackupFile, formatItemDate } from "./utils.js";
-import { getfavicon } from "./getfavicon.js";
+import { getFavicon } from "./getfavicon.js";
 import { getDescription } from "./getdescription.js";
-import { config } from "./config.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Showcase data paths for dev and production
+const devShowcaseDataPath = path.join(__dirname, "devdata", "showcase-data.json");
+const devShowcaseBackupDir = path.join(__dirname, "devdata", "showcase-data-backups");
+const prodShowcaseDataPath = path.join(__dirname, "../11tybundledb", "showcase-data.json");
+const prodShowcaseBackupDir = path.join(__dirname, "../11tybundledb", "showcase-data-backups");
 
 // Function to format timestamp for backup files
 const getTimestamp = () => {
@@ -29,27 +34,27 @@ const getTimestamp = () => {
   return `${year}-${month}-${day}--${hours}${minutes}${seconds}`;
 };
 
-// Function to read showcase data
-const readShowcaseData = () => {
+// Function to read showcase data from a specific path
+const readShowcaseData = (showcasePath) => {
   try {
-    const data = fsSync.readFileSync(config.showcaseDataPath, "utf8");
+    const data = fsSync.readFileSync(showcasePath, "utf8");
     return JSON.parse(data);
   } catch (err) {
-    console.error(chalk.red("Error reading showcase-data.json:", err));
+    console.error(chalk.red(`Error reading ${showcasePath}:`, err));
     return [];
   }
 };
 
-// Function to save showcase data
-const saveShowcaseData = (data) => {
+// Function to save showcase data to a specific path
+const saveShowcaseData = (data, showcasePath) => {
   try {
     fsSync.writeFileSync(
-      config.showcaseDataPath,
+      showcasePath,
       JSON.stringify(data, null, 2),
     );
-    console.log(chalk.green("✓ Showcase data updated successfully\n"));
+    console.log(chalk.green(`✓ Showcase data updated: ${showcasePath}\n`));
   } catch (err) {
-    console.error(chalk.red("Error saving showcase-data.json:", err));
+    console.error(chalk.red(`Error saving ${showcasePath}:`, err));
     throw err;
   }
 };
@@ -154,8 +159,16 @@ const captureScreenshot = async () => {
 
     console.log(chalk.cyan(`\nProcessing: ${testUrl}\n`));
 
-    // 3. Read showcase data and check if URL exists
-    const showcaseData = readShowcaseData();
+    // 3. Determine showcase paths based on mode
+    // Production mode: read from production (authoritative), write to both
+    // Development mode: read/write only dev
+    const primaryShowcasePath =
+      datasetChoice === "production" ? prodShowcaseDataPath : devShowcaseDataPath;
+    const primaryShowcaseBackupDir =
+      datasetChoice === "production" ? prodShowcaseBackupDir : devShowcaseBackupDir;
+
+    // Read showcase data from the primary (authoritative) source
+    const showcaseData = readShowcaseData(primaryShowcasePath);
     const existingEntry = findEntryByUrl(showcaseData, testUrl);
 
     const { filename } = await genScreenshotFilename(testUrl);
@@ -250,7 +263,7 @@ const captureScreenshot = async () => {
 
       // Auto-fetch metadata
       console.log(chalk.dim("  Fetching favicon..."));
-      const favicon = await getfavicon(testUrl);
+      const favicon = await getFavicon(testUrl);
 
       console.log(chalk.dim("  Fetching description..."));
       const description = await getDescription(testUrl);
@@ -267,15 +280,20 @@ const captureScreenshot = async () => {
         screenshotpath: `/screenshots/${filename}`,
       };
 
-      // Backup showcase data before modifying
-      console.log(chalk.dim("\n  Creating backup of showcase data..."));
-      await makeBackupFile(config.showcaseDataPath, config.showcaseBackupDir);
-
       // Insert at beginning to maintain newest-first order
       showcaseData.unshift(newEntry);
 
-      // Save updated showcase data
-      saveShowcaseData(showcaseData);
+      // Backup and save showcase data
+      console.log(chalk.dim("\n  Creating backup of showcase data..."));
+      await makeBackupFile(primaryShowcasePath, primaryShowcaseBackupDir);
+      saveShowcaseData(showcaseData, primaryShowcasePath);
+
+      // Production mode: also backup and save to dev
+      if (datasetChoice === "production") {
+        console.log(chalk.dim("  Syncing to dev showcase data..."));
+        await makeBackupFile(devShowcaseDataPath, devShowcaseBackupDir);
+        saveShowcaseData(showcaseData, devShowcaseDataPath);
+      }
 
       console.log(chalk.green(`\n✓ New showcase entry created successfully`));
       console.log(chalk.dim(`  Title: ${title}`));
