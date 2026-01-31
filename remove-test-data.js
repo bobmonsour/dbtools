@@ -3,6 +3,8 @@ import path from "path";
 import chalk from "chalk";
 import { rawlist } from "@inquirer/prompts";
 import { fileURLToPath } from "url";
+import { exec, spawn } from "child_process";
+import util from "util";
 
 //***************
 // Remove Test Data
@@ -169,6 +171,29 @@ async function removeTestData() {
   }
   separator();
   blankLine();
+
+  // Post-removal workflow for production data
+  if (datasetChoice === "production") {
+    const execPromise = util.promisify(exec);
+    const siteProjDir = path.join(__dirname, "../11tybundle.dev");
+
+    statusMessage("Generating latest issue data...");
+    await execPromise(`node ${path.join(__dirname, "generate-latest-data.js")}`);
+    successMessage("✓ Latest issue data generated");
+
+    statusMessage("Starting 11tybundle.dev dev server...");
+    const npmProcess = spawn("npm", ["run", "latest"], {
+      cwd: siteProjDir,
+      detached: true,
+      stdio: "ignore",
+    });
+    npmProcess.unref();
+    successMessage("✓ Dev server started in background");
+
+    statusMessage("Opening browser...");
+    exec("open http://localhost:8080");
+    blankLine();
+  }
 }
 
 removeTestData();
