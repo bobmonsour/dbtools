@@ -23,10 +23,15 @@ The main menu (`bundle.js`) launches these workflows via `@inquirer/prompts`:
 4. **Check Link Errors** — scan all links for broken URLs
 5. **Generate Latest Data** — export entries for the most recent issue
 6. **Create Blog Post** — generate a markdown post for a new issue announcement
+7. **Remove Test Data** — remove all entries with "bobDemo" in the title from bundledb.json and showcase-data.json
+8. **Copy Production Data** — copy bundledb.json and showcase-data.json from production to devdata
+9. **Generate Insights** — run generate-insights.js and open the results in a browser
 
 ## Dev vs Production Data
 
 `config.js` has a `useTestData` flag (default `true`). When true, all scripts read/write to `devdata/` within this repo. When false, they target the production database at `../11tybundledb/`. Always verify this flag before running scripts.
+
+Several scripts (`make-bundle-entries.js`, `remove-test-data.js`, `generate-insights.js`) prompt for dataset selection at runtime, overriding the config.js default.
 
 ## Architecture
 
@@ -89,8 +94,23 @@ Requires a `GITHUB_TOKEN` in `.env` for GitHub API access (octokit) — used for
 - `screenshots/` — generated site screenshots
 - `log/` — error logs and failure caches
 
+## Post-save Workflows
+
+`make-bundle-entries.js` and `remove-test-data.js` include post-save workflows that trigger automatically when operating on the **production** dataset:
+
+1. Copy production `bundledb.json` and `showcase-data.json` to `devdata/`
+2. Run `generate-latest-data.js` to regenerate latest issue data
+3. Spawn `npm run latest` in `../11tybundle.dev/` as a detached background process (Eleventy dev server)
+4. Open `http://localhost:8080` in the default browser
+
+In `make-bundle-entries.js`, this only runs for the "save & exit" path (not "save, push, & exit"). The dev server runs in the background; kill it with `kill $(lsof -ti :8080)`.
+
+## Test Data Convention
+
+When adding test entries to the database, include the case-sensitive string `bobDemo` in the `Title` field (e.g., "bobDemo: My First Blog Post"). The "Remove Test Data" menu item (or `node remove-test-data.js`) will find and remove all such entries from both `bundledb.json` and `showcase-data.json`.
+
 ## Notes on the generate-insights.js Script
 
-Among the recent additions to this repo is the `generate-insights.js` script, which analyzes the database to produce insights about trends in the bundledb.json file. It generates an HTML and CSS file that visualizes these insights using charts and graphs.
+Among the recent additions to this repo is the `generate-insights.js` script, which analyzes the database to produce insights about trends in the bundledb.json file. It generates an HTML and CSS file in the `insights/` directory that visualizes these insights using charts and graphs. The script prompts for dataset selection and outputs a concise summary to the console.
 
-This will be the focus of near term development in this repo, with plans to expand the types of insights generated and improve the visualizations. Future enhancements may include: making the resulting html more closely align with the visual style of the 11tybundle.dev website, ensuring that the resulting html page that is generated is "accessible" to those useing screen readers, ensuring that when used on smaller screens (mobile devices) the resulting html page is still easy to read and navigate, and further improving data quality with more effective data extraction methods.
+This will be the focus of near term development in this repo, with plans to expand the types of insights generated and improve the visualizations. Future enhancements may include: making the resulting html more closely align with the visual style of the 11tybundle.dev website, ensuring that the resulting html page that is generated is "accessible" to those using screen readers, ensuring that when used on smaller screens (mobile devices) the resulting html page is still easy to read and navigate, and further improving data quality with more effective data extraction methods.
