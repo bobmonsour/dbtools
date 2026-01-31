@@ -3,7 +3,7 @@
 // Bundle script - Main menu launcher for editorial scripts
 
 import { select } from "@inquirer/prompts";
-import { spawn } from "child_process";
+import { exec, spawn } from "child_process";
 import chalk from "chalk";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -45,7 +45,11 @@ const scripts = [
     value: "copy-prod-to-devdata.js",
   },
   {
-    name: chalk.dim("9. Exit"),
+    name: "9. Generate Insights - Generate and view database insights",
+    value: "generate-insights",
+  },
+  {
+    name: chalk.dim("10. Exit"),
     value: "exit",
   },
 ];
@@ -95,7 +99,13 @@ const showMenu = async () => {
     }
 
     try {
-      await runScript(choice);
+      if (choice === "generate-insights") {
+        await runScript("generate-insights.js");
+        const insightsPath = path.join(__dirname, "insights", "index.html");
+        exec(`open "${insightsPath}"`);
+      } else {
+        await runScript(choice);
+      }
     } catch (error) {
       // Error already logged in runScript
     }
