@@ -37,7 +37,15 @@ const scripts = [
     value: "create-blog-post.js",
   },
   {
-    name: chalk.dim("7. Exit"),
+    name: "7. Remove Test Data - Remove bobDemo entries from database",
+    value: "remove-test-data.js",
+  },
+  {
+    name: "8. Copy Production Data - Copy production data to devdata",
+    value: "copy-prod-to-devdata.js",
+  },
+  {
+    name: chalk.dim("9. Exit"),
     value: "exit",
   },
 ];
