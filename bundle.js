@@ -86,6 +86,7 @@ const showMenu = async () => {
     const choice = await select({
       message: "Select a script to run:",
       choices: scripts,
+      pageSize: scripts.length,
     });
 
     if (choice === "exit") {
