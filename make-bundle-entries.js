@@ -23,7 +23,7 @@ import { getDescription } from "./getdescription.js";
 import { getGitHubDescription } from "./getgithubdescription.js";
 import { hasLeaderboardLink } from "./hasleaderboardlink.js";
 import { genScreenshotFilename } from "./genscreenshotfilename.js";
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import util from "util";
 import slugify from "@sindresorhus/slugify";
 
@@ -45,6 +45,9 @@ let nextAction = "ask what next";
 let entryData = {};
 // Global browser instance for screenshot capture
 let browser = null;
+// Track which dataset and exit method were selected
+let selectedDataset = null;
+let exitVia = null;
 let { uniqueCategoryChoices, uniqueCategories } = getUniqueCategories();
 let uniqueAuthors = [];
 
@@ -195,6 +198,8 @@ const selectDataset = async () => {
     console.log(chalk.yellow("\n👋 Exiting...\n"));
     process.exit(0);
   }
+
+  selectedDataset = datasetChoice;
 
   // Update runtime configuration based on selection
   if (datasetChoice === "production") {
@@ -1617,6 +1622,7 @@ const afterEntry = async () => {
     case "save & exit":
       await appendToJsonFile(entryData);
       await genIssueRecords();
+      exitVia = "save & exit";
       return (nextAction = "exit");
     case "save & add another":
       await appendToJsonFile(entryData);
@@ -1708,6 +1714,50 @@ const pushChanges = async () => {
   } catch (error) {
     errorMessage(`Error pushing changes to the repository: ${error.message}`);
   }
+};
+
+// Post-save workflow: copy prod data to devdata, generate latest data,
+// start dev server, and open browser
+const runPostSaveWorkflow = async () => {
+  const execPromise = util.promisify(exec);
+
+  const prodDbDir = "/Users/Bob/Dropbox/Docs/Sites/11tybundle/11tybundledb";
+  const devDataDir = path.join(__dirname, "devdata");
+  const siteProjDir = path.join(__dirname, "../11tybundle.dev");
+
+  // Step 1: Copy production data files to devdata
+  sectionHeader("Post-save workflow");
+  blankLine();
+  statusMessage("Copying production data to devdata...");
+  fs.copyFileSync(
+    path.join(prodDbDir, "bundledb.json"),
+    path.join(devDataDir, "bundledb.json"),
+  );
+  fs.copyFileSync(
+    path.join(prodDbDir, "showcase-data.json"),
+    path.join(devDataDir, "showcase-data.json"),
+  );
+  successMessage("✓ Production data copied to devdata");
+
+  // Step 2: Run generate-latest-data.js
+  statusMessage("Generating latest issue data...");
+  await execPromise(`node ${path.join(__dirname, "generate-latest-data.js")}`);
+  successMessage("✓ Latest issue data generated");
+
+  // Step 3: Spawn npm run latest in 11tybundle.dev (background)
+  statusMessage("Starting 11tybundle.dev dev server...");
+  const npmProcess = spawn("npm", ["run", "latest"], {
+    cwd: siteProjDir,
+    detached: true,
+    stdio: "ignore",
+  });
+  npmProcess.unref();
+  successMessage("✓ Dev server started in background");
+
+  // Step 4: Open browser
+  statusMessage("Opening browser...");
+  exec("open http://localhost:8080");
+  blankLine();
 };
 
 // Main function to prompt for entry type and
@@ -1826,6 +1876,10 @@ const main = async () => {
 
   console.log(chalk.cyan("All done...bye!"));
   blankLine();
+
+  if (selectedDataset === "production" && exitVia === "save & exit") {
+    await runPostSaveWorkflow();
+  }
 };
 
 // Run the main function
